@@ -1,0 +1,503 @@
+// Smart Clinic — نموذج قاعدة البيانات الكامل
+// يغطي كل مراحل الخطة (docs/PLAN.md)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// المستخدمون والأدوار
+// ============================================================
+
+enum Role {
+  ADMIN // المالك / مدير النظام
+  DOCTOR // طبيب
+  RECEPTIONIST // سكرتارية
+  PATIENT // مريض (للحجز الإلكتروني)
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(RECEPTIONIST)
+  phone        String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  doctor       Doctor?
+  branchId     String?
+  branch       Branch?  @relation(fields: [branchId], references: [id])
+}
+
+// ============================================================
+// الفروع والأطباء
+// ============================================================
+
+model Branch {
+  id        String   @id @default(cuid())
+  name      String
+  address   String?
+  phone     String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users        User[]
+  doctors      Doctor[]
+  appointments Appointment[]
+}
+
+model Doctor {
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  specialty  String? // التخصص
+  branchId   String?
+  branch     Branch?  @relation(fields: [branchId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  appointments  Appointment[]
+  diagnoses     Diagnosis[]
+  prescriptions Prescription[]
+}
+
+// ============================================================
+// المرضى وملفهم الكامل (المرحلة 1)
+// ============================================================
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+model Patient {
+  id           String    @id @default(cuid())
+  code         String    @unique // كود المريض
+  firstName    String
+  lastName     String
+  phone        String
+  email        String?
+  gender       Gender?
+  birthDate    DateTime?
+  address      String?
+  notes        String?
+  // الملخص الطبي
+  bloodType    String?
+  allergies    String? // الحساسية
+  chronicConditions String? // أمراض مزمنة
+  balance      Float     @default(0) // الرصيد المالي
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  appointments   Appointment[]
+  diagnoses      Diagnosis[]
+  prescriptions  Prescription[]
+  toothRecords   ToothRecord[]
+  payments       Payment[]
+  invoices       Invoice[]
+  files          PatientFile[]
+  complaints     Complaint[]
+  packages       PatientPackage[]
+  reports        MedicalReport[]
+  reminders      Reminder[]
+  whatsappMessages WhatsAppMessage[]
+
+  @@index([phone])
+  @@index([firstName, lastName])
+}
+
+// ============================================================
+// الحجوزات والمواعيد (المرحلة 2)
+// ============================================================
+
+enum AppointmentStatus {
+  PENDING // منتظر
+  CONFIRMED // مؤكد
+  COMPLETED // تم
+  CANCELLED // ملغي
+  NO_SHOW // لم يحضر
+}
+
+model Appointment {
+  id        String            @id @default(cuid())
+  patientId String
+  patient   Patient           @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  doctorId  String
+  doctor    Doctor            @relation(fields: [doctorId], references: [id])
+  branchId  String?
+  branch    Branch?           @relation(fields: [branchId], references: [id])
+  startsAt  DateTime
+  endsAt    DateTime?
+  status    AppointmentStatus @default(PENDING)
+  reason    String? // سبب الزيارة
+  notes     String?
+  isOnline  Boolean           @default(false) // حجز إلكتروني من المريض
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  invoice   Invoice?
+  reminders Reminder[]
+
+  @@index([doctorId, startsAt])
+  @@index([branchId, startsAt])
+  @@index([patientId])
+}
+
+// ============================================================
+// التشخيص والروشتات (المرحلة 1 / 8)
+// ============================================================
+
+model Diagnosis {
+  id        String   @id @default(cuid())
+  patientId String
+  patient   Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  doctorId  String?
+  doctor    Doctor?  @relation(fields: [doctorId], references: [id])
+  title     String
+  details   String?
+  createdAt DateTime @default(now())
+
+  @@index([patientId])
+}
+
+model Prescription {
+  id        String             @id @default(cuid())
+  patientId String
+  patient   Patient            @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  doctorId  String?
+  doctor    Doctor?            @relation(fields: [doctorId], references: [id])
+  notes     String?
+  createdAt DateTime           @default(now())
+  items     PrescriptionItem[]
+
+  @@index([patientId])
+}
+
+model PrescriptionItem {
+  id             String       @id @default(cuid())
+  prescriptionId String
+  prescription   Prescription @relation(fields: [prescriptionId], references: [id], onDelete: Cascade)
+  drugName       String
+  dose           String? // الجرعة
+  frequency      String? // عدد المرات
+  duration       String? // المدة
+  alternatives   String? // بدائل الدواء
+}
+
+// نماذج روشتات محفوظة لإعادة الاستخدام
+model PrescriptionTemplate {
+  id        String   @id @default(cuid())
+  name      String
+  body      Json // عناصر الروشتة كـ JSON
+  createdAt DateTime @default(now())
+}
+
+// ============================================================
+// مخطط الأسنان Dental Chart (المرحلة 3)
+// ============================================================
+
+// إجراء طبي مع سعره الافتراضي (حشو عصب / خلع / تنظيف ...)
+model Procedure {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  price       Float    @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  toothRecords ToothRecord[]
+  products     ProcedureProduct[]
+  invoiceItems InvoiceItem[]
+}
+
+// سجل سن مصاب + الجزء + الإجراء + السعر
+model ToothRecord {
+  id          String   @id @default(cuid())
+  patientId   String
+  patient     Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  toothNumber Int // رقم السن (FDI 11-48)
+  surface     String? // الجزء المصاب (mesial/distal/occlusal/...)
+  procedureId String?
+  procedure   Procedure? @relation(fields: [procedureId], references: [id])
+  price       Float    @default(0) // السعر المطبق (يُملأ تلقائياً من الإجراء)
+  status      String   @default("planned") // planned / done
+  notes       String?
+  createdAt   DateTime @default(now())
+
+  invoiceItem InvoiceItem?
+
+  @@index([patientId])
+}
+
+// ============================================================
+// الفوترة والمدفوعات (المرحلة 4)
+// ============================================================
+
+enum InvoiceStatus {
+  OPEN
+  PAID
+  PARTIAL
+  CANCELLED
+}
+
+model Invoice {
+  id            String        @id @default(cuid())
+  number        String        @unique
+  patientId     String
+  patient       Patient       @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  appointmentId String?       @unique
+  appointment   Appointment?  @relation(fields: [appointmentId], references: [id])
+  status        InvoiceStatus @default(OPEN)
+  total         Float         @default(0)
+  paidAmount    Float         @default(0)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  items    InvoiceItem[]
+  payments Payment[]
+
+  @@index([patientId])
+}
+
+model InvoiceItem {
+  id          String      @id @default(cuid())
+  invoiceId   String
+  invoice     Invoice     @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  description String
+  procedureId String?
+  procedure   Procedure?  @relation(fields: [procedureId], references: [id])
+  toothRecordId String?   @unique
+  toothRecord ToothRecord? @relation(fields: [toothRecordId], references: [id])
+  quantity    Int         @default(1)
+  unitPrice   Float       @default(0)
+  total       Float       @default(0)
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  TRANSFER
+  OTHER
+}
+
+model Payment {
+  id        String        @id @default(cuid())
+  patientId String
+  patient   Patient       @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  invoiceId String?
+  invoice   Invoice?      @relation(fields: [invoiceId], references: [id])
+  amount    Float
+  method    PaymentMethod @default(CASH)
+  note      String?
+  createdAt DateTime      @default(now())
+
+  @@index([patientId])
+}
+
+// ============================================================
+// المخزون وربط المنتجات (المرحلة 5)
+// ============================================================
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  sku         String?  @unique
+  unit        String   @default("piece")
+  quantity    Float    @default(0) // الكمية الحالية
+  minQuantity Float    @default(0) // حد التنبيه
+  costPrice   Float    @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  procedures     ProcedureProduct[]
+  stockMovements StockMovement[]
+}
+
+// ربط منتج بإجراء (كمية تُسحب تلقائياً عند تنفيذ الإجراء)
+model ProcedureProduct {
+  id          String    @id @default(cuid())
+  procedureId String
+  procedure   Procedure @relation(fields: [procedureId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quantity    Float     @default(1) // الكمية المسحوبة لكل إجراء
+
+  @@unique([procedureId, productId])
+}
+
+enum StockMovementType {
+  IN // إضافة مخزون
+  OUT // سحب (إجراء/استهلاك)
+  ADJUST // تسوية
+}
+
+model StockMovement {
+  id        String            @id @default(cuid())
+  productId String
+  product   Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
+  type      StockMovementType
+  quantity  Float
+  reason    String?
+  createdAt DateTime          @default(now())
+
+  @@index([productId])
+}
+
+// ============================================================
+// الباقات والتذكيرات (المرحلة 6)
+// ============================================================
+
+model Package {
+  id           String   @id @default(cuid())
+  name         String
+  description  String?
+  sessionCount Int      @default(1) // عدد الجلسات
+  price        Float    @default(0)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  patientPackages PatientPackage[]
+}
+
+model PatientPackage {
+  id              String   @id @default(cuid())
+  patientId       String
+  patient         Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  packageId       String
+  package         Package  @relation(fields: [packageId], references: [id])
+  totalSessions   Int
+  usedSessions    Int      @default(0)
+  startedAt       DateTime @default(now())
+  isActive        Boolean  @default(true)
+
+  sessions PackageSession[]
+
+  @@index([patientId])
+}
+
+model PackageSession {
+  id               String         @id @default(cuid())
+  patientPackageId String
+  patientPackage   PatientPackage @relation(fields: [patientPackageId], references: [id], onDelete: Cascade)
+  sessionNumber    Int
+  scheduledAt      DateTime?
+  completedAt      DateTime?
+  notes            String?
+}
+
+enum ReminderType {
+  APPOINTMENT // تذكير حجز
+  PACKAGE // متابعة باقة
+  CUSTOM
+}
+
+enum ReminderStatus {
+  PENDING
+  SENT
+  CONFIRMED
+  RESCHEDULED
+  CANCELLED
+}
+
+model Reminder {
+  id            String         @id @default(cuid())
+  patientId     String
+  patient       Patient        @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  appointmentId String?
+  appointment   Appointment?   @relation(fields: [appointmentId], references: [id])
+  type          ReminderType   @default(APPOINTMENT)
+  status        ReminderStatus @default(PENDING)
+  message       String?
+  remindAt      DateTime
+  createdAt     DateTime       @default(now())
+
+  @@index([remindAt, status])
+  @@index([patientId])
+}
+
+// ============================================================
+// الملفات والشكاوى والتقارير (المرحلة 1 / 9)
+// ============================================================
+
+model PatientFile {
+  id        String   @id @default(cuid())
+  patientId String
+  patient   Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  name      String
+  url       String
+  mimeType  String?
+  size      Int?
+  category  String? // أشعة / صورة / تقرير / أخرى
+  createdAt DateTime @default(now())
+
+  @@index([patientId])
+}
+
+model Complaint {
+  id        String   @id @default(cuid())
+  patientId String
+  patient   Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  title     String
+  details   String?
+  status    String   @default("open") // open / resolved
+  createdAt DateTime @default(now())
+
+  @@index([patientId])
+}
+
+model MedicalReport {
+  id        String   @id @default(cuid())
+  patientId String
+  patient   Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+
+  @@index([patientId])
+}
+
+// ============================================================
+// واتساب (المرحلة 7)
+// ============================================================
+
+enum WhatsAppStatus {
+  SCHEDULED // مجدولة
+  SENDING
+  SENT // تم الإرسال
+  DELIVERED // تم التسليم
+  READ // تم القراءة
+  FAILED
+}
+
+model WhatsAppMessage {
+  id          String         @id @default(cuid())
+  patientId   String?
+  patient     Patient?       @relation(fields: [patientId], references: [id])
+  toPhone     String
+  body        String?
+  mediaUrl    String? // ملف (صورة/فيديو/PDF)
+  mediaType   String?
+  status      WhatsAppStatus @default(SCHEDULED)
+  scheduledAt DateTime?
+  sentAt      DateTime?
+  // التكرار
+  repeatEvery String? // none / daily / weekly / monthly
+  repeatUntil DateTime?
+  externalId  String? // معرّف رسالة واتساب
+  error       String?
+  createdAt   DateTime       @default(now())
+
+  @@index([status, scheduledAt])
+  @@index([patientId])
+}

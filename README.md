@@ -16,8 +16,39 @@
 
 ## الحالة الحالية
 
-المشروع في مرحلة التخطيط. راجع **[الخطة المعمارية الكاملة](docs/PLAN.md)** للتفاصيل.
+تم إنجاز **المرحلة 0 (الأساس)** و **المرحلة 1 (المرضى والملف الكامل)**.
+راجع **[الخطة المعمارية الكاملة](docs/PLAN.md)** لباقي المراحل.
+
+✅ منجز:
+- إعداد Next.js + TypeScript + Tailwind (واجهة عربية RTL)
+- قاعدة بيانات PostgreSQL + Prisma (نموذج كامل لكل المراحل)
+- مصادقة وأدوار (مدير / طبيب / سكرتارية / مريض) + حماية الصفحات
+- لوحة تحكم بإحصائيات حية
+- إدارة المرضى: إضافة، بحث، **بروفايل كامل** (تشخيصات، روشتات، حجوزات، مدفوعات، ملفات، شكاوي، أسنان)
+
+## التشغيل محلياً
+
+```bash
+# 1) ثبّت الحزم
+npm install
+
+# 2) جهّز ملف البيئة
+cp .env.example .env   # عدّل DATABASE_URL و AUTH_SECRET
+
+# 3) شغّل قاعدة البيانات (Docker) أو استخدم PostgreSQL محلي
+npm run db:up
+
+# 4) أنشئ الجداول وأضف بيانات تجريبية
+npm run db:migrate
+npm run db:seed
+
+# 5) شغّل التطبيق
+npm run dev
+```
+
+ثم افتح http://localhost:3000 وسجّل الدخول بـ:
+`admin@clinic.com` / `admin123`
 
 ## التقنيات
 
-Next.js · TypeScript · PostgreSQL · Prisma · Tailwind CSS · Claude API · WhatsApp Cloud API
+Next.js 15 · TypeScript · PostgreSQL · Prisma · Tailwind CSS · jose (JWT) · Claude API · WhatsApp Cloud API
