@@ -5,6 +5,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { toothName } from "@/lib/teeth";
+import { getOrCreateOpenInvoice, recalcInvoice } from "@/server/billing";
 
 const schema = z.object({
   patientId: z.string().min(1),
@@ -13,44 +14,6 @@ const schema = z.object({
   procedureId: z.string().optional(),
   notes: z.string().optional(),
 });
-
-// إيجاد فاتورة مفتوحة للمريض أو إنشاء واحدة (الكشف الحالي)
-async function getOrCreateOpenInvoice(patientId: string) {
-  const existing = await db.invoice.findFirst({
-    where: { patientId, status: { in: ["OPEN", "PARTIAL"] } },
-    orderBy: { createdAt: "desc" },
-  });
-  if (existing) return existing;
-
-  const count = await db.invoice.count();
-  return db.invoice.create({
-    data: {
-      number: `INV-${String(count + 1).padStart(5, "0")}`,
-      patientId,
-      status: "OPEN",
-    },
-  });
-}
-
-async function recalcInvoice(invoiceId: string) {
-  const agg = await db.invoiceItem.aggregate({
-    where: { invoiceId },
-    _sum: { total: true },
-  });
-  const total = agg._sum.total ?? 0;
-  const inv = await db.invoice.findUnique({ where: { id: invoiceId } });
-  if (!inv) return;
-  const status =
-    inv.paidAmount >= total && total > 0
-      ? "PAID"
-      : inv.paidAmount > 0
-        ? "PARTIAL"
-        : "OPEN";
-  await db.invoice.update({
-    where: { id: invoiceId },
-    data: { total, status },
-  });
-}
 
 // إضافة إجراء على سن + إضافة سعره تلقائياً على الكشف (الفاتورة)
 export async function addToothRecord(
@@ -102,6 +65,11 @@ export async function addToothRecord(
       },
     });
     await recalcInvoice(invoice.id);
+    // الإجراء عبارة عن مديونية على المريض → ينقص الرصيد
+    await db.patient.update({
+      where: { id: d.patientId },
+      data: { balance: { decrement: price } },
+    });
 
     // السحب التلقائي من المخزون (ربط المنتجات بالإجراء)
     await deductInventoryForProcedure(d.procedureId);
@@ -157,8 +125,14 @@ export async function deleteToothRecord(id: string, patientId: string) {
   });
   if (record?.invoiceItem) {
     const invoiceId = record.invoiceItem.invoiceId;
+    const itemTotal = record.invoiceItem.total;
     await db.invoiceItem.delete({ where: { id: record.invoiceItem.id } });
     await recalcInvoice(invoiceId);
+    // إلغاء المديونية المقابلة → يُعاد الرصيد
+    await db.patient.update({
+      where: { id: patientId },
+      data: { balance: { increment: itemTotal } },
+    });
   }
   await db.toothRecord.delete({ where: { id } });
 

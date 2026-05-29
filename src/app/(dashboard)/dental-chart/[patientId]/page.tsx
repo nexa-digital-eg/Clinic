@@ -52,18 +52,20 @@ export default async function PatientDentalChart({
       </div>
 
       {openInvoice && (
-        <Card className="flex items-center justify-between bg-brand-50/50 p-4">
-          <div>
-            <p className="text-sm text-slate-600">الكشف الحالي (فاتورة مفتوحة)</p>
-            <p className="font-mono text-xs text-slate-400">{openInvoice.number}</p>
-          </div>
-          <div className="text-left">
-            <p className="text-xs text-slate-500">الإجمالي</p>
-            <p className="text-xl font-bold text-brand-700">
-              {formatCurrency(openInvoice.total)}
-            </p>
-          </div>
-        </Card>
+        <Link href={`/billing/${openInvoice.id}`}>
+          <Card className="flex items-center justify-between bg-brand-50/50 p-4 transition-shadow hover:shadow-md">
+            <div>
+              <p className="text-sm text-slate-600">الكشف الحالي (فاتورة مفتوحة)</p>
+              <p className="font-mono text-xs text-slate-400">{openInvoice.number}</p>
+            </div>
+            <div className="text-left">
+              <p className="text-xs text-slate-500">الإجمالي</p>
+              <p className="text-xl font-bold text-brand-700">
+                {formatCurrency(openInvoice.total)}
+              </p>
+            </div>
+          </Card>
+        </Link>
       )}
 
       <ToothChart
