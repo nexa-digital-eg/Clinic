@@ -32,17 +32,46 @@ export function PatientFiles({
   const inputRef = useRef<HTMLInputElement>(null);
   const [category, setCategory] = useState("xray");
   const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [, startTransition] = useTransition();
 
-  const onPick = async (file: File) => {
+  // ضغط الصور الكبيرة قبل الرفع لتسريعه (لا يمس PDF/الفيديو)
+  const maybeCompress = async (file: File): Promise<File> => {
+    if (!file.type.startsWith("image/") || file.size < 1.5 * 1024 * 1024) return file;
+    try {
+      const bitmap = await createImageBitmap(file);
+      const maxDim = 2000;
+      const scale = Math.min(1, maxDim / Math.max(bitmap.width, bitmap.height));
+      const w = Math.round(bitmap.width * scale);
+      const h = Math.round(bitmap.height * scale);
+      const canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return file;
+      ctx.drawImage(bitmap, 0, 0, w, h);
+      const blob: Blob | null = await new Promise((res) =>
+        canvas.toBlob((b) => res(b), "image/jpeg", 0.85),
+      );
+      if (!blob || blob.size >= file.size) return file;
+      return new File([blob], file.name.replace(/\.\w+$/, ".jpg"), { type: "image/jpeg" });
+    } catch {
+      return file;
+    }
+  };
+
+  const onPick = async (picked: File) => {
     setError(null);
     setUploading(true);
+    setProgress(0);
     try {
+      const file = await maybeCompress(picked);
       const blob = await upload(file.name, file, {
         access: "public",
         handleUploadUrl: "/api/files/upload",
         clientPayload: JSON.stringify({ patientId }),
+        onUploadProgress: (e) => setProgress(Math.round(e.percentage)),
       });
       await recordPatientFile(patientId, {
         name: file.name,
@@ -97,10 +126,18 @@ export function PatientFiles({
           {uploading && (
             <span className="flex items-center gap-1.5 text-sm text-brand-600">
               <Upload className="h-4 w-4 animate-pulse" />
-              {tr("files.uploading")}
+              {tr("files.uploading")} {progress}%
             </span>
           )}
         </div>
+        {uploading && (
+          <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-slate-100">
+            <div
+              className="h-full bg-brand-500 transition-all"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        )}
         {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
       </Card>
 
