@@ -337,9 +337,18 @@ export default async function PatientProfile({
       )}
 
       {tab === "teeth" && (
-        <Card>
+        <div className="space-y-3">
+          <div className="flex justify-end">
+            <Link
+              href={`/dental-chart/${patient.id}`}
+              className="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+            >
+              فتح مخطط الأسنان
+            </Link>
+          </div>
+          <Card>
           {patient.toothRecords.length === 0 ? (
-            <EmptyState title="لا توجد سجلات أسنان" description="تُضاف من مخطط الأسنان (المرحلة 3)" />
+            <EmptyState title="لا توجد سجلات أسنان" description="افتح مخطط الأسنان لإضافة إجراء" />
           ) : (
             <table className="w-full text-sm">
               <thead className="border-b border-slate-200 text-right text-xs text-slate-500">
@@ -368,7 +377,8 @@ export default async function PatientProfile({
               </tbody>
             </table>
           )}
-        </Card>
+          </Card>
+        </div>
       )}
     </div>
   );
