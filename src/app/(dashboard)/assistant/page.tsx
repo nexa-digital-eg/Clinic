@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { Card, Input, Badge } from "@/components/ui";
-import { isAIConfigured } from "@/lib/ai";
+import { isAIConfigured, aiProviderName } from "@/lib/ai";
 import { Search, Brain, CheckCheck, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import type { Prisma } from "@prisma/client";
@@ -41,13 +41,15 @@ export default async function AssistantPicker({
       {configured ? (
         <div className="flex items-center gap-2 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
           <CheckCheck className="h-5 w-5" />
-          متصل بـ Claude API — ردود حقيقية.
+          متصل بـ {aiProviderName()} — ردود حقيقية.
         </div>
       ) : (
         <div className="flex items-center gap-2 rounded-xl border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-700">
           <AlertCircle className="h-5 w-5" />
           وضع المحاكاة: أضف
           <code className="mx-1 rounded bg-yellow-100 px-1">ANTHROPIC_API_KEY</code>
+          أو
+          <code className="mx-1 rounded bg-yellow-100 px-1">GEMINI_API_KEY</code>
           في .env لتفعيل الردود الحقيقية.
         </div>
       )}
