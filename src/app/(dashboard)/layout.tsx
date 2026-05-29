@@ -1,15 +1,11 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { Sidebar } from "@/components/sidebar";
+import { LanguageToggle } from "@/components/language-toggle";
 import { logout } from "../(auth)/actions";
 import { LogOut } from "lucide-react";
-
-const ROLE_LABELS: Record<string, string> = {
-  ADMIN: "مدير النظام",
-  DOCTOR: "طبيب",
-  RECEPTIONIST: "سكرتارية",
-  PATIENT: "مريض",
-};
+import { getLocale } from "@/lib/locale";
+import { t } from "@/lib/i18n";
 
 export default async function DashboardLayout({
   children,
@@ -18,20 +14,21 @@ export default async function DashboardLayout({
 }) {
   const session = await getSession();
   if (!session) redirect("/login");
+  const locale = await getLocale();
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50">
-      <Sidebar role={session.role} />
+      <Sidebar role={session.role} locale={locale} />
       <div className="flex flex-1 flex-col overflow-hidden">
         <header className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-3">
-          <div />
+          <LanguageToggle locale={locale} />
           <div className="flex items-center gap-4">
-            <div className="text-left">
+            <div className={locale === "ar" ? "text-left" : "text-right"}>
               <p className="text-sm font-medium text-slate-800">
                 {session.name}
               </p>
               <p className="text-xs text-slate-400">
-                {ROLE_LABELS[session.role] ?? session.role}
+                {t(`role.${session.role}`, locale)}
               </p>
             </div>
             <form action={logout}>
@@ -40,7 +37,7 @@ export default async function DashboardLayout({
                 className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-slate-500 hover:bg-slate-100 hover:text-red-600"
               >
                 <LogOut className="h-4 w-4" />
-                خروج
+                {t("common.logout", locale)}
               </button>
             </form>
           </div>

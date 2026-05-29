@@ -4,6 +4,8 @@ import { formatDate, calcAge } from "@/lib/utils";
 import { Plus, Search, UserRound } from "lucide-react";
 import Link from "next/link";
 import type { Prisma } from "@prisma/client";
+import { getLocale } from "@/lib/locale";
+import { t } from "@/lib/i18n";
 
 export default async function PatientsPage({
   searchParams,
@@ -12,6 +14,7 @@ export default async function PatientsPage({
 }) {
   const { q } = await searchParams;
   const query = q?.trim();
+  const locale = await getLocale();
 
   const where: Prisma.PatientWhereInput = query
     ? {
@@ -34,12 +37,12 @@ export default async function PatientsPage({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">المرضى</h1>
-          <p className="text-sm text-slate-500">إدارة ملفات المرضى</p>
+          <h1 className="text-2xl font-bold text-slate-800">{t("patients.title", locale)}</h1>
+          <p className="text-sm text-slate-500">{t("patients.subtitle", locale)}</p>
         </div>
         <LinkButton href="/patients/new">
           <Plus className="h-4 w-4" />
-          مريض جديد
+          {t("patients.new", locale)}
         </LinkButton>
       </div>
 
@@ -49,7 +52,7 @@ export default async function PatientsPage({
           <Input
             name="q"
             defaultValue={query}
-            placeholder="ابحث بالاسم أو الهاتف أو الكود..."
+            placeholder={t("patients.searchPlaceholder", locale)}
             className="pr-10"
           />
         </form>

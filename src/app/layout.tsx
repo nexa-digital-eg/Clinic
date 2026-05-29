@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Cairo } from "next/font/google";
 import "./globals.css";
+import { getLocale } from "@/lib/locale";
+import { dirFor } from "@/lib/i18n";
 
 const cairo = Cairo({
   subsets: ["arabic", "latin"],
@@ -22,11 +24,12 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const locale = await getLocale();
   return (
-    <html lang="ar" dir="rtl">
+    <html lang={locale} dir={dirFor(locale)}>
       <body className={`${cairo.variable} font-sans antialiased`}>
         {children}
       </body>

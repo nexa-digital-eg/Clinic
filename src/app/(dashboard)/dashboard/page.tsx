@@ -3,6 +3,8 @@ import { Card } from "@/components/ui";
 import { formatCurrency, formatDateTime } from "@/lib/utils";
 import { Users, CalendarDays, Receipt, Boxes } from "lucide-react";
 import Link from "next/link";
+import { getLocale } from "@/lib/locale";
+import { t } from "@/lib/i18n";
 
 export default async function DashboardPage() {
   const startOfDay = new Date();
@@ -32,30 +34,32 @@ export default async function DashboardPage() {
   const due =
     (openInvoices._sum.total ?? 0) - (openInvoices._sum.paidAmount ?? 0);
 
+  const locale = await getLocale();
+
   const stats = [
     {
-      label: "إجمالي المرضى",
+      label: t("dashboard.totalPatients", locale),
       value: patientCount,
       icon: Users,
       href: "/patients",
       color: "bg-brand-50 text-brand-600",
     },
     {
-      label: "حجوزات اليوم",
+      label: t("dashboard.todayAppointments", locale),
       value: todayAppointments,
       icon: CalendarDays,
       href: "/appointments",
       color: "bg-green-50 text-green-600",
     },
     {
-      label: "مستحقات غير محصّلة",
+      label: t("dashboard.outstanding", locale),
       value: formatCurrency(due),
       icon: Receipt,
       href: "/billing",
       color: "bg-yellow-50 text-yellow-600",
     },
     {
-      label: "منتجات تحت الحد",
+      label: t("dashboard.lowStock", locale),
       value: typeof lowStock === "number" ? lowStock : 0,
       icon: Boxes,
       href: "/inventory",
@@ -66,8 +70,8 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">لوحة التحكم</h1>
-        <p className="text-sm text-slate-500">نظرة عامة على نشاط العيادة</p>
+        <h1 className="text-2xl font-bold text-slate-800">{t("dashboard.title", locale)}</h1>
+        <p className="text-sm text-slate-500">{t("dashboard.subtitle", locale)}</p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -94,11 +98,11 @@ export default async function DashboardPage() {
 
       <Card className="p-5">
         <h2 className="mb-4 text-lg font-semibold text-slate-800">
-          الحجوزات القادمة
+          {t("dashboard.upcoming", locale)}
         </h2>
         {upcoming.length === 0 ? (
           <p className="py-8 text-center text-sm text-slate-400">
-            لا توجد حجوزات قادمة
+            {t("dashboard.noUpcoming", locale)}
           </p>
         ) : (
           <div className="divide-y divide-slate-100">
