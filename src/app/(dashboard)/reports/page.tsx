@@ -2,6 +2,8 @@ import { db } from "@/lib/db";
 import { Card, Badge } from "@/components/ui";
 import { formatCurrency } from "@/lib/utils";
 import { TrendingUp, Users, CalendarDays, Boxes, Wallet, Stethoscope } from "lucide-react";
+import { getLocale } from "@/lib/locale";
+import { t } from "@/lib/i18n";
 
 function pad(n: number) {
   return String(n).padStart(2, "0");
@@ -27,6 +29,7 @@ export default async function ReportsPage({
   searchParams: Promise<{ from?: string; to?: string }>;
 }) {
   const sp = await searchParams;
+  const locale = await getLocale();
   const now = new Date();
   const defFrom = new Date(now.getFullYear(), now.getMonth(), 1);
   const from = sp.from ? new Date(sp.from) : defFrom;
@@ -88,8 +91,8 @@ export default async function ReportsPage({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">التقارير</h1>
-        <p className="text-sm text-slate-500">أداء العيادة خلال الفترة المحددة</p>
+        <h1 className="text-2xl font-bold text-slate-800">{t("reports.title", locale)}</h1>
+        <p className="text-sm text-slate-500">{t("reports.subtitle", locale)}</p>
       </div>
 
       {/* فلتر الفترة */}

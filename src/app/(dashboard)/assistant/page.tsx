@@ -1,6 +1,8 @@
 import { db } from "@/lib/db";
 import { Card, Input, Badge } from "@/components/ui";
 import { isAIConfigured, aiProviderName } from "@/lib/ai";
+import { getLocale } from "@/lib/locale";
+import { t } from "@/lib/i18n";
 import { Search, Brain, CheckCheck, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import type { Prisma } from "@prisma/client";
@@ -14,6 +16,7 @@ export default async function AssistantPicker({
   const { q } = await searchParams;
   const query = q?.trim();
   const configured = isAIConfigured();
+  const locale = await getLocale();
 
   const where: Prisma.PatientWhereInput = query
     ? {
@@ -34,8 +37,8 @@ export default async function AssistantPicker({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">المساعد الذكي</h1>
-        <p className="text-sm text-slate-500">اختر مريضاً ليساعدك المساعد على علم بملفه</p>
+        <h1 className="text-2xl font-bold text-slate-800">{t("assistant.title", locale)}</h1>
+        <p className="text-sm text-slate-500">{t("assistant.subtitle", locale)}</p>
       </div>
 
       {configured ? (

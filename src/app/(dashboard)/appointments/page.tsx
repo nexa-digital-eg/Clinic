@@ -4,23 +4,25 @@ import { Plus, ChevronRight, ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import type { Prisma } from "@prisma/client";
 import { AppointmentActions } from "./appointment-actions";
+import { getLocale } from "@/lib/locale";
+import { t, type Locale } from "@/lib/i18n";
 
-const STATUS_META: Record<
-  string,
-  { label: string; color: "slate" | "green" | "yellow" | "red" | "blue" }
-> = {
-  PENDING: { label: "منتظر", color: "yellow" },
-  CONFIRMED: { label: "مؤكد", color: "blue" },
-  COMPLETED: { label: "تم", color: "green" },
-  CANCELLED: { label: "ملغي", color: "red" },
-  NO_SHOW: { label: "لم يحضر", color: "slate" },
+const STATUS_COLOR: Record<string, "slate" | "green" | "yellow" | "red" | "blue"> = {
+  PENDING: "yellow",
+  CONFIRMED: "blue",
+  COMPLETED: "green",
+  CANCELLED: "red",
+  NO_SHOW: "slate",
 };
 
-const WEEKDAYS = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
-const MONTHS = [
-  "يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو",
-  "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر",
-];
+const WEEKDAYS: Record<Locale, string[]> = {
+  ar: ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"],
+  en: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+};
+const MONTHS: Record<Locale, string[]> = {
+  ar: ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"],
+  en: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+};
 
 function pad(n: number) {
   return String(n).padStart(2, "0");
@@ -32,6 +34,7 @@ export default async function AppointmentsPage({
   searchParams: Promise<{ month?: string; doctorId?: string; branchId?: string }>;
 }) {
   const sp = await searchParams;
+  const locale = await getLocale();
   const now = new Date();
   const [yStr, mStr] = (sp.month ?? `${now.getFullYear()}-${pad(now.getMonth() + 1)}`).split("-");
   const year = parseInt(yStr, 10);
@@ -90,16 +93,16 @@ export default async function AppointmentsPage({
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">الحجوزات والمواعيد</h1>
-          <p className="text-sm text-slate-500">تقويم شهري لكل طبيب وفرع</p>
+          <h1 className="text-2xl font-bold text-slate-800">{t("appt.title", locale)}</h1>
+          <p className="text-sm text-slate-500">{t("appt.subtitle", locale)}</p>
         </div>
         <div className="flex items-center gap-2">
           <LinkButton href="/booking" variant="secondary" target="_blank">
-            رابط الحجز الإلكتروني
+            {t("appt.bookingLink", locale)}
           </LinkButton>
           <LinkButton href="/appointments/new">
             <Plus className="h-4 w-4" />
-            حجز جديد
+            {t("appt.new", locale)}
           </LinkButton>
         </div>
       </div>
@@ -111,7 +114,7 @@ export default async function AppointmentsPage({
             <ChevronRight className="h-5 w-5 text-slate-500" />
           </Link>
           <span className="min-w-32 text-center font-semibold text-slate-800">
-            {MONTHS[month]} {year}
+            {MONTHS[locale][month]} {year}
           </span>
           <Link href={mkMonthLink(nextMonth)} className="rounded-lg p-2 hover:bg-slate-100">
             <ChevronLeft className="h-5 w-5 text-slate-500" />
@@ -125,9 +128,9 @@ export default async function AppointmentsPage({
             defaultValue={sp.doctorId ?? ""}
             className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm"
           >
-            <option value="">كل الأطباء</option>
+            <option value="">{t("appt.allDoctors", locale)}</option>
             {doctors.map((d) => (
-              <option key={d.id} value={d.id}>د. {d.user.name}</option>
+              <option key={d.id} value={d.id}>{d.user.name}</option>
             ))}
           </select>
           <select
@@ -135,13 +138,13 @@ export default async function AppointmentsPage({
             defaultValue={sp.branchId ?? ""}
             className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm"
           >
-            <option value="">كل الفروع</option>
+            <option value="">{t("appt.allBranches", locale)}</option>
             {branches.map((b) => (
               <option key={b.id} value={b.id}>{b.name}</option>
             ))}
           </select>
           <button type="submit" className="rounded-lg bg-slate-100 px-3 py-1.5 text-sm font-medium hover:bg-slate-200">
-            تصفية
+            {t("common.filter", locale)}
           </button>
         </form>
       </Card>
@@ -149,7 +152,7 @@ export default async function AppointmentsPage({
       {/* شبكة التقويم */}
       <Card className="overflow-hidden p-0">
         <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-50 text-center text-xs font-medium text-slate-500">
-          {WEEKDAYS.map((w) => (
+          {WEEKDAYS[locale].map((w) => (
             <div key={w} className="py-2">{w}</div>
           ))}
         </div>
@@ -198,41 +201,40 @@ export default async function AppointmentsPage({
       <Card>
         <div className="border-b border-slate-200 px-5 py-3">
           <h2 className="font-semibold text-slate-800">
-            حجوزات {MONTHS[month]} ({appointments.length})
+            {MONTHS[locale][month]} ({appointments.length})
           </h2>
         </div>
         {appointments.length === 0 ? (
-          <p className="py-10 text-center text-sm text-slate-400">لا توجد حجوزات هذا الشهر</p>
+          <p className="py-10 text-center text-sm text-slate-400">{t("appt.none", locale)}</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="border-b border-slate-200 text-right text-xs text-slate-500">
                 <tr>
-                  <th className="px-4 py-3 font-medium">الموعد</th>
-                  <th className="px-4 py-3 font-medium">المريض</th>
-                  <th className="px-4 py-3 font-medium">الطبيب</th>
-                  <th className="px-4 py-3 font-medium">السبب</th>
-                  <th className="px-4 py-3 font-medium">الحالة</th>
-                  <th className="px-4 py-3 font-medium">إجراءات</th>
+                  <th className="px-4 py-3 font-medium">{t("col.datetime", locale)}</th>
+                  <th className="px-4 py-3 font-medium">{t("col.patient", locale)}</th>
+                  <th className="px-4 py-3 font-medium">{t("col.doctor", locale)}</th>
+                  <th className="px-4 py-3 font-medium">{t("col.reason", locale)}</th>
+                  <th className="px-4 py-3 font-medium">{t("col.status", locale)}</th>
+                  <th className="px-4 py-3 font-medium">{t("col.actions", locale)}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {appointments.map((a) => {
-                  const meta = STATUS_META[a.status];
                   return (
                     <tr key={a.id} className="hover:bg-slate-50">
                       <td className="px-4 py-3 whitespace-nowrap text-slate-600">
-                        {new Date(a.startsAt).toLocaleString("ar-EG", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
-                        {a.isOnline && <Badge color="blue" className="mr-2">إلكتروني</Badge>}
+                        {new Date(a.startsAt).toLocaleString(locale === "ar" ? "ar-EG" : "en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                        {a.isOnline && <Badge color="blue" className="mr-2">{t("appt.online", locale)}</Badge>}
                       </td>
                       <td className="px-4 py-3">
                         <Link href={`/patients/${a.patientId}`} className="font-medium text-slate-800 hover:text-brand-600">
                           {a.patient.firstName} {a.patient.lastName}
                         </Link>
                       </td>
-                      <td className="px-4 py-3 text-slate-600">د. {a.doctor.user.name}</td>
+                      <td className="px-4 py-3 text-slate-600">{a.doctor.user.name}</td>
                       <td className="px-4 py-3 text-slate-500">{a.reason ?? "—"}</td>
-                      <td className="px-4 py-3"><Badge color={meta.color}>{meta.label}</Badge></td>
+                      <td className="px-4 py-3"><Badge color={STATUS_COLOR[a.status]}>{t(`apptStatus.${a.status}`, locale)}</Badge></td>
                       <td className="px-4 py-3"><AppointmentActions id={a.id} status={a.status} /></td>
                     </tr>
                   );

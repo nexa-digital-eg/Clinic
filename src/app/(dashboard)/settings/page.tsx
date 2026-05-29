@@ -14,12 +14,14 @@ import {
   StaffForm,
   StaffToggle,
 } from "./client";
+import { getLocale } from "@/lib/locale";
+import { t } from "@/lib/i18n";
 
 const TABS = [
-  { key: "clinic", label: "بيانات العيادة" },
-  { key: "procedures", label: "الإجراءات والأسعار" },
-  { key: "branches", label: "الفروع" },
-  { key: "staff", label: "الأطباء والمستخدمين" },
+  { key: "clinic", labelKey: "settings.tabClinic" },
+  { key: "procedures", labelKey: "settings.tabProcedures" },
+  { key: "branches", labelKey: "settings.tabBranches" },
+  { key: "staff", labelKey: "settings.tabStaff" },
 ];
 
 const ROLE_LABELS: Record<string, string> = {
@@ -45,6 +47,7 @@ export default async function SettingsPage({
   }
 
   const { tab = "clinic" } = await searchParams;
+  const locale = await getLocale();
 
   const [clinic, procedures, branches, staff] = await Promise.all([
     getClinicSettings(),
@@ -60,22 +63,22 @@ export default async function SettingsPage({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">الإعدادات</h1>
-        <p className="text-sm text-slate-500">إدارة بيانات العيادة والإجراءات والفروع والمستخدمين</p>
+        <h1 className="text-2xl font-bold text-slate-800">{t("settings.title", locale)}</h1>
+        <p className="text-sm text-slate-500">{t("settings.subtitle", locale)}</p>
       </div>
 
       <div className="flex flex-wrap gap-1 border-b border-slate-200">
-        {TABS.map((t) => (
+        {TABS.map((tab2) => (
           <Link
-            key={t.key}
-            href={`/settings?tab=${t.key}`}
+            key={tab2.key}
+            href={`/settings?tab=${tab2.key}`}
             className={`rounded-t-lg px-4 py-2 text-sm font-medium transition-colors ${
-              tab === t.key
+              tab === tab2.key
                 ? "border-b-2 border-brand-600 text-brand-700"
                 : "text-slate-500 hover:text-slate-700"
             }`}
           >
-            {t.label}
+            {t(tab2.labelKey, locale)}
           </Link>
         ))}
       </div>

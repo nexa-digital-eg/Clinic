@@ -4,6 +4,8 @@ import { formatCurrency } from "@/lib/utils";
 import Link from "next/link";
 import { Package as PackageIcon } from "lucide-react";
 import { PackageCatalogForm, AssignPackageForm, DeletePackageButton } from "./forms";
+import { getLocale } from "@/lib/locale";
+import { t } from "@/lib/i18n";
 
 export default async function PackagesPage() {
   const [packages, patientPackages, patients] = await Promise.all([
@@ -18,12 +20,13 @@ export default async function PackagesPage() {
     }),
     db.patient.findMany({ orderBy: { createdAt: "desc" }, take: 200 }),
   ]);
+  const locale = await getLocale();
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">الباقات</h1>
-        <p className="text-sm text-slate-500">باقات متعددة الجلسات ومتابعتها مع المرضى</p>
+        <h1 className="text-2xl font-bold text-slate-800">{t("packages.title", locale)}</h1>
+        <p className="text-sm text-slate-500">{t("packages.subtitle", locale)}</p>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">

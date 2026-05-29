@@ -4,6 +4,8 @@ import { isWhatsAppConfigured } from "@/lib/whatsapp";
 import { MessageCircle, CheckCheck, AlertCircle } from "lucide-react";
 import { ComposeForm, MessageActions, RunScheduledButton } from "./client";
 import type { Prisma } from "@prisma/client";
+import { getLocale } from "@/lib/locale";
+import { t } from "@/lib/i18n";
 
 const STATUS_META: Record<
   string,
@@ -24,6 +26,7 @@ export default async function WhatsAppPage({
 }) {
   const { status } = await searchParams;
   const configured = isWhatsAppConfigured();
+  const locale = await getLocale();
 
   const where: Prisma.WhatsAppMessageWhereInput =
     status && STATUS_META[status]
@@ -54,8 +57,8 @@ export default async function WhatsAppPage({
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">واتساب</h1>
-          <p className="text-sm text-slate-500">إرسال وجدولة الرسائل ومتابعة حالتها</p>
+          <h1 className="text-2xl font-bold text-slate-800">{t("whatsapp.title", locale)}</h1>
+          <p className="text-sm text-slate-500">{t("whatsapp.subtitle", locale)}</p>
         </div>
         <RunScheduledButton count={scheduledCount} />
       </div>

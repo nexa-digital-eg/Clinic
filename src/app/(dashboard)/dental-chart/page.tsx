@@ -3,6 +3,8 @@ import { Card, Input } from "@/components/ui";
 import { Search, Stethoscope } from "lucide-react";
 import Link from "next/link";
 import type { Prisma } from "@prisma/client";
+import { getLocale } from "@/lib/locale";
+import { t } from "@/lib/i18n";
 
 export default async function DentalChartPicker({
   searchParams,
@@ -11,6 +13,7 @@ export default async function DentalChartPicker({
 }) {
   const { q } = await searchParams;
   const query = q?.trim();
+  const locale = await getLocale();
 
   const where: Prisma.PatientWhereInput = query
     ? {
@@ -33,14 +36,14 @@ export default async function DentalChartPicker({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">مخطط الأسنان</h1>
-        <p className="text-sm text-slate-500">اختر مريضاً لفتح مخطط أسنانه</p>
+        <h1 className="text-2xl font-bold text-slate-800">{t("dental.title", locale)}</h1>
+        <p className="text-sm text-slate-500">{t("dental.pickPatient", locale)}</p>
       </div>
 
       <Card className="p-4">
         <form className="relative">
           <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-          <Input name="q" defaultValue={query} placeholder="ابحث عن مريض..." className="pr-10" />
+          <Input name="q" defaultValue={query} placeholder={t("dental.searchPatient", locale)} className="pr-10" />
         </form>
       </Card>
 

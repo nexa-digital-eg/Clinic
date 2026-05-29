@@ -2,6 +2,8 @@ import { db } from "@/lib/db";
 import { Card, Badge } from "@/components/ui";
 import { Bell } from "lucide-react";
 import { ReminderRow, GenerateButton, CreateReminderForm } from "./client";
+import { getLocale } from "@/lib/locale";
+import { t } from "@/lib/i18n";
 
 export default async function RemindersPage() {
   const [reminders, patients] = await Promise.all([
@@ -15,6 +17,7 @@ export default async function RemindersPage() {
     }),
     db.patient.findMany({ orderBy: { createdAt: "desc" }, take: 200 }),
   ]);
+  const locale = await getLocale();
 
   const pending = reminders.filter((r) => r.status === "PENDING");
   const handled = reminders.filter((r) => r.status !== "PENDING");
@@ -23,10 +26,8 @@ export default async function RemindersPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">التذكيرات</h1>
-          <p className="text-sm text-slate-500">
-            تأكيد الحجوزات ومتابعة الباقات — تذكيرات يدوية وتلقائية
-          </p>
+          <h1 className="text-2xl font-bold text-slate-800">{t("reminders.title", locale)}</h1>
+          <p className="text-sm text-slate-500">{t("reminders.subtitle", locale)}</p>
         </div>
         <GenerateButton />
       </div>

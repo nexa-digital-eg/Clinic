@@ -3,8 +3,11 @@ import { Card, Badge, LinkButton } from "@/components/ui";
 import { formatCurrency } from "@/lib/utils";
 import { Boxes, Link2 } from "lucide-react";
 import { ProductForms, ProductRow } from "./forms";
+import { getLocale } from "@/lib/locale";
+import { t } from "@/lib/i18n";
 
 export default async function InventoryPage() {
+  const locale = await getLocale();
   const products = await db.product.findMany({
     orderBy: { name: "asc" },
     include: { _count: { select: { procedures: true } } },
@@ -17,26 +20,26 @@ export default async function InventoryPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">المخزون</h1>
-          <p className="text-sm text-slate-500">إدارة المنتجات والكميات</p>
+          <h1 className="text-2xl font-bold text-slate-800">{t("inventory.title", locale)}</h1>
+          <p className="text-sm text-slate-500">{t("inventory.subtitle", locale)}</p>
         </div>
         <LinkButton href="/inventory/procedures" variant="secondary">
           <Link2 className="h-4 w-4" />
-          ربط المنتجات بالإجراءات
+          {t("inventory.linkProducts", locale)}
         </LinkButton>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Card className="p-5">
-          <p className="text-sm text-slate-500">عدد المنتجات</p>
+          <p className="text-sm text-slate-500">{t("inventory.productCount", locale)}</p>
           <p className="mt-1 text-2xl font-bold text-slate-800">{products.length}</p>
         </Card>
         <Card className="p-5">
-          <p className="text-sm text-slate-500">قيمة المخزون</p>
+          <p className="text-sm text-slate-500">{t("inventory.stockValue", locale)}</p>
           <p className="mt-1 text-2xl font-bold text-slate-800">{formatCurrency(totalValue)}</p>
         </Card>
         <Card className="p-5">
-          <p className="text-sm text-slate-500">منتجات تحت الحد</p>
+          <p className="text-sm text-slate-500">{t("inventory.lowStock", locale)}</p>
           <p className="mt-1 text-2xl font-bold text-red-600">{lowStock.length}</p>
         </Card>
       </div>
