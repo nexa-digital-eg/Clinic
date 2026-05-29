@@ -1,0 +1,81 @@
+import { db } from "@/lib/db";
+import { notFound } from "next/navigation";
+import { Card, Badge } from "@/components/ui";
+import { formatCurrency } from "@/lib/utils";
+import { ArrowRight } from "lucide-react";
+import Link from "next/link";
+import { SessionRow } from "./session-row";
+
+export default async function PatientPackageDetail({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+
+  const pp = await db.patientPackage.findUnique({
+    where: { id },
+    include: {
+      patient: true,
+      package: true,
+      sessions: { orderBy: { sessionNumber: "asc" } },
+    },
+  });
+
+  if (!pp) notFound();
+
+  const pct = Math.round((pp.usedSessions / pp.totalSessions) * 100);
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-3">
+        <Link href="/packages" className="rounded-lg p-2 text-slate-500 hover:bg-slate-100">
+          <ArrowRight className="h-5 w-5" />
+        </Link>
+        <div className="flex-1">
+          <h1 className="text-2xl font-bold text-slate-800">{pp.package.name}</h1>
+          <Link href={`/patients/${pp.patientId}`} className="text-sm text-brand-600 hover:underline">
+            {pp.patient.firstName} {pp.patient.lastName}
+          </Link>
+        </div>
+        {pp.isActive ? <Badge color="green">نشطة</Badge> : <Badge color="slate">منتهية</Badge>}
+      </div>
+
+      <Card className="p-5">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm text-slate-500">التقدّم</p>
+            <p className="text-2xl font-bold text-slate-800">
+              {pp.usedSessions} / {pp.totalSessions} جلسة
+            </p>
+          </div>
+          <div className="text-left">
+            <p className="text-sm text-slate-500">سعر الباقة</p>
+            <p className="text-xl font-bold text-brand-700">{formatCurrency(pp.package.price)}</p>
+          </div>
+        </div>
+        <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-slate-100">
+          <div className="h-full bg-brand-500" style={{ width: `${pct}%` }} />
+        </div>
+      </Card>
+
+      <Card>
+        <div className="border-b border-slate-200 px-5 py-3">
+          <h2 className="font-semibold text-slate-800">الجلسات</h2>
+        </div>
+        <div className="divide-y divide-slate-100">
+          {pp.sessions.map((s) => (
+            <SessionRow
+              key={s.id}
+              id={s.id}
+              patientPackageId={pp.id}
+              sessionNumber={s.sessionNumber}
+              scheduledAt={s.scheduledAt?.toISOString() ?? null}
+              completed={!!s.completedAt}
+            />
+          ))}
+        </div>
+      </Card>
+    </div>
+  );
+}
