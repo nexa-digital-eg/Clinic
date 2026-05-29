@@ -7,6 +7,7 @@ import Link from "next/link";
 import { ArrowRight, Phone, Mail, MapPin, Droplet } from "lucide-react";
 import { getLocale } from "@/lib/locale";
 import { t, type Locale } from "@/lib/i18n";
+import { PatientFiles } from "./patient-files";
 
 const TABS = [
   { key: "overview", labelKey: "tab.overview" },
@@ -29,6 +30,7 @@ export default async function PatientProfile({
   const { id } = await params;
   const { tab = "overview" } = await searchParams;
   const locale = await getLocale();
+  const blobEnabled = !!process.env.BLOB_READ_WRITE_TOKEN;
 
   const patient = await db.patient.findUnique({
     where: { id },
@@ -293,22 +295,18 @@ export default async function PatientProfile({
       )}
 
       {tab === "files" && (
-        <Card className="p-5">
-          {patient.files.length === 0 ? (
-            <EmptyState title={t("profile.noFiles", locale)} />
-          ) : (
-            <ul className="divide-y divide-slate-100">
-              {patient.files.map((f) => (
-                <li key={f.id} className="flex items-center justify-between py-3">
-                  <a href={f.url} target="_blank" className="text-sm text-brand-600 hover:underline">
-                    {f.name}
-                  </a>
-                  <span className="text-xs text-slate-400">{formatDate(f.createdAt)}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </Card>
+        <PatientFiles
+          patientId={patient.id}
+          enabled={blobEnabled}
+          files={patient.files.map((f) => ({
+            id: f.id,
+            name: f.name,
+            url: f.url,
+            mimeType: f.mimeType,
+            category: f.category,
+            createdAt: f.createdAt.toISOString(),
+          }))}
+        />
       )}
 
       {tab === "complaints" && (

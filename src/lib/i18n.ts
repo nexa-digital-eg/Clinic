@@ -283,6 +283,22 @@ const DICT: Record<string, { ar: string; en: string }> = {
   "set.deactivate": { ar: "تعطيل", en: "Deactivate" },
   "set.disabled": { ar: "معطّل", en: "Disabled" },
   "set.you": { ar: "(أنت)", en: "(you)" },
+
+  // ملفات المريض
+  "files.upload": { ar: "رفع ملف", en: "Upload File" },
+  "files.category": { ar: "التصنيف", en: "Category" },
+  "files.catXray": { ar: "أشعة", en: "X-ray" },
+  "files.catPhoto": { ar: "صورة", en: "Photo" },
+  "files.catReport": { ar: "تقرير", en: "Report" },
+  "files.catOther": { ar: "أخرى", en: "Other" },
+  "files.uploading": { ar: "جارٍ الرفع...", en: "Uploading..." },
+  "files.choose": { ar: "اختر ملفاً (صورة / فيديو / PDF)", en: "Choose a file (image / video / PDF)" },
+  "files.view": { ar: "عرض", en: "View" },
+  "files.disabledHint": {
+    ar: "التخزين غير مفعّل. فعّل Vercel Blob من Storage في لوحة Vercel.",
+    en: "Storage not enabled. Enable Vercel Blob from the Storage tab in Vercel.",
+  },
+  "files.error": { ar: "فشل الرفع", en: "Upload failed" },
 };
 
 export function t(key: string, locale: Locale): string {

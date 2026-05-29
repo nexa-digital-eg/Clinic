@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { del } from "@vercel/blob";
 
 const patientSchema = z.object({
   firstName: z.string().min(1, "الاسم الأول مطلوب"),
@@ -83,6 +84,42 @@ export async function addDiagnosis(patientId: string, formData: FormData) {
     },
   });
   revalidatePath(`/patients/${patientId}`);
+}
+
+// تسجيل ملف مريض بعد رفعه إلى التخزين
+export async function recordPatientFile(
+  patientId: string,
+  data: { name: string; url: string; mimeType?: string; size?: number; category?: string },
+) {
+  const session = await getSession();
+  if (!session) return;
+  if (!data.url || !data.name) return;
+  await db.patientFile.create({
+    data: {
+      patientId,
+      name: data.name,
+      url: data.url,
+      mimeType: data.mimeType || null,
+      size: data.size ?? null,
+      category: data.category || null,
+    },
+  });
+  revalidatePath(`/patients/${patientId}`);
+}
+
+export async function deletePatientFile(id: string) {
+  const session = await getSession();
+  if (!session) return;
+  const file = await db.patientFile.findUnique({ where: { id } });
+  if (!file) return;
+  // احذف من التخزين السحابي (تجاهل الخطأ لو غير متاح)
+  try {
+    await del(file.url);
+  } catch {
+    // ignore
+  }
+  await db.patientFile.delete({ where: { id } });
+  revalidatePath(`/patients/${file.patientId}`);
 }
 
 export async function addPayment(patientId: string, formData: FormData) {
