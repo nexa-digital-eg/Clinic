@@ -24,13 +24,6 @@ const TABS = [
   { key: "staff", labelKey: "settings.tabStaff" },
 ];
 
-const ROLE_LABELS: Record<string, string> = {
-  ADMIN: "مدير",
-  DOCTOR: "طبيب",
-  RECEPTIONIST: "سكرتارية",
-  PATIENT: "مريض",
-};
-
 export default async function SettingsPage({
   searchParams,
 }: {
@@ -41,7 +34,7 @@ export default async function SettingsPage({
   if (session.role !== "ADMIN") {
     return (
       <Card className="p-10 text-center">
-        <p className="text-sm font-medium text-slate-600">هذه الصفحة متاحة للمدير فقط</p>
+        <p className="text-sm font-medium text-slate-600">For administrators only — هذه الصفحة متاحة للمدير فقط</p>
       </Card>
     );
   }
@@ -103,7 +96,7 @@ export default async function SettingsPage({
           <div className="lg:col-span-2">
             <Card>
               <div className="border-b border-slate-200 px-5 py-3">
-                <h2 className="font-semibold text-slate-800">الإجراءات ({procedures.length})</h2>
+                <h2 className="font-semibold text-slate-800">{t("settings.tabProcedures", locale)} ({procedures.length})</h2>
               </div>
               {procedures.length === 0 ? (
                 <p className="py-8 text-center text-sm text-slate-400">لا توجد إجراءات</p>
@@ -131,7 +124,7 @@ export default async function SettingsPage({
           <div className="lg:col-span-2">
             <Card>
               <div className="border-b border-slate-200 px-5 py-3">
-                <h2 className="font-semibold text-slate-800">الفروع ({branches.length})</h2>
+                <h2 className="font-semibold text-slate-800">{t("settings.tabBranches", locale)} ({branches.length})</h2>
               </div>
               <div className="divide-y divide-slate-100">
                 {branches.map((b) => (
@@ -155,7 +148,7 @@ export default async function SettingsPage({
           <div className="lg:col-span-2">
             <Card>
               <div className="border-b border-slate-200 px-5 py-3">
-                <h2 className="font-semibold text-slate-800">المستخدمون ({staff.length})</h2>
+                <h2 className="font-semibold text-slate-800">{t("settings.tabStaff", locale)} ({staff.length})</h2>
               </div>
               <div className="divide-y divide-slate-100">
                 {staff.map((u) => (
@@ -163,13 +156,13 @@ export default async function SettingsPage({
                     <div>
                       <p className="font-medium text-slate-800">
                         {u.name}
-                        {!u.isActive && <Badge color="red" className="mr-2">معطّل</Badge>}
+                        {!u.isActive && <Badge color="red" className="mr-2">{t("set.disabled", locale)}</Badge>}
                       </p>
                       <p className="text-xs text-slate-400" dir="ltr">{u.email}</p>
                     </div>
                     <div className="flex items-center gap-3">
                       <Badge color={u.role === "ADMIN" ? "blue" : u.role === "DOCTOR" ? "green" : "slate"}>
-                        {ROLE_LABELS[u.role]}
+                        {t(`role.${u.role}`, locale)}
                       </Badge>
                       <StaffToggle id={u.id} isActive={u.isActive} self={u.id === session.id} />
                     </div>

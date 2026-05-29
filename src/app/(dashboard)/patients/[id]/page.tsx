@@ -5,16 +5,18 @@ import { formatDate, formatDateTime, formatCurrency, calcAge } from "@/lib/utils
 import { addComplaint, addDiagnosis, addPayment } from "../actions";
 import Link from "next/link";
 import { ArrowRight, Phone, Mail, MapPin, Droplet } from "lucide-react";
+import { getLocale } from "@/lib/locale";
+import { t, type Locale } from "@/lib/i18n";
 
 const TABS = [
-  { key: "overview", label: "نظرة عامة" },
-  { key: "diagnoses", label: "التشخيصات" },
-  { key: "prescriptions", label: "الروشتات" },
-  { key: "appointments", label: "الحجوزات" },
-  { key: "billing", label: "المدفوعات" },
-  { key: "files", label: "الملفات" },
-  { key: "complaints", label: "الشكاوي" },
-  { key: "teeth", label: "الأسنان" },
+  { key: "overview", labelKey: "tab.overview" },
+  { key: "diagnoses", labelKey: "tab.diagnoses" },
+  { key: "prescriptions", labelKey: "tab.prescriptions" },
+  { key: "appointments", labelKey: "tab.appointments" },
+  { key: "billing", labelKey: "tab.billing" },
+  { key: "files", labelKey: "tab.files" },
+  { key: "complaints", labelKey: "tab.complaints" },
+  { key: "teeth", labelKey: "tab.teeth" },
 ];
 
 export default async function PatientProfile({
@@ -26,6 +28,7 @@ export default async function PatientProfile({
 }) {
   const { id } = await params;
   const { tab = "overview" } = await searchParams;
+  const locale = await getLocale();
 
   const patient = await db.patient.findUnique({
     where: { id },
@@ -78,7 +81,7 @@ export default async function PatientProfile({
           </p>
         </div>
         <Card className="px-5 py-3 text-center">
-          <p className="text-xs text-slate-500">الرصيد</p>
+          <p className="text-xs text-slate-500">{t("profile.balance", locale)}</p>
           <p
             className={`text-lg font-bold ${patient.balance >= 0 ? "text-green-600" : "text-red-600"}`}
           >
@@ -89,25 +92,25 @@ export default async function PatientProfile({
 
       {/* بطاقة المعلومات السريعة */}
       <Card className="grid grid-cols-2 gap-4 p-5 sm:grid-cols-4">
-        <InfoItem icon={<Phone className="h-4 w-4" />} label="الهاتف" value={patient.phone} ltr />
-        <InfoItem icon={<Mail className="h-4 w-4" />} label="البريد" value={patient.email ?? "—"} ltr />
-        <InfoItem icon={<MapPin className="h-4 w-4" />} label="العنوان" value={patient.address ?? "—"} />
-        <InfoItem icon={<Droplet className="h-4 w-4" />} label="فصيلة الدم" value={patient.bloodType ?? "—"} ltr />
+        <InfoItem icon={<Phone className="h-4 w-4" />} label={t("form.phone", locale)} value={patient.phone} ltr />
+        <InfoItem icon={<Mail className="h-4 w-4" />} label={t("form.email", locale)} value={patient.email ?? "—"} ltr />
+        <InfoItem icon={<MapPin className="h-4 w-4" />} label={t("form.address", locale)} value={patient.address ?? "—"} />
+        <InfoItem icon={<Droplet className="h-4 w-4" />} label={t("form.bloodType", locale)} value={patient.bloodType ?? "—"} ltr />
       </Card>
 
       {/* التابات */}
       <div className="flex flex-wrap gap-1 border-b border-slate-200">
-        {TABS.map((t) => (
+        {TABS.map((tb) => (
           <Link
-            key={t.key}
-            href={`/patients/${patient.id}?tab=${t.key}`}
+            key={tb.key}
+            href={`/patients/${patient.id}?tab=${tb.key}`}
             className={`rounded-t-lg px-4 py-2 text-sm font-medium transition-colors ${
-              tab === t.key
+              tab === tb.key
                 ? "border-b-2 border-brand-600 text-brand-700"
                 : "text-slate-500 hover:text-slate-700"
             }`}
           >
-            {t.label}
+            {t(tb.labelKey, locale)}
           </Link>
         ))}
       </div>
@@ -115,20 +118,20 @@ export default async function PatientProfile({
       {tab === "overview" && (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <Card className="p-5">
-            <h3 className="mb-3 font-semibold text-slate-800">الملخص الطبي</h3>
+            <h3 className="mb-3 font-semibold text-slate-800">{t("profile.medicalSummary", locale)}</h3>
             <dl className="space-y-2 text-sm">
-              <Row label="الحساسية" value={patient.allergies ?? "لا يوجد"} />
-              <Row label="أمراض مزمنة" value={patient.chronicConditions ?? "لا يوجد"} />
-              <Row label="ملاحظات" value={patient.notes ?? "—"} />
+              <Row label={t("form.allergies", locale)} value={patient.allergies ?? t("profile.none", locale)} />
+              <Row label={t("form.chronic", locale)} value={patient.chronicConditions ?? t("profile.none", locale)} />
+              <Row label={t("form.notes", locale)} value={patient.notes ?? "—"} />
             </dl>
           </Card>
           <Card className="p-5">
-            <h3 className="mb-3 font-semibold text-slate-800">إحصائيات سريعة</h3>
+            <h3 className="mb-3 font-semibold text-slate-800">{t("profile.quickStats", locale)}</h3>
             <div className="grid grid-cols-2 gap-3 text-center">
-              <Stat label="التشخيصات" value={patient.diagnoses.length} />
-              <Stat label="الروشتات" value={patient.prescriptions.length} />
-              <Stat label="الحجوزات" value={patient.appointments.length} />
-              <Stat label="الشكاوي" value={patient.complaints.length} />
+              <Stat label={t("tab.diagnoses", locale)} value={patient.diagnoses.length} />
+              <Stat label={t("tab.prescriptions", locale)} value={patient.prescriptions.length} />
+              <Stat label={t("tab.appointments", locale)} value={patient.appointments.length} />
+              <Stat label={t("tab.complaints", locale)} value={patient.complaints.length} />
             </div>
           </Card>
         </div>
@@ -137,22 +140,22 @@ export default async function PatientProfile({
       {tab === "diagnoses" && (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
           <Card className="p-5 lg:col-span-1">
-            <h3 className="mb-3 font-semibold text-slate-800">إضافة تشخيص</h3>
+            <h3 className="mb-3 font-semibold text-slate-800">{t("profile.addDiagnosis", locale)}</h3>
             <form action={addDiagnosisBound} className="space-y-3">
               <div>
-                <Label htmlFor="title">العنوان</Label>
+                <Label htmlFor="title">{t("form.title", locale)}</Label>
                 <Input id="title" name="title" required />
               </div>
               <div>
-                <Label htmlFor="details">التفاصيل</Label>
+                <Label htmlFor="details">{t("form.details", locale)}</Label>
                 <Textarea id="details" name="details" rows={3} />
               </div>
-              <Button type="submit" className="w-full">حفظ</Button>
+              <Button type="submit" className="w-full">{t("common.save", locale)}</Button>
             </form>
           </Card>
           <div className="space-y-3 lg:col-span-2">
             {patient.diagnoses.length === 0 ? (
-              <EmptyState title="لا توجد تشخيصات" />
+              <EmptyState title={t("profile.noDiagnoses", locale)} />
             ) : (
               patient.diagnoses.map((d) => (
                 <Card key={d.id} className="p-4">
@@ -171,7 +174,7 @@ export default async function PatientProfile({
       {tab === "prescriptions" && (
         <div className="space-y-3">
           {patient.prescriptions.length === 0 ? (
-            <EmptyState title="لا توجد روشتات" description="تُضاف الروشتات من المساعد الذكي (المرحلة 8)" />
+            <EmptyState title={t("profile.noPrescriptions", locale)} />
           ) : (
             patient.prescriptions.map((p) => (
               <Card key={p.id} className="p-4">
@@ -207,24 +210,24 @@ export default async function PatientProfile({
       {tab === "appointments" && (
         <Card>
           {patient.appointments.length === 0 ? (
-            <EmptyState title="لا توجد حجوزات" />
+            <EmptyState title={t("profile.noAppointments", locale)} />
           ) : (
             <table className="w-full text-sm">
               <thead className="border-b border-slate-200 text-right text-xs text-slate-500">
                 <tr>
-                  <th className="px-4 py-3 font-medium">الموعد</th>
-                  <th className="px-4 py-3 font-medium">الطبيب</th>
-                  <th className="px-4 py-3 font-medium">السبب</th>
-                  <th className="px-4 py-3 font-medium">الحالة</th>
+                  <th className="px-4 py-3 font-medium">{t("col.datetime", locale)}</th>
+                  <th className="px-4 py-3 font-medium">{t("col.doctor", locale)}</th>
+                  <th className="px-4 py-3 font-medium">{t("col.reason", locale)}</th>
+                  <th className="px-4 py-3 font-medium">{t("col.status", locale)}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {patient.appointments.map((a) => (
                   <tr key={a.id}>
                     <td className="px-4 py-3">{formatDateTime(a.startsAt)}</td>
-                    <td className="px-4 py-3">د. {a.doctor.user.name}</td>
+                    <td className="px-4 py-3">{a.doctor.user.name}</td>
                     <td className="px-4 py-3 text-slate-600">{a.reason ?? "—"}</td>
-                    <td className="px-4 py-3"><AppointmentStatusBadge status={a.status} /></td>
+                    <td className="px-4 py-3"><AppointmentStatusBadge status={a.status} locale={locale} /></td>
                   </tr>
                 ))}
               </tbody>
@@ -236,40 +239,40 @@ export default async function PatientProfile({
       {tab === "billing" && (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
           <Card className="p-5 lg:col-span-1">
-            <h3 className="mb-3 font-semibold text-slate-800">تسجيل دفعة</h3>
+            <h3 className="mb-3 font-semibold text-slate-800">{t("profile.recordPayment", locale)}</h3>
             <form action={addPaymentBound} className="space-y-3">
               <div>
-                <Label htmlFor="amount">المبلغ</Label>
+                <Label htmlFor="amount">{t("form.amount", locale)}</Label>
                 <Input id="amount" name="amount" type="number" step="0.01" dir="ltr" required />
               </div>
               <div>
-                <Label htmlFor="method">طريقة الدفع</Label>
+                <Label htmlFor="method">{t("form.method", locale)}</Label>
                 <Select id="method" name="method" defaultValue="CASH">
-                  <option value="CASH">نقدي</option>
-                  <option value="CARD">بطاقة</option>
-                  <option value="TRANSFER">تحويل</option>
-                  <option value="OTHER">أخرى</option>
+                  <option value="CASH">{t("method.CASH", locale)}</option>
+                  <option value="CARD">{t("method.CARD", locale)}</option>
+                  <option value="TRANSFER">{t("method.TRANSFER", locale)}</option>
+                  <option value="OTHER">{t("method.OTHER", locale)}</option>
                 </Select>
               </div>
               <div>
-                <Label htmlFor="note">ملاحظة</Label>
+                <Label htmlFor="note">{t("form.note", locale)}</Label>
                 <Input id="note" name="note" />
               </div>
-              <Button type="submit" className="w-full">حفظ الدفعة</Button>
+              <Button type="submit" className="w-full">{t("common.save", locale)}</Button>
             </form>
           </Card>
           <div className="lg:col-span-2">
             <Card>
               {patient.payments.length === 0 ? (
-                <EmptyState title="لا توجد مدفوعات" />
+                <EmptyState title={t("profile.noPayments", locale)} />
               ) : (
                 <table className="w-full text-sm">
                   <thead className="border-b border-slate-200 text-right text-xs text-slate-500">
                     <tr>
-                      <th className="px-4 py-3 font-medium">التاريخ</th>
-                      <th className="px-4 py-3 font-medium">المبلغ</th>
-                      <th className="px-4 py-3 font-medium">الطريقة</th>
-                      <th className="px-4 py-3 font-medium">ملاحظة</th>
+                      <th className="px-4 py-3 font-medium">{t("col.date", locale)}</th>
+                      <th className="px-4 py-3 font-medium">{t("col.amount", locale)}</th>
+                      <th className="px-4 py-3 font-medium">{t("col.method", locale)}</th>
+                      <th className="px-4 py-3 font-medium">{t("form.note", locale)}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -277,7 +280,7 @@ export default async function PatientProfile({
                       <tr key={p.id}>
                         <td className="px-4 py-3 text-slate-500">{formatDate(p.createdAt)}</td>
                         <td className="px-4 py-3 font-medium text-green-600">{formatCurrency(p.amount)}</td>
-                        <td className="px-4 py-3">{methodLabel(p.method)}</td>
+                        <td className="px-4 py-3">{t(`method.${p.method}`, locale)}</td>
                         <td className="px-4 py-3 text-slate-600">{p.note ?? "—"}</td>
                       </tr>
                     ))}
@@ -292,7 +295,7 @@ export default async function PatientProfile({
       {tab === "files" && (
         <Card className="p-5">
           {patient.files.length === 0 ? (
-            <EmptyState title="لا توجد ملفات" description="رفع الملفات (أشعة/صور/PDF) يُضاف لاحقاً" />
+            <EmptyState title={t("profile.noFiles", locale)} />
           ) : (
             <ul className="divide-y divide-slate-100">
               {patient.files.map((f) => (
@@ -311,29 +314,29 @@ export default async function PatientProfile({
       {tab === "complaints" && (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
           <Card className="p-5 lg:col-span-1">
-            <h3 className="mb-3 font-semibold text-slate-800">إضافة شكوى</h3>
+            <h3 className="mb-3 font-semibold text-slate-800">{t("profile.addComplaint", locale)}</h3>
             <form action={addComplaintBound} className="space-y-3">
               <div>
-                <Label htmlFor="title">العنوان</Label>
+                <Label htmlFor="title">{t("form.title", locale)}</Label>
                 <Input id="title" name="title" required />
               </div>
               <div>
-                <Label htmlFor="details">التفاصيل</Label>
+                <Label htmlFor="details">{t("form.details", locale)}</Label>
                 <Textarea id="details" name="details" rows={3} />
               </div>
-              <Button type="submit" className="w-full">حفظ</Button>
+              <Button type="submit" className="w-full">{t("common.save", locale)}</Button>
             </form>
           </Card>
           <div className="space-y-3 lg:col-span-2">
             {patient.complaints.length === 0 ? (
-              <EmptyState title="لا توجد شكاوي" />
+              <EmptyState title={t("profile.noComplaints", locale)} />
             ) : (
               patient.complaints.map((c) => (
                 <Card key={c.id} className="p-4">
                   <div className="flex items-center justify-between">
                     <p className="font-medium text-slate-800">{c.title}</p>
                     <Badge color={c.status === "open" ? "yellow" : "green"}>
-                      {c.status === "open" ? "مفتوحة" : "محلولة"}
+                      {c.status === "open" ? t("complaint.open", locale) : t("complaint.resolved", locale)}
                     </Badge>
                   </div>
                   {c.details && <p className="mt-1 text-sm text-slate-600">{c.details}</p>}
@@ -352,33 +355,33 @@ export default async function PatientProfile({
               href={`/dental-chart/${patient.id}`}
               className="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
             >
-              فتح مخطط الأسنان
+              {t("profile.openDental", locale)}
             </Link>
           </div>
           <Card>
           {patient.toothRecords.length === 0 ? (
-            <EmptyState title="لا توجد سجلات أسنان" description="افتح مخطط الأسنان لإضافة إجراء" />
+            <EmptyState title={t("profile.noTeeth", locale)} />
           ) : (
             <table className="w-full text-sm">
               <thead className="border-b border-slate-200 text-right text-xs text-slate-500">
                 <tr>
-                  <th className="px-4 py-3 font-medium">السن</th>
-                  <th className="px-4 py-3 font-medium">الجزء</th>
-                  <th className="px-4 py-3 font-medium">الإجراء</th>
-                  <th className="px-4 py-3 font-medium">السعر</th>
-                  <th className="px-4 py-3 font-medium">الحالة</th>
+                  <th className="px-4 py-3 font-medium">{t("col.tooth", locale)}</th>
+                  <th className="px-4 py-3 font-medium">{t("col.surface", locale)}</th>
+                  <th className="px-4 py-3 font-medium">{t("col.procedure", locale)}</th>
+                  <th className="px-4 py-3 font-medium">{t("col.price", locale)}</th>
+                  <th className="px-4 py-3 font-medium">{t("col.status", locale)}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {patient.toothRecords.map((t) => (
-                  <tr key={t.id}>
-                    <td className="px-4 py-3 font-mono">{t.toothNumber}</td>
-                    <td className="px-4 py-3 text-slate-600">{t.surface ?? "—"}</td>
-                    <td className="px-4 py-3">{t.procedure?.name ?? "—"}</td>
-                    <td className="px-4 py-3">{formatCurrency(t.price)}</td>
+                {patient.toothRecords.map((tooth) => (
+                  <tr key={tooth.id}>
+                    <td className="px-4 py-3 font-mono">{tooth.toothNumber}</td>
+                    <td className="px-4 py-3 text-slate-600">{tooth.surface ?? "—"}</td>
+                    <td className="px-4 py-3">{tooth.procedure?.name ?? "—"}</td>
+                    <td className="px-4 py-3">{formatCurrency(tooth.price)}</td>
                     <td className="px-4 py-3">
-                      <Badge color={t.status === "done" ? "green" : "yellow"}>
-                        {t.status === "done" ? "تم" : "مخطط"}
+                      <Badge color={tooth.status === "done" ? "green" : "yellow"}>
+                        {tooth.status === "done" ? t("tooth.done", locale) : t("tooth.planned", locale)}
                       </Badge>
                     </td>
                   </tr>
@@ -423,18 +426,13 @@ function Stat({ label, value }: { label: string; value: number }) {
   );
 }
 
-function methodLabel(m: string) {
-  return { CASH: "نقدي", CARD: "بطاقة", TRANSFER: "تحويل", OTHER: "أخرى" }[m] ?? m;
-}
-
-function AppointmentStatusBadge({ status }: { status: string }) {
-  const map: Record<string, { label: string; color: "slate" | "green" | "yellow" | "red" | "blue" }> = {
-    PENDING: { label: "منتظر", color: "yellow" },
-    CONFIRMED: { label: "مؤكد", color: "blue" },
-    COMPLETED: { label: "تم", color: "green" },
-    CANCELLED: { label: "ملغي", color: "red" },
-    NO_SHOW: { label: "لم يحضر", color: "slate" },
+function AppointmentStatusBadge({ status, locale }: { status: string; locale: Locale }) {
+  const color: Record<string, "slate" | "green" | "yellow" | "red" | "blue"> = {
+    PENDING: "yellow",
+    CONFIRMED: "blue",
+    COMPLETED: "green",
+    CANCELLED: "red",
+    NO_SHOW: "slate",
   };
-  const s = map[status] ?? { label: status, color: "slate" as const };
-  return <Badge color={s.color}>{s.label}</Badge>;
+  return <Badge color={color[status] ?? "slate"}>{t(`apptStatus.${status}`, locale)}</Badge>;
 }

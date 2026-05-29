@@ -6,6 +6,7 @@ import { logout } from "../(auth)/actions";
 import { LogOut } from "lucide-react";
 import { getLocale } from "@/lib/locale";
 import { t } from "@/lib/i18n";
+import { LocaleProvider } from "@/lib/i18n-client";
 
 export default async function DashboardLayout({
   children,
@@ -17,6 +18,7 @@ export default async function DashboardLayout({
   const locale = await getLocale();
 
   return (
+    <LocaleProvider locale={locale}>
     <div className="flex h-screen overflow-hidden bg-slate-50">
       <Sidebar role={session.role} locale={locale} />
       <div className="flex flex-1 flex-col overflow-hidden">
@@ -45,5 +47,6 @@ export default async function DashboardLayout({
         <main className="flex-1 overflow-y-auto p-6">{children}</main>
       </div>
     </div>
+    </LocaleProvider>
   );
 }

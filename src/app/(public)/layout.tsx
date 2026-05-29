@@ -1,11 +1,15 @@
 import { Stethoscope } from "lucide-react";
+import { getLocale } from "@/lib/locale";
+import { LocaleProvider } from "@/lib/i18n-client";
 
-export default function PublicLayout({
+export default async function PublicLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const locale = await getLocale();
   return (
+    <LocaleProvider locale={locale}>
     <div className="min-h-screen bg-gradient-to-br from-brand-50 to-slate-100">
       <header className="border-b border-slate-200 bg-white/80 backdrop-blur">
         <div className="mx-auto flex max-w-3xl items-center gap-2 px-4 py-3">
@@ -17,5 +21,6 @@ export default function PublicLayout({
       </header>
       <main className="mx-auto max-w-3xl px-4 py-8">{children}</main>
     </div>
+    </LocaleProvider>
   );
 }
