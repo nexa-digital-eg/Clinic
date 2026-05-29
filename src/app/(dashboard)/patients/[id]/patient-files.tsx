@@ -7,7 +7,6 @@ import { Card, Button, Label, Select, EmptyState } from "@/components/ui";
 import { useT } from "@/lib/i18n-client";
 import { formatDate } from "@/lib/utils";
 import { Upload, Trash2, FileText, ExternalLink } from "lucide-react";
-import { useRouter } from "next/navigation";
 
 type FileItem = {
   id: string;
@@ -28,7 +27,7 @@ export function PatientFiles({
   enabled: boolean;
 }) {
   const tr = useT();
-  const router = useRouter();
+  const [items, setItems] = useState<FileItem[]>(files);
   const inputRef = useRef<HTMLInputElement>(null);
   const [category, setCategory] = useState("xray");
   const [uploading, setUploading] = useState(false);
@@ -38,10 +37,10 @@ export function PatientFiles({
 
   // ضغط الصور الكبيرة قبل الرفع لتسريعه (لا يمس PDF/الفيديو)
   const maybeCompress = async (file: File): Promise<File> => {
-    if (!file.type.startsWith("image/") || file.size < 1.5 * 1024 * 1024) return file;
+    if (!file.type.startsWith("image/") || file.size < 1 * 1024 * 1024) return file;
     try {
       const bitmap = await createImageBitmap(file);
-      const maxDim = 2000;
+      const maxDim = 1800;
       const scale = Math.min(1, maxDim / Math.max(bitmap.width, bitmap.height));
       const w = Math.round(bitmap.width * scale);
       const h = Math.round(bitmap.height * scale);
@@ -73,14 +72,25 @@ export function PatientFiles({
         clientPayload: JSON.stringify({ patientId }),
         onUploadProgress: (e) => setProgress(Math.round(e.percentage)),
       });
-      await recordPatientFile(patientId, {
+      const rec = await recordPatientFile(patientId, {
         name: file.name,
         url: blob.url,
         mimeType: file.type,
         size: file.size,
         category,
       });
-      router.refresh();
+      // أظهر الملف فوراً بدون إعادة تحميل الصفحة كاملة
+      setItems((prev) => [
+        {
+          id: rec?.id ?? blob.url,
+          name: file.name,
+          url: blob.url,
+          mimeType: file.type,
+          category,
+          createdAt: new Date().toISOString(),
+        },
+        ...prev,
+      ]);
     } catch (e) {
       setError((e as Error).message || tr("files.error"));
     } finally {
@@ -141,11 +151,11 @@ export function PatientFiles({
         {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
       </Card>
 
-      {files.length === 0 ? (
+      {items.length === 0 ? (
         <EmptyState title={tr("profile.noFiles")} />
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {files.map((f) => (
+          {items.map((f) => (
             <Card key={f.id} className="overflow-hidden">
               <a href={f.url} target="_blank" rel="noreferrer" className="block">
                 {isImage(f) ? (
@@ -174,8 +184,10 @@ export function PatientFiles({
                   </a>
                   <button
                     onClick={() => {
-                      if (confirm(tr("common.delete") + "؟"))
-                        startTransition(() => deletePatientFile(f.id).then(() => router.refresh()));
+                      if (confirm(tr("common.delete") + "؟")) {
+                        setItems((prev) => prev.filter((x) => x.id !== f.id));
+                        startTransition(() => deletePatientFile(f.id));
+                      }
                     }}
                     className="rounded p-1 text-slate-400 hover:bg-red-50 hover:text-red-600"
                   >

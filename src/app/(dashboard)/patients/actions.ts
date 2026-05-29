@@ -90,11 +90,11 @@ export async function addDiagnosis(patientId: string, formData: FormData) {
 export async function recordPatientFile(
   patientId: string,
   data: { name: string; url: string; mimeType?: string; size?: number; category?: string },
-) {
+): Promise<{ id: string } | null> {
   const session = await getSession();
-  if (!session) return;
-  if (!data.url || !data.name) return;
-  await db.patientFile.create({
+  if (!session) return null;
+  if (!data.url || !data.name) return null;
+  const file = await db.patientFile.create({
     data: {
       patientId,
       name: data.name,
@@ -105,6 +105,7 @@ export async function recordPatientFile(
     },
   });
   revalidatePath(`/patients/${patientId}`);
+  return { id: file.id };
 }
 
 export async function deletePatientFile(id: string) {
