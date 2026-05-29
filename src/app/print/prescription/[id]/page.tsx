@@ -1,0 +1,79 @@
+import { db } from "@/lib/db";
+import { notFound } from "next/navigation";
+import { getClinicSettings } from "@/server/clinic";
+import { ClinicHeader } from "@/components/clinic-header";
+import { PrintButton } from "../../print-button";
+import { formatDate, calcAge } from "@/lib/utils";
+
+export default async function PrintPrescription({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const [prescription, clinic] = await Promise.all([
+    db.prescription.findUnique({
+      where: { id },
+      include: { patient: true, items: true, doctor: { include: { user: true } } },
+    }),
+    getClinicSettings(),
+  ]);
+  if (!prescription) notFound();
+
+  const age = calcAge(prescription.patient.birthDate);
+
+  return (
+    <div className="rounded-xl bg-white p-8 shadow-sm print:rounded-none print:shadow-none">
+      <div className="mb-4 flex justify-end">
+        <PrintButton />
+      </div>
+
+      <ClinicHeader clinic={clinic} />
+
+      <div className="mt-6 flex items-start justify-between">
+        <div>
+          <h2 className="text-lg font-bold text-slate-800">روشتة طبية</h2>
+          {prescription.doctor && (
+            <p className="text-sm text-slate-500">د. {prescription.doctor.user.name}{prescription.doctor.specialty ? ` — ${prescription.doctor.specialty}` : ""}</p>
+          )}
+        </div>
+        <div className="text-left text-sm text-slate-600">
+          <p>التاريخ: {formatDate(prescription.createdAt)}</p>
+          <p>المريض: {prescription.patient.firstName} {prescription.patient.lastName}</p>
+          {age !== null && <p>العمر: {age} سنة</p>}
+        </div>
+      </div>
+
+      <div className="mt-6 flex items-center gap-2 text-2xl font-bold text-brand-700">℞</div>
+
+      <ol className="mt-2 space-y-3">
+        {prescription.items.map((it, i) => (
+          <li key={it.id} className="border-b border-slate-100 pb-2">
+            <div className="flex items-baseline gap-2">
+              <span className="text-slate-400">{i + 1}.</span>
+              <span className="font-semibold text-slate-800">{it.drugName}</span>
+              {it.dose && <span className="text-sm text-slate-600">{it.dose}</span>}
+            </div>
+            <div className="mr-6 text-sm text-slate-500">
+              {[it.frequency, it.duration].filter(Boolean).join(" — ")}
+              {it.alternatives && <span className="block text-xs text-slate-400">بديل: {it.alternatives}</span>}
+            </div>
+          </li>
+        ))}
+      </ol>
+
+      {prescription.notes && (
+        <div className="mt-4 rounded-lg bg-slate-50 p-3 text-sm text-slate-600">
+          <span className="font-medium">ملاحظات: </span>{prescription.notes}
+        </div>
+      )}
+
+      <div className="mt-12 flex justify-start">
+        <div className="text-center">
+          <div className="h-10 border-b border-slate-300" style={{ width: "12rem" }} />
+          <p className="mt-1 text-xs text-slate-400">توقيع الطبيب</p>
+        </div>
+      </div>
+    </div>
+  );
+}

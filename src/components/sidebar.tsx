@@ -15,6 +15,7 @@ import {
   MessageCircle,
   Brain,
   BarChart3,
+  Settings,
 } from "lucide-react";
 
 const NAV = [
@@ -29,10 +30,12 @@ const NAV = [
   { href: "/whatsapp", label: "واتساب", icon: MessageCircle },
   { href: "/assistant", label: "المساعد الذكي", icon: Brain },
   { href: "/reports", label: "التقارير", icon: BarChart3 },
+  { href: "/settings", label: "الإعدادات", icon: Settings, adminOnly: true },
 ];
 
-export function Sidebar() {
+export function Sidebar({ role }: { role?: string }) {
   const pathname = usePathname();
+  const nav = NAV.filter((n) => !n.adminOnly || role === "ADMIN");
 
   return (
     <aside className="flex w-64 flex-col border-l border-slate-200 bg-white">
@@ -44,7 +47,7 @@ export function Sidebar() {
       </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto p-3">
-        {NAV.map(({ href, label, icon: Icon }) => {
+        {nav.map(({ href, label, icon: Icon }) => {
           const active =
             pathname === href || pathname.startsWith(href + "/");
           return (

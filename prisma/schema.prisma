@@ -203,6 +203,18 @@ model PrescriptionTemplate {
   createdAt DateTime @default(now())
 }
 
+// إعدادات العيادة (سجل واحد)
+model ClinicSettings {
+  id        String   @id @default("clinic")
+  name      String   @default("Smart Clinic")
+  logoUrl   String?
+  address   String?
+  phone     String?
+  email     String?
+  currency  String   @default("ج.م")
+  updatedAt DateTime @updatedAt
+}
+
 // ============================================================
 // مخطط الأسنان Dental Chart (المرحلة 3)
 // ============================================================

@@ -9,7 +9,7 @@ import { getOrCreateOpenInvoice, recalcInvoice } from "@/server/billing";
 
 const schema = z.object({
   patientId: z.string().min(1),
-  toothNumber: z.coerce.number().int().min(11).max(48),
+  toothNumber: z.coerce.number().int().min(11).max(85),
   surface: z.string().optional(),
   procedureId: z.string().optional(),
   notes: z.string().optional(),

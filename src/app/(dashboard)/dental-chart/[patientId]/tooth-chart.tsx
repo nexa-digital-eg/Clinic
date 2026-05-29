@@ -6,7 +6,15 @@ import {
   setToothStatus,
   deleteToothRecord,
 } from "../actions";
-import { UPPER_TEETH, LOWER_TEETH, SURFACES, surfaceLabel, toothName } from "@/lib/teeth";
+import {
+  UPPER_TEETH,
+  LOWER_TEETH,
+  UPPER_PRIMARY_TEETH,
+  LOWER_PRIMARY_TEETH,
+  SURFACES,
+  surfaceLabel,
+  toothName,
+} from "@/lib/teeth";
 import { Card, Button, Label, Select, Textarea, Badge, EmptyState } from "@/components/ui";
 import { formatCurrency } from "@/lib/utils";
 import { Check, RotateCcw, Trash2 } from "lucide-react";
@@ -31,8 +39,12 @@ export function ToothChart({
   records: Record[];
 }) {
   const [selected, setSelected] = useState<number | null>(null);
+  const [dentition, setDentition] = useState<"permanent" | "primary">("permanent");
   const [state, formAction, pending] = useActionState(addToothRecord, undefined);
   const [, startTransition] = useTransition();
+
+  const upperTeeth = dentition === "permanent" ? UPPER_TEETH : UPPER_PRIMARY_TEETH;
+  const lowerTeeth = dentition === "permanent" ? LOWER_TEETH : LOWER_PRIMARY_TEETH;
 
   // أغلق نموذج الإضافة بعد الحفظ الناجح
   useEffect(() => {
@@ -76,11 +88,35 @@ export function ToothChart({
       {/* المخطط */}
       <div className="space-y-4 lg:col-span-2">
         <Card className="p-6">
+          {/* تبديل بين الأسنان الدائمة واللبنية */}
+          <div className="mb-4 flex justify-center">
+            <div className="inline-flex rounded-lg bg-slate-100 p-1">
+              <button
+                onClick={() => {
+                  setDentition("permanent");
+                  setSelected(null);
+                }}
+                className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${dentition === "permanent" ? "bg-white text-brand-700 shadow-sm" : "text-slate-500"}`}
+              >
+                أسنان دائمة (بالغين)
+              </button>
+              <button
+                onClick={() => {
+                  setDentition("primary");
+                  setSelected(null);
+                }}
+                className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${dentition === "primary" ? "bg-white text-brand-700 shadow-sm" : "text-slate-500"}`}
+              >
+                أسنان لبنية (أطفال)
+              </button>
+            </div>
+          </div>
+
           <div className="space-y-4">
             <div>
               <p className="mb-2 text-center text-xs text-slate-400">الفك العلوي</p>
               <div className="flex flex-wrap justify-center gap-1">
-                {UPPER_TEETH.map((n) => (
+                {upperTeeth.map((n) => (
                   <Tooth key={n} num={n} />
                 ))}
               </div>
@@ -88,7 +124,7 @@ export function ToothChart({
             <div className="border-t border-dashed border-slate-200" />
             <div>
               <div className="flex flex-wrap justify-center gap-1">
-                {LOWER_TEETH.map((n) => (
+                {lowerTeeth.map((n) => (
                   <Tooth key={n} num={n} />
                 ))}
               </div>

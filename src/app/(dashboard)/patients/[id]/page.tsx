@@ -179,7 +179,16 @@ export default async function PatientProfile({
                   <p className="text-sm text-slate-500">
                     {p.doctor ? `د. ${p.doctor.user.name}` : "روشتة"}
                   </p>
-                  <span className="text-xs text-slate-400">{formatDate(p.createdAt)}</span>
+                  <div className="flex items-center gap-3">
+                    <a
+                      href={`/print/prescription/${p.id}`}
+                      target="_blank"
+                      className="text-xs font-medium text-brand-600 hover:underline"
+                    >
+                      طباعة / PDF
+                    </a>
+                    <span className="text-xs text-slate-400">{formatDate(p.createdAt)}</span>
+                  </div>
                 </div>
                 <ul className="space-y-1 text-sm">
                   {p.items.map((it) => (
