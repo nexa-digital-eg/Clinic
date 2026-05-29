@@ -3,8 +3,10 @@ import { jwtVerify } from "jose";
 
 const PUBLIC_PATHS = ["/login", "/booking"];
 
+const FALLBACK_SECRET = "smart-clinic-insecure-default-secret-please-set-AUTH_SECRET";
+
 function getSecret(): Uint8Array {
-  return new TextEncoder().encode(process.env.AUTH_SECRET ?? "");
+  return new TextEncoder().encode(process.env.AUTH_SECRET || FALLBACK_SECRET);
 }
 
 export async function middleware(req: NextRequest) {

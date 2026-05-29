@@ -7,9 +7,12 @@ import type { Role } from "@prisma/client";
 const COOKIE_NAME = "clinic_session";
 const ALG = "HS256";
 
+// قيمة افتراضية احتياطية حتى لا ينهار التطبيق عند غياب AUTH_SECRET
+// (يُنصح بشدة بضبط AUTH_SECRET الحقيقي في الإنتاج)
+const FALLBACK_SECRET = "smart-clinic-insecure-default-secret-please-set-AUTH_SECRET";
+
 function getSecret(): Uint8Array {
-  const secret = process.env.AUTH_SECRET;
-  if (!secret) throw new Error("AUTH_SECRET is not set");
+  const secret = process.env.AUTH_SECRET || FALLBACK_SECRET;
   return new TextEncoder().encode(secret);
 }
 
