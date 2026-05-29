@@ -11,6 +11,33 @@ services:
       - "5432:5432"
     volumes:
       - clinic-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U clinic"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # تطبيق Smart Clinic — فعّله بـ: docker compose --profile app up -d --build
+  app:
+    profiles: ["app"]
+    build: .
+    container_name: clinic-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: "postgresql://clinic:clinic@db:5432/clinic?schema=public"
+      AUTH_SECRET: "${AUTH_SECRET:-change-me-in-production}"
+      APP_URL: "${APP_URL:-http://localhost:3000}"
+      ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY:-}"
+      WHATSAPP_TOKEN: "${WHATSAPP_TOKEN:-}"
+      WHATSAPP_PHONE_NUMBER_ID: "${WHATSAPP_PHONE_NUMBER_ID:-}"
+      WHATSAPP_VERIFY_TOKEN: "${WHATSAPP_VERIFY_TOKEN:-}"
+    ports:
+      - "3000:3000"
+    # طبّق الهجرات ثم شغّل الخادم
+    command: sh -c "node node_modules/prisma/build/index.js migrate deploy && node server.js"
 
 volumes:
   clinic-pgdata:
