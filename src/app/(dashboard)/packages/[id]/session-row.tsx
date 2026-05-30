@@ -5,6 +5,7 @@ import { completeSession, scheduleSession } from "../actions";
 import { Button } from "@/components/ui";
 import { formatDateTime } from "@/lib/utils";
 import { CheckCircle2, Circle } from "lucide-react";
+import { useT } from "@/lib/i18n-client";
 
 export function SessionRow({
   id,
@@ -19,6 +20,7 @@ export function SessionRow({
   scheduledAt: string | null;
   completed: boolean;
 }) {
+  const tr = useT();
   const [pending, startTransition] = useTransition();
   const scheduleBound = scheduleSession.bind(null, id, patientPackageId);
 
@@ -31,9 +33,9 @@ export function SessionRow({
           <Circle className="h-6 w-6 text-slate-300" />
         )}
         <div>
-          <p className="font-medium text-slate-800">الجلسة {sessionNumber}</p>
+          <p className="font-medium text-slate-800">{tr("pkg.session1")} {sessionNumber}</p>
           {scheduledAt && (
-            <p className="text-xs text-slate-400">موعد: {formatDateTime(scheduledAt)}</p>
+            <p className="text-xs text-slate-400">{tr("pkg.appt")}: {formatDateTime(scheduledAt)}</p>
           )}
         </div>
       </div>
@@ -47,14 +49,14 @@ export function SessionRow({
               className="rounded-lg border border-slate-300 px-2 py-1 text-sm"
               dir="ltr"
             />
-            <Button type="submit" variant="secondary">جدولة</Button>
+            <Button type="submit" variant="secondary">{tr("pkg.scheduleBtn")}</Button>
           </form>
           <Button
             type="button"
             disabled={pending}
             onClick={() => startTransition(() => completeSession(id, patientPackageId))}
           >
-            {pending ? "..." : "إتمام الجلسة"}
+            {pending ? "..." : tr("pkg.complete")}
           </Button>
         </div>
       )}

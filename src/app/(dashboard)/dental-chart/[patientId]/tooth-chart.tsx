@@ -17,6 +17,7 @@ import {
 } from "@/lib/teeth";
 import { Card, Button, Label, Select, Textarea, Badge, EmptyState } from "@/components/ui";
 import { formatCurrency } from "@/lib/utils";
+import { useT } from "@/lib/i18n-client";
 import { Check, RotateCcw, Trash2 } from "lucide-react";
 
 type Procedure = { id: string; name: string; price: number };
@@ -38,6 +39,7 @@ export function ToothChart({
   procedures: Procedure[];
   records: Record[];
 }) {
+  const tr = useT();
   const [selected, setSelected] = useState<number | null>(null);
   const [dentition, setDentition] = useState<"permanent" | "primary">("permanent");
   const [state, formAction, pending] = useActionState(addToothRecord, undefined);
@@ -74,7 +76,7 @@ export function ToothChart({
     return (
       <button
         onClick={() => setSelected(isSel ? null : num)}
-        title={`سن ${num} - ${toothName(num)}`}
+        title={`${tr("dent.tooth")} ${num} - ${toothName(num)}`}
         className={`flex h-11 w-9 flex-col items-center justify-center rounded-md border text-xs font-medium transition-all ${colors[st]} ${isSel ? "ring-2 ring-brand-500 ring-offset-1" : ""}`}
       >
         <span className="text-[10px]">{num}</span>
@@ -98,7 +100,7 @@ export function ToothChart({
                 }}
                 className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${dentition === "permanent" ? "bg-white text-brand-700 shadow-sm" : "text-slate-500"}`}
               >
-                أسنان دائمة (بالغين)
+                {tr("dent.permanent")}
               </button>
               <button
                 onClick={() => {
@@ -107,14 +109,14 @@ export function ToothChart({
                 }}
                 className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${dentition === "primary" ? "bg-white text-brand-700 shadow-sm" : "text-slate-500"}`}
               >
-                أسنان لبنية (أطفال)
+                {tr("dent.primary")}
               </button>
             </div>
           </div>
 
           <div className="space-y-4">
             <div>
-              <p className="mb-2 text-center text-xs text-slate-400">الفك العلوي</p>
+              <p className="mb-2 text-center text-xs text-slate-400">{tr("dent.upper")}</p>
               <div className="flex flex-wrap justify-center gap-1">
                 {upperTeeth.map((n) => (
                   <Tooth key={n} num={n} />
@@ -128,19 +130,19 @@ export function ToothChart({
                   <Tooth key={n} num={n} />
                 ))}
               </div>
-              <p className="mt-2 text-center text-xs text-slate-400">الفك السفلي</p>
+              <p className="mt-2 text-center text-xs text-slate-400">{tr("dent.lower")}</p>
             </div>
           </div>
 
           <div className="mt-5 flex justify-center gap-4 text-xs text-slate-500">
             <span className="flex items-center gap-1.5">
-              <span className="h-3 w-3 rounded border border-slate-200 bg-white" /> سليم
+              <span className="h-3 w-3 rounded border border-slate-200 bg-white" /> {tr("dent.healthy")}
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="h-3 w-3 rounded border border-yellow-300 bg-yellow-50" /> مخطط
+              <span className="h-3 w-3 rounded border border-yellow-300 bg-yellow-50" /> {tr("dent.planned")}
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="h-3 w-3 rounded border border-green-300 bg-green-50" /> تم
+              <span className="h-3 w-3 rounded border border-green-300 bg-green-50" /> {tr("dent.done")}
             </span>
           </div>
         </Card>
@@ -148,23 +150,23 @@ export function ToothChart({
         {/* قائمة سجلات الأسنان */}
         <Card>
           <div className="border-b border-slate-200 px-5 py-3">
-            <h2 className="font-semibold text-slate-800">السجلات والإجراءات</h2>
+            <h2 className="font-semibold text-slate-800">{tr("dent.records")}</h2>
           </div>
           {records.length === 0 ? (
             <div className="p-5">
-              <EmptyState title="لا توجد إجراءات بعد" description="اختر سناً من المخطط لإضافة إجراء" />
+              <EmptyState title={tr("dent.noRecords")} description={tr("dent.pickToothHint")} />
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="border-b border-slate-200 text-right text-xs text-slate-500">
                   <tr>
-                    <th className="px-4 py-2 font-medium">السن</th>
-                    <th className="px-4 py-2 font-medium">الجزء</th>
-                    <th className="px-4 py-2 font-medium">الإجراء</th>
-                    <th className="px-4 py-2 font-medium">السعر</th>
-                    <th className="px-4 py-2 font-medium">الحالة</th>
-                    <th className="px-4 py-2 font-medium">إجراءات</th>
+                    <th className="px-4 py-2 font-medium">{tr("col.tooth")}</th>
+                    <th className="px-4 py-2 font-medium">{tr("col.surface")}</th>
+                    <th className="px-4 py-2 font-medium">{tr("col.procedure")}</th>
+                    <th className="px-4 py-2 font-medium">{tr("col.price")}</th>
+                    <th className="px-4 py-2 font-medium">{tr("col.status")}</th>
+                    <th className="px-4 py-2 font-medium">{tr("col.actions")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -176,13 +178,13 @@ export function ToothChart({
                       <td className="px-4 py-2">{formatCurrency(r.price)}</td>
                       <td className="px-4 py-2">
                         <Badge color={r.status === "done" ? "green" : "yellow"}>
-                          {r.status === "done" ? "تم" : "مخطط"}
+                          {r.status === "done" ? tr("dent.done") : tr("dent.planned")}
                         </Badge>
                       </td>
                       <td className="px-4 py-2">
                         <div className="flex items-center gap-1">
                           <button
-                            title={r.status === "done" ? "إرجاع لمخطط" : "تحديد كمنفّذ"}
+                            title={r.status === "done" ? tr("dent.planned") : tr("dent.done")}
                             onClick={() =>
                               startTransition(() =>
                                 setToothStatus(
@@ -201,9 +203,9 @@ export function ToothChart({
                             )}
                           </button>
                           <button
-                            title="حذف"
+                            title={tr("common.delete")}
                             onClick={() => {
-                              if (confirm("حذف هذا الإجراء؟ سيُزال من الكشف أيضاً."))
+                              if (confirm(tr("dent.confirmDel")))
                                 startTransition(() => deleteToothRecord(r.id, patientId));
                             }}
                             className="rounded p-1.5 text-slate-500 hover:bg-red-50 hover:text-red-600"
@@ -226,8 +228,8 @@ export function ToothChart({
         <Card className="sticky top-4 p-5">
           {selected === null ? (
             <div className="py-8 text-center">
-              <p className="text-sm font-medium text-slate-600">اختر سناً من المخطط</p>
-              <p className="mt-1 text-xs text-slate-400">لإضافة إجراء وتحديد الجزء المصاب</p>
+              <p className="text-sm font-medium text-slate-600">{tr("dent.pickTooth")}</p>
+              <p className="mt-1 text-xs text-slate-400">{tr("dent.pickToothHint")}</p>
             </div>
           ) : (
             <form action={formAction} className="space-y-4">
@@ -235,12 +237,12 @@ export function ToothChart({
               <input type="hidden" name="toothNumber" value={selected} />
 
               <div className="rounded-lg bg-brand-50 p-3 text-center">
-                <p className="text-2xl font-bold text-brand-700">سن {selected}</p>
+                <p className="text-2xl font-bold text-brand-700">{tr("dent.tooth")} {selected}</p>
                 <p className="text-xs text-brand-600">{toothName(selected)}</p>
               </div>
 
               <div>
-                <Label htmlFor="surface">الجزء المصاب</Label>
+                <Label htmlFor="surface">{tr("dent.surface")}</Label>
                 <Select id="surface" name="surface" defaultValue="whole">
                   {SURFACES.map((s) => (
                     <option key={s.value} value={s.value}>{s.label}</option>
@@ -249,9 +251,9 @@ export function ToothChart({
               </div>
 
               <div>
-                <Label htmlFor="procedureId">الإجراء</Label>
+                <Label htmlFor="procedureId">{tr("dent.procedure")}</Label>
                 <Select id="procedureId" name="procedureId" defaultValue="">
-                  <option value="">— بدون إجراء —</option>
+                  <option value="">{tr("dent.noProcedure")}</option>
                   {procedures.map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.name} ({formatCurrency(p.price)})
@@ -259,12 +261,12 @@ export function ToothChart({
                   ))}
                 </Select>
                 <p className="mt-1 text-xs text-slate-400">
-                  سعر الإجراء يُضاف تلقائياً على الكشف
+                  {tr("dent.priceAuto")}
                 </p>
               </div>
 
               <div>
-                <Label htmlFor="notes">ملاحظات</Label>
+                <Label htmlFor="notes">{tr("form.notes")}</Label>
                 <Textarea id="notes" name="notes" rows={2} />
               </div>
 
@@ -274,10 +276,10 @@ export function ToothChart({
 
               <div className="flex gap-2">
                 <Button type="submit" className="flex-1" disabled={pending}>
-                  {pending ? "جارٍ الحفظ..." : "إضافة الإجراء"}
+                  {pending ? tr("form.saving") : tr("dent.addProcedure")}
                 </Button>
                 <Button type="button" variant="secondary" onClick={() => setSelected(null)}>
-                  إلغاء
+                  {tr("common.cancel")}
                 </Button>
               </div>
             </form>

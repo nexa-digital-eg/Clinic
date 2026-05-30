@@ -36,13 +36,13 @@ export default async function RemindersPage() {
         <div className="space-y-6 lg:col-span-2">
           <Card>
             <div className="flex items-center justify-between border-b border-slate-200 px-5 py-3">
-              <h2 className="font-semibold text-slate-800">قيد الانتظار</h2>
+              <h2 className="font-semibold text-slate-800">{t("rem.pending", locale)}</h2>
               <Badge color="yellow">{pending.length}</Badge>
             </div>
             {pending.length === 0 ? (
               <div className="flex flex-col items-center py-12 text-center">
                 <Bell className="mb-3 h-10 w-10 text-slate-300" />
-                <p className="text-sm font-medium text-slate-600">لا توجد تذكيرات قيد الانتظار</p>
+                <p className="text-sm font-medium text-slate-600">{t("rem.noPending", locale)}</p>
                 <p className="mt-1 text-xs text-slate-400">
                   اضغط «توليد تذكيرات الحجوزات» لإنشائها تلقائياً
                 </p>
@@ -69,7 +69,7 @@ export default async function RemindersPage() {
           {handled.length > 0 && (
             <Card>
               <div className="border-b border-slate-200 px-5 py-3">
-                <h2 className="font-semibold text-slate-800">تمت معالجتها</h2>
+                <h2 className="font-semibold text-slate-800">{t("rem.handled", locale)}</h2>
               </div>
               <div className="divide-y divide-slate-100">
                 {handled.map((r) => (

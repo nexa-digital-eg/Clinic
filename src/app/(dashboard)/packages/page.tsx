@@ -34,12 +34,12 @@ export default async function PackagesPage() {
         <div className="space-y-4 lg:col-span-2">
           <Card>
             <div className="border-b border-slate-200 px-5 py-3">
-              <h2 className="font-semibold text-slate-800">كتالوج الباقات</h2>
+              <h2 className="font-semibold text-slate-800">{t("pkg.catalog", locale)}</h2>
             </div>
             {packages.length === 0 ? (
               <div className="flex flex-col items-center py-12 text-center">
                 <PackageIcon className="mb-3 h-10 w-10 text-slate-300" />
-                <p className="text-sm font-medium text-slate-600">لا توجد باقات</p>
+                <p className="text-sm font-medium text-slate-600">{t("pkg.noPackages", locale)}</p>
                 <p className="mt-1 text-xs text-slate-400">أنشئ أول باقة من النموذج</p>
               </div>
             ) : (
@@ -54,7 +54,7 @@ export default async function PackagesPage() {
                       <p className="mt-1 text-xs text-slate-500">{pkg.description}</p>
                     )}
                     <div className="mt-3 flex items-center justify-between">
-                      <Badge color="blue">{pkg.sessionCount} جلسة</Badge>
+                      <Badge color="blue">{pkg.sessionCount} {t("pkg.session", locale)}</Badge>
                       <span className="font-bold text-brand-700">{formatCurrency(pkg.price)}</span>
                     </div>
                   </div>
@@ -66,10 +66,10 @@ export default async function PackagesPage() {
           {/* باقات المرضى النشطة */}
           <Card>
             <div className="border-b border-slate-200 px-5 py-3">
-              <h2 className="font-semibold text-slate-800">باقات المرضى</h2>
+              <h2 className="font-semibold text-slate-800">{t("pkg.patientPackages", locale)}</h2>
             </div>
             {patientPackages.length === 0 ? (
-              <p className="py-10 text-center text-sm text-slate-400">لا توجد باقات مُسندة</p>
+              <p className="py-10 text-center text-sm text-slate-400">{t("pkg.noAssigned", locale)}</p>
             ) : (
               <div className="divide-y divide-slate-100">
                 {patientPackages.map((pp) => {
@@ -89,12 +89,12 @@ export default async function PackagesPage() {
                         </div>
                         <div className="text-left">
                           {pp.isActive ? (
-                            <Badge color="green">نشطة</Badge>
+                            <Badge color="green">{t("pkg.active", locale)}</Badge>
                           ) : (
-                            <Badge color="slate">منتهية</Badge>
+                            <Badge color="slate">{t("pkg.finished", locale)}</Badge>
                           )}
                           <p className="mt-1 text-xs text-slate-500">
-                            {pp.usedSessions} / {pp.totalSessions} جلسة
+                            {pp.usedSessions} / {pp.totalSessions} {t("pkg.session", locale)}
                           </p>
                         </div>
                       </div>

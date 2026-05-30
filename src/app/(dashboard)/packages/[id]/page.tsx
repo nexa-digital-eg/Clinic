@@ -5,6 +5,8 @@ import { formatCurrency } from "@/lib/utils";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { SessionRow } from "./session-row";
+import { getLocale } from "@/lib/locale";
+import { t } from "@/lib/i18n";
 
 export default async function PatientPackageDetail({
   params,
@@ -24,6 +26,7 @@ export default async function PatientPackageDetail({
 
   if (!pp) notFound();
 
+  const locale = await getLocale();
   const pct = Math.round((pp.usedSessions / pp.totalSessions) * 100);
 
   return (
@@ -38,19 +41,19 @@ export default async function PatientPackageDetail({
             {pp.patient.firstName} {pp.patient.lastName}
           </Link>
         </div>
-        {pp.isActive ? <Badge color="green">نشطة</Badge> : <Badge color="slate">منتهية</Badge>}
+        {pp.isActive ? <Badge color="green">{t("pkg.active", locale)}</Badge> : <Badge color="slate">{t("pkg.finished", locale)}</Badge>}
       </div>
 
       <Card className="p-5">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-slate-500">التقدّم</p>
+            <p className="text-sm text-slate-500">{t("pkg.progress", locale)}</p>
             <p className="text-2xl font-bold text-slate-800">
-              {pp.usedSessions} / {pp.totalSessions} جلسة
+              {pp.usedSessions} / {pp.totalSessions} {t("pkg.session", locale)}
             </p>
           </div>
           <div className="text-left">
-            <p className="text-sm text-slate-500">سعر الباقة</p>
+            <p className="text-sm text-slate-500">{t("pkg.packagePrice", locale)}</p>
             <p className="text-xl font-bold text-brand-700">{formatCurrency(pp.package.price)}</p>
           </div>
         </div>
@@ -61,7 +64,7 @@ export default async function PatientPackageDetail({
 
       <Card>
         <div className="border-b border-slate-200 px-5 py-3">
-          <h2 className="font-semibold text-slate-800">الجلسات</h2>
+          <h2 className="font-semibold text-slate-800">{t("pkg.sessions", locale)}</h2>
         </div>
         <div className="divide-y divide-slate-100">
           {pp.sessions.map((s) => (

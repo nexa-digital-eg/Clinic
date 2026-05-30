@@ -5,22 +5,14 @@ import { formatCurrency, formatDate, formatDateTime } from "@/lib/utils";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { InvoiceForms, InvoiceItemRow } from "./forms";
+import { getLocale } from "@/lib/locale";
+import { t } from "@/lib/i18n";
 
-const STATUS_META: Record<
-  string,
-  { label: string; color: "slate" | "green" | "yellow" | "red" | "blue" }
-> = {
-  OPEN: { label: "مفتوحة", color: "yellow" },
-  PARTIAL: { label: "مدفوعة جزئياً", color: "blue" },
-  PAID: { label: "مدفوعة", color: "green" },
-  CANCELLED: { label: "ملغاة", color: "red" },
-};
-
-const METHOD_LABELS: Record<string, string> = {
-  CASH: "نقدي",
-  CARD: "بطاقة",
-  TRANSFER: "تحويل",
-  OTHER: "أخرى",
+const STATUS_COLOR: Record<string, "slate" | "green" | "yellow" | "red" | "blue"> = {
+  OPEN: "yellow",
+  PARTIAL: "blue",
+  PAID: "green",
+  CANCELLED: "red",
 };
 
 export default async function InvoiceDetail({
@@ -29,6 +21,7 @@ export default async function InvoiceDetail({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const locale = await getLocale();
 
   const [invoice, procedures] = await Promise.all([
     db.invoice.findUnique({
@@ -44,7 +37,6 @@ export default async function InvoiceDetail({
 
   if (!invoice) notFound();
 
-  const meta = STATUS_META[invoice.status];
   const due = invoice.total - invoice.paidAmount;
   const cancelled = invoice.status === "CANCELLED";
 
@@ -56,8 +48,8 @@ export default async function InvoiceDetail({
         </Link>
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-slate-800">فاتورة {invoice.number}</h1>
-            <Badge color={meta.color}>{meta.label}</Badge>
+            <h1 className="text-2xl font-bold text-slate-800">{t("invd.invoice", locale)} {invoice.number}</h1>
+            <Badge color={STATUS_COLOR[invoice.status]}>{t(`invStatus.${invoice.status}`, locale)}</Badge>
           </div>
           <Link href={`/patients/${invoice.patientId}`} className="text-sm text-brand-600 hover:underline">
             {invoice.patient.firstName} {invoice.patient.lastName}
@@ -69,21 +61,21 @@ export default async function InvoiceDetail({
           target="_blank"
           className="inline-flex items-center gap-2 rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200"
         >
-          طباعة / PDF
+          {t("billing.print", locale)}
         </a>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Card className="p-5">
-          <p className="text-sm text-slate-500">الإجمالي</p>
+          <p className="text-sm text-slate-500">{t("col.total", locale)}</p>
           <p className="mt-1 text-2xl font-bold text-slate-800">{formatCurrency(invoice.total)}</p>
         </Card>
         <Card className="p-5">
-          <p className="text-sm text-slate-500">المدفوع</p>
+          <p className="text-sm text-slate-500">{t("col.paid", locale)}</p>
           <p className="mt-1 text-2xl font-bold text-green-600">{formatCurrency(invoice.paidAmount)}</p>
         </Card>
         <Card className="p-5">
-          <p className="text-sm text-slate-500">المتبقي</p>
+          <p className="text-sm text-slate-500">{t("col.due", locale)}</p>
           <p className="mt-1 text-2xl font-bold text-red-600">{formatCurrency(due > 0 ? due : 0)}</p>
         </Card>
       </div>
@@ -93,19 +85,19 @@ export default async function InvoiceDetail({
           {/* البنود */}
           <Card>
             <div className="border-b border-slate-200 px-5 py-3">
-              <h2 className="font-semibold text-slate-800">البنود</h2>
+              <h2 className="font-semibold text-slate-800">{t("invd.items", locale)}</h2>
             </div>
             {invoice.items.length === 0 ? (
-              <p className="py-8 text-center text-sm text-slate-400">لا توجد بنود</p>
+              <p className="py-8 text-center text-sm text-slate-400">{t("invd.noItems", locale)}</p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead className="border-b border-slate-200 text-right text-xs text-slate-500">
                     <tr>
-                      <th className="px-4 py-2 font-medium">الوصف</th>
-                      <th className="px-4 py-2 font-medium">الكمية</th>
-                      <th className="px-4 py-2 font-medium">سعر الوحدة</th>
-                      <th className="px-4 py-2 font-medium">الإجمالي</th>
+                      <th className="px-4 py-2 font-medium">{t("col.description", locale)}</th>
+                      <th className="px-4 py-2 font-medium">{t("col.qty", locale)}</th>
+                      <th className="px-4 py-2 font-medium">{t("col.unitPrice", locale)}</th>
+                      <th className="px-4 py-2 font-medium">{t("col.total", locale)}</th>
                       {!cancelled && <th className="px-4 py-2 font-medium"></th>}
                     </tr>
                   </thead>
@@ -130,10 +122,10 @@ export default async function InvoiceDetail({
           {/* المدفوعات */}
           <Card>
             <div className="border-b border-slate-200 px-5 py-3">
-              <h2 className="font-semibold text-slate-800">المدفوعات</h2>
+              <h2 className="font-semibold text-slate-800">{t("invd.payments", locale)}</h2>
             </div>
             {invoice.payments.length === 0 ? (
-              <p className="py-8 text-center text-sm text-slate-400">لا توجد مدفوعات بعد</p>
+              <p className="py-8 text-center text-sm text-slate-400">{t("invd.noPayments", locale)}</p>
             ) : (
               <div className="divide-y divide-slate-100">
                 {invoice.payments.map((p) => (
@@ -141,7 +133,7 @@ export default async function InvoiceDetail({
                     <div>
                       <p className="font-medium text-green-600">{formatCurrency(p.amount)}</p>
                       <p className="text-xs text-slate-400">
-                        {METHOD_LABELS[p.method]} • {formatDateTime(p.createdAt)}
+                        {t(`method.${p.method}`, locale)} • {formatDateTime(p.createdAt)}
                       </p>
                     </div>
                     {p.note && <span className="text-sm text-slate-500">{p.note}</span>}

@@ -10,6 +10,7 @@ import {
 import { Card, Button, Input, Label, Select } from "@/components/ui";
 import { formatCurrency } from "@/lib/utils";
 import { Trash2 } from "lucide-react";
+import { useT } from "@/lib/i18n-client";
 
 type Procedure = { id: string; name: string; price: number };
 
@@ -27,11 +28,12 @@ export function InvoiceForms({
   const [payState, payAction, payPending] = useActionState(payInvoice, undefined);
   const [itemState, itemAction, itemPending] = useActionState(addInvoiceItem, undefined);
   const [, startTransition] = useTransition();
+  const tr = useT();
 
   if (cancelled) {
     return (
       <Card className="p-5">
-        <p className="text-center text-sm text-slate-500">هذه الفاتورة ملغاة</p>
+        <p className="text-center text-sm text-slate-500">{tr("invd.cancelled")}</p>
       </Card>
     );
   }
@@ -40,11 +42,11 @@ export function InvoiceForms({
     <div className="space-y-6">
       {/* تسجيل دفعة */}
       <Card className="p-5">
-        <h3 className="mb-3 font-semibold text-slate-800">تسجيل دفعة</h3>
+        <h3 className="mb-3 font-semibold text-slate-800">{tr("invd.recordPayment")}</h3>
         <form action={payAction} className="space-y-3">
           <input type="hidden" name="invoiceId" value={invoiceId} />
           <div>
-            <Label htmlFor="amount">المبلغ</Label>
+            <Label htmlFor="amount">{tr("form.amount")}</Label>
             <Input
               id="amount"
               name="amount"
@@ -56,36 +58,36 @@ export function InvoiceForms({
             />
           </div>
           <div>
-            <Label htmlFor="method">طريقة الدفع</Label>
+            <Label htmlFor="method">{tr("form.method")}</Label>
             <Select id="method" name="method" defaultValue="CASH">
-              <option value="CASH">نقدي</option>
-              <option value="CARD">بطاقة</option>
-              <option value="TRANSFER">تحويل</option>
-              <option value="OTHER">أخرى</option>
+              <option value="CASH">{tr("method.CASH")}</option>
+              <option value="CARD">{tr("method.CARD")}</option>
+              <option value="TRANSFER">{tr("method.TRANSFER")}</option>
+              <option value="OTHER">{tr("method.OTHER")}</option>
             </Select>
           </div>
           <div>
-            <Label htmlFor="note">ملاحظة</Label>
+            <Label htmlFor="note">{tr("form.note")}</Label>
             <Input id="note" name="note" />
           </div>
           {payState?.error && (
             <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{payState.error}</p>
           )}
           <Button type="submit" className="w-full" disabled={payPending}>
-            {payPending ? "جارٍ الحفظ..." : "تسجيل الدفعة"}
+            {payPending ? tr("form.saving") : tr("invd.recordPayment")}
           </Button>
         </form>
       </Card>
 
       {/* إضافة بند */}
       <Card className="p-5">
-        <h3 className="mb-3 font-semibold text-slate-800">إضافة بند</h3>
+        <h3 className="mb-3 font-semibold text-slate-800">{tr("invd.addItem")}</h3>
         <form action={itemAction} className="space-y-3">
           <input type="hidden" name="invoiceId" value={invoiceId} />
           <div>
-            <Label htmlFor="procedureId">إجراء (اختياري)</Label>
+            <Label htmlFor="procedureId">{tr("invd.procedureOpt")}</Label>
             <Select id="procedureId" name="procedureId" defaultValue="">
-              <option value="">— يدوي —</option>
+              <option value="">{tr("invd.manual")}</option>
               {procedures.map((p) => (
                 <option key={p.id} value={p.id} data-price={p.price}>
                   {p.name} ({formatCurrency(p.price)})
@@ -94,16 +96,16 @@ export function InvoiceForms({
             </Select>
           </div>
           <div>
-            <Label htmlFor="description">الوصف</Label>
+            <Label htmlFor="description">{tr("col.description")}</Label>
             <Input id="description" name="description" required />
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <Label htmlFor="quantity">الكمية</Label>
+              <Label htmlFor="quantity">{tr("col.qty")}</Label>
               <Input id="quantity" name="quantity" type="number" dir="ltr" defaultValue="1" />
             </div>
             <div>
-              <Label htmlFor="unitPrice">سعر الوحدة</Label>
+              <Label htmlFor="unitPrice">{tr("col.unitPrice")}</Label>
               <Input id="unitPrice" name="unitPrice" type="number" step="0.01" dir="ltr" defaultValue="0" />
             </div>
           </div>
@@ -111,7 +113,7 @@ export function InvoiceForms({
             <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{itemState.error}</p>
           )}
           <Button type="submit" variant="secondary" className="w-full" disabled={itemPending}>
-            {itemPending ? "..." : "إضافة بند"}
+            {itemPending ? "..." : tr("invd.addItem")}
           </Button>
         </form>
       </Card>
@@ -120,11 +122,11 @@ export function InvoiceForms({
       <Card className="p-5">
         <button
           onClick={() => {
-            if (confirm("إلغاء هذه الفاتورة؟")) startTransition(() => cancelInvoice(invoiceId));
+            if (confirm(tr("invd.confirmCancel"))) startTransition(() => cancelInvoice(invoiceId));
           }}
           className="w-full rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50"
         >
-          إلغاء الفاتورة
+          {tr("invd.cancelInvoice")}
         </button>
       </Card>
     </div>
@@ -147,6 +149,7 @@ export function InvoiceItemRow({
   cancelled: boolean;
 }) {
   const [, startTransition] = useTransition();
+  const tr = useT();
   return (
     <tr className="hover:bg-slate-50">
       <td className="px-4 py-2 text-slate-800">{description}</td>
@@ -158,7 +161,7 @@ export function InvoiceItemRow({
           <button
             title="حذف"
             onClick={() => {
-              if (confirm("حذف هذا البند؟")) startTransition(() => deleteInvoiceItem(id));
+              if (confirm(tr("invd.confirmDelItem"))) startTransition(() => deleteInvoiceItem(id));
             }}
             className="rounded p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600"
           >

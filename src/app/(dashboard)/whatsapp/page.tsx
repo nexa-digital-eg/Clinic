@@ -9,14 +9,14 @@ import { t } from "@/lib/i18n";
 
 const STATUS_META: Record<
   string,
-  { label: string; color: "slate" | "green" | "yellow" | "red" | "blue" }
+  { color: "slate" | "green" | "yellow" | "red" | "blue" }
 > = {
-  SCHEDULED: { label: "مجدولة", color: "yellow" },
-  SENDING: { label: "جارٍ الإرسال", color: "blue" },
-  SENT: { label: "أُرسلت", color: "blue" },
-  DELIVERED: { label: "سُلّمت", color: "green" },
-  READ: { label: "قُرئت", color: "green" },
-  FAILED: { label: "فشلت", color: "red" },
+  SCHEDULED: { color: "yellow" },
+  SENDING: { color: "blue" },
+  SENT: { color: "blue" },
+  DELIVERED: { color: "green" },
+  READ: { color: "green" },
+  FAILED: { color: "red" },
 };
 
 export default async function WhatsAppPage({
@@ -45,12 +45,12 @@ export default async function WhatsAppPage({
   ]);
 
   const filters = [
-    { key: "", label: "الكل" },
-    { key: "SCHEDULED", label: "مجدولة" },
-    { key: "SENT", label: "مُرسلة" },
-    { key: "DELIVERED", label: "مُسلّمة" },
-    { key: "READ", label: "مقروءة" },
-    { key: "FAILED", label: "فاشلة" },
+    { key: "", label: t("common.all", locale) },
+    { key: "SCHEDULED", label: t("waStatus.SCHEDULED", locale) },
+    { key: "SENT", label: t("waStatus.SENT", locale) },
+    { key: "DELIVERED", label: t("waStatus.DELIVERED", locale) },
+    { key: "READ", label: t("waStatus.READ", locale) },
+    { key: "FAILED", label: t("waStatus.FAILED", locale) },
   ];
 
   return (
@@ -67,15 +67,14 @@ export default async function WhatsAppPage({
       {configured ? (
         <div className="flex items-center gap-2 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
           <CheckCheck className="h-5 w-5" />
-          متصل بـ WhatsApp Cloud API — الإرسال حقيقي.
+          {t("wa.connected", locale)}
         </div>
       ) : (
         <div className="flex items-center gap-2 rounded-xl border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-700">
           <AlertCircle className="h-5 w-5" />
-          وضع المحاكاة: لا توجد مفاتيح WhatsApp. الرسائل تُسجَّل وتُعلَّم كمُرسلة دون إرسال فعلي. أضف
-          <code className="mx-1 rounded bg-yellow-100 px-1">WHATSAPP_TOKEN</code> و
+          {t("wa.simulation", locale)}
+          <code className="mx-1 rounded bg-yellow-100 px-1">WHATSAPP_TOKEN</code>
           <code className="mx-1 rounded bg-yellow-100 px-1">WHATSAPP_PHONE_NUMBER_ID</code>
-          لتفعيل الإرسال الحقيقي.
         </div>
       )}
 
@@ -102,7 +101,7 @@ export default async function WhatsAppPage({
             {messages.length === 0 ? (
               <div className="flex flex-col items-center py-16 text-center">
                 <MessageCircle className="mb-3 h-10 w-10 text-slate-300" />
-                <p className="text-sm font-medium text-slate-600">لا توجد رسائل</p>
+                <p className="text-sm font-medium text-slate-600">{t("wa.noMessages", locale)}</p>
                 <p className="mt-1 text-xs text-slate-400">ابدأ بإرسال أول رسالة من النموذج</p>
               </div>
             ) : (
@@ -122,13 +121,17 @@ export default async function WhatsAppPage({
                                 {m.patient.firstName} {m.patient.lastName}
                               </span>
                             )}
-                            <Badge color={meta.color}>{meta.label}</Badge>
-                            {m.repeatEvery && <Badge color="slate">تكرار: {m.repeatEvery}</Badge>}
+                            <Badge color={meta.color}>{t(`waStatus.${m.status}`, locale)}</Badge>
+                            {m.repeatEvery && (
+                              <Badge color="slate">
+                                {t("wa.repeat", locale)}: {m.repeatEvery}
+                              </Badge>
+                            )}
                           </div>
                           {m.body && <p className="mt-1 truncate text-sm text-slate-600">{m.body}</p>}
                           {m.mediaUrl && (
                             <p className="mt-0.5 text-xs text-brand-600">
-                              📎 مرفق ({m.mediaType})
+                              📎 {t("wa.attachment", locale)} ({m.mediaType})
                             </p>
                           )}
                           {m.error && <p className="mt-0.5 text-xs text-red-500">{m.error}</p>}

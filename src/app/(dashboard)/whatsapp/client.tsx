@@ -4,10 +4,12 @@ import { useActionState, useEffect, useRef, useState, useTransition } from "reac
 import { composeMessage, retryMessage, deleteMessage, runScheduledNow } from "./actions";
 import { Card, Button, Input, Label, Select, Textarea } from "@/components/ui";
 import { Send, RefreshCw, Trash2, RotateCw } from "lucide-react";
+import { useT } from "@/lib/i18n-client";
 
 type PatientOpt = { id: string; name: string; phone: string };
 
 export function ComposeForm({ patients }: { patients: PatientOpt[] }) {
+  const tr = useT();
   const [state, action, pending] = useActionState(composeMessage, undefined);
   const formRef = useRef<HTMLFormElement>(null);
   const [phone, setPhone] = useState("");
@@ -23,10 +25,10 @@ export function ComposeForm({ patients }: { patients: PatientOpt[] }) {
 
   return (
     <Card className="p-5">
-      <h3 className="mb-3 font-semibold text-slate-800">رسالة جديدة</h3>
+      <h3 className="mb-3 font-semibold text-slate-800">{tr("wa.newMessage")}</h3>
       <form ref={formRef} action={action} className="space-y-3">
         <div>
-          <Label htmlFor="patientId">المريض (اختياري)</Label>
+          <Label htmlFor="patientId">{tr("wa.patientOpt")}</Label>
           <Select
             id="patientId"
             name="patientId"
@@ -36,7 +38,7 @@ export function ComposeForm({ patients }: { patients: PatientOpt[] }) {
               if (p) setPhone(p.phone);
             }}
           >
-            <option value="">— بدون / رقم يدوي —</option>
+            <option value="">{tr("wa.manualPhone")}</option>
             {patients.map((p) => (
               <option key={p.id} value={p.id}>{p.name} ({p.phone})</option>
             ))}
@@ -44,7 +46,7 @@ export function ComposeForm({ patients }: { patients: PatientOpt[] }) {
         </div>
 
         <div>
-          <Label htmlFor="toPhone">رقم الهاتف</Label>
+          <Label htmlFor="toPhone">{tr("form.phone")}</Label>
           <Input
             id="toPhone"
             name="toPhone"
@@ -57,21 +59,21 @@ export function ComposeForm({ patients }: { patients: PatientOpt[] }) {
         </div>
 
         <div>
-          <Label htmlFor="body">نص الرسالة</Label>
+          <Label htmlFor="body">{tr("wa.body")}</Label>
           <Textarea id="body" name="body" rows={3} />
         </div>
 
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
           <div className="sm:col-span-2">
-            <Label htmlFor="mediaUrl">رابط ملف (اختياري)</Label>
+            <Label htmlFor="mediaUrl">{tr("wa.mediaUrl")}</Label>
             <Input id="mediaUrl" name="mediaUrl" dir="ltr" placeholder="https://..." />
           </div>
           <div>
-            <Label htmlFor="mediaType">النوع</Label>
+            <Label htmlFor="mediaType">{tr("wa.type")}</Label>
             <Select id="mediaType" name="mediaType" defaultValue="image">
-              <option value="image">صورة</option>
-              <option value="video">فيديو</option>
-              <option value="document">PDF/ملف</option>
+              <option value="image">{tr("wa.image")}</option>
+              <option value="video">{tr("wa.video")}</option>
+              <option value="document">{tr("wa.document")}</option>
             </Select>
           </div>
         </div>
@@ -82,27 +84,27 @@ export function ComposeForm({ patients }: { patients: PatientOpt[] }) {
             checked={showSchedule}
             onChange={(e) => setShowSchedule(e.target.checked)}
           />
-          جدولة الإرسال
+          {tr("wa.schedule")}
         </label>
 
         {showSchedule && (
           <div className="space-y-3 rounded-lg bg-slate-50 p-3">
             <div>
-              <Label htmlFor="scheduledAt">موعد الإرسال</Label>
+              <Label htmlFor="scheduledAt">{tr("wa.sendAt")}</Label>
               <Input id="scheduledAt" name="scheduledAt" type="datetime-local" dir="ltr" />
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <Label htmlFor="repeatEvery">التكرار</Label>
+                <Label htmlFor="repeatEvery">{tr("wa.repeat")}</Label>
                 <Select id="repeatEvery" name="repeatEvery" defaultValue="none">
-                  <option value="none">بدون</option>
-                  <option value="daily">يومياً</option>
-                  <option value="weekly">أسبوعياً</option>
-                  <option value="monthly">شهرياً</option>
+                  <option value="none">{tr("wa.repeatNone")}</option>
+                  <option value="daily">{tr("wa.daily")}</option>
+                  <option value="weekly">{tr("wa.weekly")}</option>
+                  <option value="monthly">{tr("wa.monthly")}</option>
                 </Select>
               </div>
               <div>
-                <Label htmlFor="repeatUntil">حتى تاريخ</Label>
+                <Label htmlFor="repeatUntil">{tr("wa.until")}</Label>
                 <Input id="repeatUntil" name="repeatUntil" type="date" dir="ltr" />
               </div>
             </div>
@@ -115,7 +117,7 @@ export function ComposeForm({ patients }: { patients: PatientOpt[] }) {
 
         <Button type="submit" className="w-full" disabled={pending}>
           <Send className="h-4 w-4" />
-          {pending ? "..." : showSchedule ? "جدولة الرسالة" : "إرسال"}
+          {pending ? "..." : showSchedule ? tr("wa.scheduleBtn") : tr("wa.send")}
         </Button>
       </form>
     </Card>
@@ -123,6 +125,7 @@ export function ComposeForm({ patients }: { patients: PatientOpt[] }) {
 }
 
 export function MessageActions({ id, status }: { id: string; status: string }) {
+  const tr = useT();
   const [, startTransition] = useTransition();
   return (
     <div className="flex items-center gap-1">
@@ -138,7 +141,7 @@ export function MessageActions({ id, status }: { id: string; status: string }) {
       <button
         title="حذف"
         onClick={() => {
-          if (confirm("حذف هذه الرسالة؟")) startTransition(() => deleteMessage(id));
+          if (confirm(tr("wa.confirmDel"))) startTransition(() => deleteMessage(id));
         }}
         className="rounded p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600"
       >
@@ -149,6 +152,7 @@ export function MessageActions({ id, status }: { id: string; status: string }) {
 }
 
 export function RunScheduledButton({ count }: { count: number }) {
+  const tr = useT();
   const [pending, startTransition] = useTransition();
   return (
     <Button
@@ -157,7 +161,7 @@ export function RunScheduledButton({ count }: { count: number }) {
       disabled={pending}
     >
       <RotateCw className={`h-4 w-4 ${pending ? "animate-spin" : ""}`} />
-      تشغيل المجدولة الآن ({count})
+      {tr("wa.runScheduled")} ({count})
     </Button>
   );
 }

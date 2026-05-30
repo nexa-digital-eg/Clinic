@@ -4,6 +4,7 @@ import { useActionState, useTransition } from "react";
 import { linkProductToProcedure, unlinkProduct } from "../actions";
 import { Card, Button, Label, Select, Input } from "@/components/ui";
 import { Link2, X } from "lucide-react";
+import { useT } from "@/lib/i18n-client";
 
 type Opt = { id: string; name: string };
 
@@ -14,37 +15,38 @@ export function LinkForm({
   procedures: Opt[];
   products: (Opt & { unit: string })[];
 }) {
+  const tr = useT();
   const [state, formAction, pending] = useActionState(linkProductToProcedure, undefined);
 
   return (
     <Card className="p-5">
-      <h3 className="mb-3 font-semibold text-slate-800">ربط جديد</h3>
+      <h3 className="mb-3 font-semibold text-slate-800">{tr("inv.newLink")}</h3>
       <form action={formAction} className="flex flex-wrap items-end gap-3">
         <div className="min-w-48 flex-1">
-          <Label htmlFor="procedureId">الإجراء</Label>
+          <Label htmlFor="procedureId">{tr("dent.procedure")}</Label>
           <Select id="procedureId" name="procedureId" required defaultValue="">
-            <option value="">— اختر الإجراء —</option>
+            <option value="">{tr("form.choose")}</option>
             {procedures.map((p) => (
               <option key={p.id} value={p.id}>{p.name}</option>
             ))}
           </Select>
         </div>
         <div className="min-w-48 flex-1">
-          <Label htmlFor="productId">المنتج</Label>
+          <Label htmlFor="productId">{tr("inv.productName")}</Label>
           <Select id="productId" name="productId" required defaultValue="">
-            <option value="">— اختر المنتج —</option>
+            <option value="">{tr("form.choose")}</option>
             {products.map((p) => (
               <option key={p.id} value={p.id}>{p.name}</option>
             ))}
           </Select>
         </div>
         <div className="w-32">
-          <Label htmlFor="quantity">الكمية / إجراء</Label>
+          <Label htmlFor="quantity">{tr("inv.qtyPerProc")}</Label>
           <Input id="quantity" name="quantity" type="number" step="0.01" dir="ltr" defaultValue="1" />
         </div>
         <Button type="submit" disabled={pending}>
           <Link2 className="h-4 w-4" />
-          {pending ? "..." : "ربط"}
+          {pending ? "..." : tr("inv.link")}
         </Button>
       </form>
       {state?.error && (

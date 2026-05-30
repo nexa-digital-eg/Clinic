@@ -10,6 +10,7 @@ import {
 import type { ChatMessage } from "@/lib/ai";
 import { Card, Button, Input, Label, Textarea } from "@/components/ui";
 import { Send, Mic, MicOff, FileText, Plus, Trash2, Sparkles } from "lucide-react";
+import { useT } from "@/lib/i18n-client";
 
 /* ============ Web Speech API hook (تحويل الصوت لنص) ============ */
 type RecognitionLike = {
@@ -67,6 +68,7 @@ function useSpeech(onText: (t: string) => void) {
 
 /* ============ الدردشة ============ */
 export function AssistantChat({ patientId }: { patientId: string }) {
+  const tr = useT();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [pending, startTransition] = useTransition();
@@ -90,13 +92,13 @@ export function AssistantChat({ patientId }: { patientId: string }) {
     <Card className="flex h-[28rem] flex-col">
       <div className="flex items-center gap-2 border-b border-slate-200 px-5 py-3">
         <Sparkles className="h-5 w-5 text-brand-500" />
-        <h2 className="font-semibold text-slate-800">محادثة</h2>
+        <h2 className="font-semibold text-slate-800">{tr("ai.chat")}</h2>
       </div>
 
       <div className="flex-1 space-y-3 overflow-y-auto p-4">
         {messages.length === 0 ? (
           <p className="py-8 text-center text-sm text-slate-400">
-            اسأل عن أي شيء يخص المريض — مثلاً: «ما آخر التشخيصات؟» أو «اقترح خطة علاج».
+            {tr("ai.chatHint")}
           </p>
         ) : (
           messages.map((m, i) => (
@@ -116,7 +118,7 @@ export function AssistantChat({ patientId }: { patientId: string }) {
             </div>
           ))
         )}
-        {pending && <p className="text-center text-xs text-slate-400">يفكّر...</p>}
+        {pending && <p className="text-center text-xs text-slate-400">{tr("ai.thinking")}</p>}
       </div>
 
       <div className="flex items-end gap-2 border-t border-slate-200 p-3">
@@ -139,7 +141,7 @@ export function AssistantChat({ patientId }: { patientId: string }) {
             }
           }}
           rows={1}
-          placeholder="اكتب سؤالك..."
+          placeholder={tr("ai.typeQuestion")}
           className="flex-1 resize-none"
         />
         <Button onClick={send} disabled={pending}>
@@ -152,6 +154,7 @@ export function AssistantChat({ patientId }: { patientId: string }) {
 
 /* ============ إضافة بيانات بالصوت ============ */
 export function VoicePanel({ patientId }: { patientId: string }) {
+  const tr = useT();
   const [text, setText] = useState("");
   const [result, setResult] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -170,9 +173,9 @@ export function VoicePanel({ patientId }: { patientId: string }) {
 
   return (
     <Card className="p-5">
-      <h3 className="mb-2 font-semibold text-slate-800">إضافة بيانات بالصوت</h3>
+      <h3 className="mb-2 font-semibold text-slate-800">{tr("ai.voiceTitle")}</h3>
       <p className="mb-3 text-xs text-slate-400">
-        تكلّم أو اكتب ملاحظة، وسيستخرج المساعد البيانات ويضيفها لملف المريض.
+        {tr("ai.voiceHint")}
       </p>
       <div className="flex items-start gap-2">
         {supported && (
@@ -188,15 +191,15 @@ export function VoicePanel({ patientId }: { patientId: string }) {
           value={text}
           onChange={(e) => setText(e.target.value)}
           rows={3}
-          placeholder="مثال: المريض عنده حساسية من البنسلين..."
+          placeholder={tr("ai.voiceExample")}
           className="flex-1"
         />
       </div>
       {!supported && (
-        <p className="mt-1 text-xs text-amber-500">المتصفح لا يدعم الإدخال الصوتي — استخدم الكتابة.</p>
+        <p className="mt-1 text-xs text-amber-500">{tr("ai.noVoice")}</p>
       )}
       <Button onClick={apply} disabled={pending} className="mt-3 w-full" variant="secondary">
-        {pending ? "..." : "استخراج وإضافة"}
+        {pending ? "..." : tr("ai.extractAdd")}
       </Button>
       {result && <p className="mt-2 text-xs text-green-600">{result}</p>}
     </Card>
@@ -205,6 +208,7 @@ export function VoicePanel({ patientId }: { patientId: string }) {
 
 /* ============ توليد تقرير طبي ============ */
 export function ReportPanel({ patientId }: { patientId: string }) {
+  const tr = useT();
   const [pending, startTransition] = useTransition();
   const [msg, setMsg] = useState<string | null>(null);
 
@@ -212,19 +216,19 @@ export function ReportPanel({ patientId }: { patientId: string }) {
     setMsg(null);
     startTransition(async () => {
       const res = await generateReport(patientId);
-      setMsg(res.error ? `خطأ: ${res.error}` : "تم إنشاء التقرير وحفظه بالأسفل.");
+      setMsg(res.error ? `خطأ: ${res.error}` : tr("ai.reportDone"));
     });
   };
 
   return (
     <Card className="p-5">
-      <h3 className="mb-2 font-semibold text-slate-800">تقرير طبي شامل</h3>
+      <h3 className="mb-2 font-semibold text-slate-800">{tr("ai.reportTitle")}</h3>
       <p className="mb-3 text-xs text-slate-400">
-        يولّد المساعد تقريراً من ملف المريض ويحفظه.
+        {tr("ai.reportHint")}
       </p>
       <Button onClick={gen} disabled={pending} className="w-full">
         <FileText className="h-4 w-4" />
-        {pending ? "جارٍ التوليد..." : "توليد تقرير"}
+        {pending ? tr("ai.generating") : tr("ai.generateReport")}
       </Button>
       {msg && <p className="mt-2 text-xs text-green-600">{msg}</p>}
     </Card>
@@ -235,6 +239,7 @@ export function ReportPanel({ patientId }: { patientId: string }) {
 type Row = { id: number };
 
 export function PrescriptionBuilder({ patientId }: { patientId: string }) {
+  const tr = useT();
   const [state, action, pending] = useActionState(createPrescription, undefined);
   const [rows, setRows] = useState<Row[]>([{ id: 1 }]);
   const formRef = useRef<HTMLFormElement>(null);
@@ -247,7 +252,7 @@ export function PrescriptionBuilder({ patientId }: { patientId: string }) {
 
   return (
     <Card className="p-5">
-      <h3 className="mb-3 font-semibold text-slate-800">روشتة جديدة</h3>
+      <h3 className="mb-3 font-semibold text-slate-800">{tr("ai.newRx")}</h3>
       <form ref={formRef} action={action} className="space-y-3">
         <input type="hidden" name="patientId" value={patientId} />
 
@@ -255,23 +260,23 @@ export function PrescriptionBuilder({ patientId }: { patientId: string }) {
           {rows.map((r, idx) => (
             <div key={r.id} className="grid grid-cols-1 gap-2 rounded-lg border border-slate-200 p-3 sm:grid-cols-12">
               <div className="sm:col-span-3">
-                <Label>الدواء</Label>
+                <Label>{tr("ai.drug")}</Label>
                 <Input name="drugName" placeholder="اسم الدواء" />
               </div>
               <div className="sm:col-span-2">
-                <Label>الجرعة</Label>
+                <Label>{tr("ai.dose")}</Label>
                 <Input name="dose" placeholder="500mg" dir="ltr" />
               </div>
               <div className="sm:col-span-2">
-                <Label>التكرار</Label>
+                <Label>{tr("ai.freq")}</Label>
                 <Input name="frequency" placeholder="مرتين يومياً" />
               </div>
               <div className="sm:col-span-2">
-                <Label>المدة</Label>
+                <Label>{tr("ai.dur")}</Label>
                 <Input name="duration" placeholder="5 أيام" />
               </div>
               <div className="sm:col-span-2">
-                <Label>بدائل</Label>
+                <Label>{tr("ai.alt")}</Label>
                 <Input name="alternatives" placeholder="بديل اختياري" />
               </div>
               <div className="flex items-end sm:col-span-1">
@@ -293,31 +298,31 @@ export function PrescriptionBuilder({ patientId }: { patientId: string }) {
           className="flex items-center gap-1 text-sm font-medium text-brand-600 hover:text-brand-700"
         >
           <Plus className="h-4 w-4" />
-          إضافة دواء
+          {tr("ai.addDrug")}
         </button>
 
         <div>
-          <Label htmlFor="notes">ملاحظات</Label>
+          <Label htmlFor="notes">{tr("form.notes")}</Label>
           <Textarea id="notes" name="notes" rows={2} />
         </div>
 
         <label className="flex items-center gap-2 text-sm text-slate-600">
           <input type="checkbox" name="saveAsTemplate" checked={saveTpl} onChange={(e) => setSaveTpl(e.target.checked)} />
-          حفظ كنموذج لإعادة الاستخدام
+          {tr("ai.saveAsTemplate")}
         </label>
         {saveTpl && (
-          <Input name="templateName" placeholder="اسم النموذج" />
+          <Input name="templateName" placeholder={tr("ai.templateName")} />
         )}
 
         {state?.error && (
           <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{state.error}</p>
         )}
         {state?.ok && (
-          <p className="rounded-lg bg-green-50 px-3 py-2 text-sm text-green-600">تم حفظ الروشتة ✅</p>
+          <p className="rounded-lg bg-green-50 px-3 py-2 text-sm text-green-600">{tr("ai.rxSaved")}</p>
         )}
 
         <Button type="submit" disabled={pending}>
-          {pending ? "جارٍ الحفظ..." : "حفظ الروشتة"}
+          {pending ? tr("form.saving") : tr("ai.saveRx")}
         </Button>
       </form>
     </Card>

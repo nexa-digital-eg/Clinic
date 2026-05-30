@@ -4,8 +4,11 @@ import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { formatCurrency } from "@/lib/utils";
 import { LinkForm, UnlinkButton } from "./forms";
+import { getLocale } from "@/lib/locale";
+import { t } from "@/lib/i18n";
 
 export default async function ProcedureLinksPage() {
+  const locale = await getLocale();
   const [procedures, products] = await Promise.all([
     db.procedure.findMany({
       where: { isActive: true },
@@ -22,9 +25,9 @@ export default async function ProcedureLinksPage() {
           <ArrowRight className="h-5 w-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">ربط المنتجات بالإجراءات</h1>
+          <h1 className="text-2xl font-bold text-slate-800">{t("inv.linkTitle", locale)}</h1>
           <p className="text-sm text-slate-500">
-            المنتجات المرتبطة تُسحب تلقائياً من المخزون عند تنفيذ الإجراء
+            {t("inv.linkSubtitle", locale)}
           </p>
         </div>
       </div>
@@ -42,7 +45,7 @@ export default async function ProcedureLinksPage() {
               <span className="text-sm text-slate-400">{formatCurrency(proc.price)}</span>
             </div>
             {proc.products.length === 0 ? (
-              <p className="text-sm text-slate-400">لا توجد منتجات مرتبطة</p>
+              <p className="text-sm text-slate-400">{t("inv.noLinked", locale)}</p>
             ) : (
               <ul className="space-y-2">
                 {proc.products.map((pp) => (
@@ -66,7 +69,7 @@ export default async function ProcedureLinksPage() {
       </div>
 
       {procedures.length === 0 && (
-        <EmptyState title="لا توجد إجراءات" description="أضف إجراءات أولاً" />
+        <EmptyState title={t("common.noResults", locale)} description="أضف إجراءات أولاً" />
       )}
     </div>
   );

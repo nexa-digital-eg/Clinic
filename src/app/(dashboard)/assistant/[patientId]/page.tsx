@@ -5,6 +5,8 @@ import { formatDate } from "@/lib/utils";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { AssistantChat, ReportPanel, VoicePanel, PrescriptionBuilder } from "./client";
+import { getLocale } from "@/lib/locale";
+import { t } from "@/lib/i18n";
 
 export default async function AssistantWorkspace({
   params,
@@ -12,6 +14,7 @@ export default async function AssistantWorkspace({
   params: Promise<{ patientId: string }>;
 }) {
   const { patientId } = await params;
+  const locale = await getLocale();
 
   const [patient, reports] = await Promise.all([
     db.patient.findUnique({ where: { id: patientId } }),
@@ -37,13 +40,13 @@ export default async function AssistantWorkspace({
             </h1>
             <Badge color="blue">{patient.code}</Badge>
           </div>
-          <p className="text-sm text-slate-500">المساعد على علم بملف المريض كاملاً</p>
+          <p className="text-sm text-slate-500">{t("ai.knowsFile", locale)}</p>
         </div>
         <Link
           href={`/patients/${patient.id}`}
           className="rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200"
         >
-          ملف المريض
+          {t("ai.patientFile", locale)}
         </Link>
       </div>
 
@@ -66,10 +69,10 @@ export default async function AssistantWorkspace({
       {/* التقارير الأخيرة */}
       <Card>
         <div className="border-b border-slate-200 px-5 py-3">
-          <h2 className="font-semibold text-slate-800">التقارير الطبية</h2>
+          <h2 className="font-semibold text-slate-800">{t("ai.reports", locale)}</h2>
         </div>
         {reports.length === 0 ? (
-          <p className="py-8 text-center text-sm text-slate-400">لا توجد تقارير بعد</p>
+          <p className="py-8 text-center text-sm text-slate-400">{t("ai.noReports", locale)}</p>
         ) : (
           <div className="divide-y divide-slate-100">
             {reports.map((r) => (
