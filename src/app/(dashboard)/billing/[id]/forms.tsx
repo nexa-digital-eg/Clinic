@@ -159,7 +159,7 @@ export function InvoiceItemRow({
       {!cancelled && (
         <td className="px-4 py-2">
           <button
-            title="حذف"
+            title={tr("common.delete")}
             onClick={() => {
               if (confirm(tr("invd.confirmDelItem"))) startTransition(() => deleteInvoiceItem(id));
             }}

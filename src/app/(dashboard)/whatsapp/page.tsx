@@ -102,7 +102,7 @@ export default async function WhatsAppPage({
               <div className="flex flex-col items-center py-16 text-center">
                 <MessageCircle className="mb-3 h-10 w-10 text-slate-300" />
                 <p className="text-sm font-medium text-slate-600">{t("wa.noMessages", locale)}</p>
-                <p className="mt-1 text-xs text-slate-400">ابدأ بإرسال أول رسالة من النموذج</p>
+                <p className="mt-1 text-xs text-slate-400">{t("wa.newMessage", locale)}</p>
               </div>
             ) : (
               <div className="divide-y divide-slate-100">
@@ -137,10 +137,10 @@ export default async function WhatsAppPage({
                           {m.error && <p className="mt-0.5 text-xs text-red-500">{m.error}</p>}
                           <p className="mt-0.5 text-xs text-slate-400">
                             {m.scheduledAt
-                              ? `مجدولة: ${m.scheduledAt.toLocaleString("ar-EG")}`
+                              ? `${t("waStatus.SCHEDULED", locale)}: ${m.scheduledAt.toLocaleString(locale === "ar" ? "ar-EG" : "en-GB")}`
                               : m.sentAt
-                                ? `أُرسلت: ${m.sentAt.toLocaleString("ar-EG")}`
-                                : m.createdAt.toLocaleString("ar-EG")}
+                                ? `${t("waStatus.SENT", locale)}: ${m.sentAt.toLocaleString(locale === "ar" ? "ar-EG" : "en-GB")}`
+                                : m.createdAt.toLocaleString(locale === "ar" ? "ar-EG" : "en-GB")}
                           </p>
                         </div>
                         <MessageActions id={m.id} status={m.status} />

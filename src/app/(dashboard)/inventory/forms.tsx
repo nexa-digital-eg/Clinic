@@ -25,7 +25,7 @@ export function ProductForms() {
           </div>
           <div>
             <Label htmlFor="unit">{tr("inv.unit")}</Label>
-            <Input id="unit" name="unit" placeholder="قطعة" />
+            <Input id="unit" name="unit" placeholder={tr("common.piece")} />
           </div>
         </div>
         <div className="grid grid-cols-2 gap-2">
@@ -95,7 +95,7 @@ export function ProductRow({
         <td className="px-4 py-2">
           <div className="flex items-center gap-1">
             <button
-              title="حركة مخزون"
+              title={tr("inv.stockMovement")}
               onClick={() => setOpen((v) => !v)}
               className="rounded p-1.5 text-slate-500 hover:bg-slate-100"
             >
@@ -132,7 +132,7 @@ export function ProductRow({
               </div>
               <div className="flex-1">
                 <Label htmlFor={`reason-${id}`}>{tr("col.reason")}</Label>
-                <Input id={`reason-${id}`} name="reason" placeholder="اختياري" />
+                <Input id={`reason-${id}`} name="reason" placeholder={tr("common.optional")} />
               </div>
               <Button type="submit">
                 <Plus className="h-4 w-4" />

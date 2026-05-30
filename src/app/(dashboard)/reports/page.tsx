@@ -9,20 +9,6 @@ function pad(n: number) {
   return String(n).padStart(2, "0");
 }
 
-const METHOD_LABELS: Record<string, string> = {
-  CASH: "نقدي",
-  CARD: "بطاقة",
-  TRANSFER: "تحويل",
-  OTHER: "أخرى",
-};
-const APPT_LABELS: Record<string, string> = {
-  PENDING: "منتظر",
-  CONFIRMED: "مؤكد",
-  COMPLETED: "تم",
-  CANCELLED: "ملغي",
-  NO_SHOW: "لم يحضر",
-};
-
 export default async function ReportsPage({
   searchParams,
 }: {
@@ -99,36 +85,36 @@ export default async function ReportsPage({
       <Card className="p-4">
         <form className="flex flex-wrap items-end gap-3" method="get">
           <div>
-            <label className="mb-1 block text-xs text-slate-500">من</label>
+            <label className="mb-1 block text-xs text-slate-500">{t("rep.from", locale)}</label>
             <input type="date" name="from" defaultValue={fromStr} dir="ltr" className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm" />
           </div>
           <div>
-            <label className="mb-1 block text-xs text-slate-500">إلى</label>
+            <label className="mb-1 block text-xs text-slate-500">{t("rep.to", locale)}</label>
             <input type="date" name="to" defaultValue={toStr} dir="ltr" className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm" />
           </div>
           <button type="submit" className="rounded-lg bg-brand-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-brand-700">
-            عرض
+            {t("rep.show", locale)}
           </button>
         </form>
       </Card>
 
       {/* بطاقات مالية */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard icon={Wallet} color="bg-green-50 text-green-600" label="المحصّل (مدفوعات)" value={formatCurrency(totalPaid)} sub={`${paymentsAgg._count} دفعة`} />
-        <StatCard icon={TrendingUp} color="bg-brand-50 text-brand-600" label="إجمالي الفواتير" value={formatCurrency(billed)} />
-        <StatCard icon={Wallet} color="bg-yellow-50 text-yellow-600" label="المتبقي" value={formatCurrency(due > 0 ? due : 0)} />
-        <StatCard icon={Users} color="bg-purple-50 text-purple-600" label="مرضى جدد" value={`${newPatients}`} sub={`الإجمالي ${totalPatients}`} />
+        <StatCard icon={Wallet} color="bg-green-50 text-green-600" label={t("rep.collected", locale)} value={formatCurrency(totalPaid)} sub={`${paymentsAgg._count} ${t("rep.payments", locale)}`} />
+        <StatCard icon={TrendingUp} color="bg-brand-50 text-brand-600" label={t("rep.billed", locale)} value={formatCurrency(billed)} />
+        <StatCard icon={Wallet} color="bg-yellow-50 text-yellow-600" label={t("rep.remaining", locale)} value={formatCurrency(due > 0 ? due : 0)} />
+        <StatCard icon={Users} color="bg-purple-50 text-purple-600" label={t("rep.newPatients", locale)} value={`${newPatients}`} sub={`${t("rep.totalLabel", locale)} ${totalPatients}`} />
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* المدفوعات حسب الطريقة */}
         <Card>
           <div className="border-b border-slate-200 px-5 py-3">
-            <h2 className="font-semibold text-slate-800">المدفوعات حسب الطريقة</h2>
+            <h2 className="font-semibold text-slate-800">{t("rep.paymentsByMethod", locale)}</h2>
           </div>
           <div className="p-5">
             {paymentsByMethod.length === 0 ? (
-              <p className="py-4 text-center text-sm text-slate-400">لا توجد مدفوعات في الفترة</p>
+              <p className="py-4 text-center text-sm text-slate-400">{t("rep.noPaymentsPeriod", locale)}</p>
             ) : (
               <div className="space-y-2">
                 {paymentsByMethod.map((m) => {
@@ -137,7 +123,7 @@ export default async function ReportsPage({
                   return (
                     <div key={m.method}>
                       <div className="flex justify-between text-sm">
-                        <span className="text-slate-600">{METHOD_LABELS[m.method]}</span>
+                        <span className="text-slate-600">{t(`method.${m.method}`, locale)}</span>
                         <span className="font-medium">{formatCurrency(amt)} ({pct}%)</span>
                       </div>
                       <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-slate-100">
@@ -155,16 +141,16 @@ export default async function ReportsPage({
         <Card>
           <div className="flex items-center gap-2 border-b border-slate-200 px-5 py-3">
             <CalendarDays className="h-5 w-5 text-slate-400" />
-            <h2 className="font-semibold text-slate-800">الحجوزات حسب الحالة</h2>
+            <h2 className="font-semibold text-slate-800">{t("rep.apptByStatus", locale)}</h2>
           </div>
           <div className="grid grid-cols-2 gap-3 p-5 sm:grid-cols-3">
             {apptByStatus.length === 0 ? (
-              <p className="col-span-full py-4 text-center text-sm text-slate-400">لا توجد حجوزات</p>
+              <p className="col-span-full py-4 text-center text-sm text-slate-400">{t("rep.noAppts", locale)}</p>
             ) : (
               apptByStatus.map((s) => (
                 <div key={s.status} className="rounded-lg bg-slate-50 p-3 text-center">
                   <p className="text-2xl font-bold text-slate-800">{s._count}</p>
-                  <p className="text-xs text-slate-500">{APPT_LABELS[s.status]}</p>
+                  <p className="text-xs text-slate-500">{t(`apptStatus.${s.status}`, locale)}</p>
                 </div>
               ))
             )}
@@ -175,17 +161,17 @@ export default async function ReportsPage({
         <Card>
           <div className="flex items-center gap-2 border-b border-slate-200 px-5 py-3">
             <Stethoscope className="h-5 w-5 text-slate-400" />
-            <h2 className="font-semibold text-slate-800">أداء الأطباء</h2>
+            <h2 className="font-semibold text-slate-800">{t("rep.doctorPerf", locale)}</h2>
           </div>
           <div className="p-5">
             {apptByDoctor.length === 0 ? (
-              <p className="py-4 text-center text-sm text-slate-400">لا توجد بيانات</p>
+              <p className="py-4 text-center text-sm text-slate-400">{t("rep.noData", locale)}</p>
             ) : (
               <ul className="space-y-2">
                 {apptByDoctor.map((d) => (
                   <li key={d.doctorId} className="flex items-center justify-between text-sm">
-                    <span className="text-slate-700">د. {doctorName(d.doctorId)}</span>
-                    <Badge color="blue">{d._count} حجز</Badge>
+                    <span className="text-slate-700">{doctorName(d.doctorId)}</span>
+                    <Badge color="blue">{d._count} {t("rep.apptCount", locale)}</Badge>
                   </li>
                 ))}
               </ul>
@@ -196,11 +182,11 @@ export default async function ReportsPage({
         {/* أعلى الإجراءات */}
         <Card>
           <div className="border-b border-slate-200 px-5 py-3">
-            <h2 className="font-semibold text-slate-800">أعلى الإجراءات إيراداً</h2>
+            <h2 className="font-semibold text-slate-800">{t("rep.topProcedures", locale)}</h2>
           </div>
           <div className="p-5">
             {topProcedures.length === 0 ? (
-              <p className="py-4 text-center text-sm text-slate-400">لا توجد إجراءات في الفترة</p>
+              <p className="py-4 text-center text-sm text-slate-400">{t("rep.noProceduresPeriod", locale)}</p>
             ) : (
               <ul className="space-y-2">
                 {topProcedures.map((p) => (
@@ -219,15 +205,15 @@ export default async function ReportsPage({
       <Card>
         <div className="flex items-center gap-2 border-b border-slate-200 px-5 py-3">
           <Boxes className="h-5 w-5 text-slate-400" />
-          <h2 className="font-semibold text-slate-800">المخزون</h2>
-          <span className="mr-auto text-sm text-slate-500">قيمة المخزون: {formatCurrency(stockValue)}</span>
+          <h2 className="font-semibold text-slate-800">{t("rep.inventory", locale)}</h2>
+          <span className="mr-auto text-sm text-slate-500">{t("rep.stockValue", locale)}: {formatCurrency(stockValue)}</span>
         </div>
         <div className="p-5">
           {lowStock.length === 0 ? (
-            <p className="text-sm text-slate-400">لا توجد منتجات تحت حد التنبيه ✅</p>
+            <p className="text-sm text-slate-400">{t("rep.lowStockOk", locale)}</p>
           ) : (
             <div>
-              <p className="mb-2 text-sm font-medium text-red-600">منتجات تحت الحد ({lowStock.length}):</p>
+              <p className="mb-2 text-sm font-medium text-red-600">{t("rep.lowStockList", locale)} ({lowStock.length}):</p>
               <ul className="flex flex-wrap gap-2">
                 {lowStock.map((p) => (
                   <li key={p.id}>

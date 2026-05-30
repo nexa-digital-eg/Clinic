@@ -58,9 +58,10 @@ export function LinkForm({
 
 export function UnlinkButton({ id }: { id: string }) {
   const [, startTransition] = useTransition();
+  const tr = useT();
   return (
     <button
-      title="إلغاء الربط"
+      title={tr("inv.unlink")}
       onClick={() => startTransition(() => unlinkProduct(id))}
       className="rounded p-1 text-slate-400 hover:bg-red-50 hover:text-red-600"
     >

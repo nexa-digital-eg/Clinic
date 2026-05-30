@@ -4,6 +4,8 @@ import { getClinicSettings } from "@/server/clinic";
 import { ClinicHeader } from "@/components/clinic-header";
 import { PrintButton } from "../../print-button";
 import { formatDate, calcAge } from "@/lib/utils";
+import { getLocale } from "@/lib/locale";
+import { t } from "@/lib/i18n";
 
 export default async function PrintPrescription({
   params,
@@ -11,12 +13,13 @@ export default async function PrintPrescription({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [prescription, clinic] = await Promise.all([
+  const [prescription, clinic, locale] = await Promise.all([
     db.prescription.findUnique({
       where: { id },
       include: { patient: true, items: true, doctor: { include: { user: true } } },
     }),
     getClinicSettings(),
+    getLocale(),
   ]);
   if (!prescription) notFound();
 
@@ -32,15 +35,15 @@ export default async function PrintPrescription({
 
       <div className="mt-6 flex items-start justify-between">
         <div>
-          <h2 className="text-lg font-bold text-slate-800">روشتة طبية</h2>
+          <h2 className="text-lg font-bold text-slate-800">{t("print.prescription", locale)}</h2>
           {prescription.doctor && (
-            <p className="text-sm text-slate-500">د. {prescription.doctor.user.name}{prescription.doctor.specialty ? ` — ${prescription.doctor.specialty}` : ""}</p>
+            <p className="text-sm text-slate-500">{prescription.doctor.user.name}{prescription.doctor.specialty ? ` — ${prescription.doctor.specialty}` : ""}</p>
           )}
         </div>
         <div className="text-left text-sm text-slate-600">
-          <p>التاريخ: {formatDate(prescription.createdAt)}</p>
-          <p>المريض: {prescription.patient.firstName} {prescription.patient.lastName}</p>
-          {age !== null && <p>العمر: {age} سنة</p>}
+          <p>{t("print.date", locale)}: {formatDate(prescription.createdAt)}</p>
+          <p>{t("print.patient", locale)}: {prescription.patient.firstName} {prescription.patient.lastName}</p>
+          {age !== null && <p>{t("print.age", locale)}: {age} {t("common.years", locale)}</p>}
         </div>
       </div>
 
@@ -56,7 +59,7 @@ export default async function PrintPrescription({
             </div>
             <div className="mr-6 text-sm text-slate-500">
               {[it.frequency, it.duration].filter(Boolean).join(" — ")}
-              {it.alternatives && <span className="block text-xs text-slate-400">بديل: {it.alternatives}</span>}
+              {it.alternatives && <span className="block text-xs text-slate-400">{t("ai.alt", locale)}: {it.alternatives}</span>}
             </div>
           </li>
         ))}
@@ -64,14 +67,14 @@ export default async function PrintPrescription({
 
       {prescription.notes && (
         <div className="mt-4 rounded-lg bg-slate-50 p-3 text-sm text-slate-600">
-          <span className="font-medium">ملاحظات: </span>{prescription.notes}
+          <span className="font-medium">{t("print.notes", locale)}: </span>{prescription.notes}
         </div>
       )}
 
       <div className="mt-12 flex justify-start">
         <div className="text-center">
           <div className="h-10 border-b border-slate-300" style={{ width: "12rem" }} />
-          <p className="mt-1 text-xs text-slate-400">توقيع الطبيب</p>
+          <p className="mt-1 text-xs text-slate-400">{t("print.doctorSign", locale)}</p>
         </div>
       </div>
     </div>

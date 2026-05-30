@@ -63,11 +63,11 @@ export default async function PatientsPage({
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <UserRound className="mb-3 h-10 w-10 text-slate-300" />
             <p className="text-sm font-medium text-slate-600">
-              {query ? "لا توجد نتائج" : "لا يوجد مرضى بعد"}
+              {query ? t("common.noResults", locale) : t("patients.empty", locale)}
             </p>
             {!query && (
               <p className="mt-1 text-xs text-slate-400">
-                ابدأ بإضافة أول مريض
+                {t("patients.new", locale)}
               </p>
             )}
           </div>
@@ -76,12 +76,12 @@ export default async function PatientsPage({
             <table className="w-full text-sm">
               <thead className="border-b border-slate-200 text-right text-xs text-slate-500">
                 <tr>
-                  <th className="px-4 py-3 font-medium">الكود</th>
-                  <th className="px-4 py-3 font-medium">الاسم</th>
-                  <th className="px-4 py-3 font-medium">الهاتف</th>
-                  <th className="px-4 py-3 font-medium">العمر</th>
-                  <th className="px-4 py-3 font-medium">تاريخ التسجيل</th>
-                  <th className="px-4 py-3 font-medium">الرصيد</th>
+                  <th className="px-4 py-3 font-medium">{t("col.code", locale)}</th>
+                  <th className="px-4 py-3 font-medium">{t("col.name", locale)}</th>
+                  <th className="px-4 py-3 font-medium">{t("col.phone", locale)}</th>
+                  <th className="px-4 py-3 font-medium">{t("col.age", locale)}</th>
+                  <th className="px-4 py-3 font-medium">{t("col.registered", locale)}</th>
+                  <th className="px-4 py-3 font-medium">{t("col.balance", locale)}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -109,7 +109,7 @@ export default async function PatientsPage({
                         {p.phone}
                       </td>
                       <td className="px-4 py-3 text-slate-600">
-                        {age !== null ? `${age} سنة` : "—"}
+                        {age !== null ? `${age} ${t("common.years", locale)}` : "—"}
                       </td>
                       <td className="px-4 py-3 text-slate-500">
                         {formatDate(p.createdAt)}

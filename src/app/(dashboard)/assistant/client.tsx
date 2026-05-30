@@ -10,7 +10,7 @@ export function DeleteTemplateButton({ id }: { id: string }) {
   const [, startTransition] = useTransition();
   return (
     <button
-      title="حذف النموذج"
+      title={tr("common.delete")}
       onClick={() => {
         if (confirm(tr("ai.confirmDelTemplate"))) startTransition(() => deleteTemplate(id));
       }}

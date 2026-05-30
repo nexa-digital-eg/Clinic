@@ -89,7 +89,7 @@ export function DeletePackageButton({ id }: { id: string }) {
   const [, startTransition] = useTransition();
   return (
     <button
-      title="حذف"
+      title={tr("common.delete")}
       onClick={() => {
         if (confirm(tr("pkg.confirmDel"))) startTransition(() => deletePackage(id));
       }}

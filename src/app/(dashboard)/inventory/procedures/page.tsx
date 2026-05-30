@@ -69,7 +69,7 @@ export default async function ProcedureLinksPage() {
       </div>
 
       {procedures.length === 0 && (
-        <EmptyState title={t("common.noResults", locale)} description="أضف إجراءات أولاً" />
+        <EmptyState title={t("common.noResults", locale)} />
       )}
     </div>
   );

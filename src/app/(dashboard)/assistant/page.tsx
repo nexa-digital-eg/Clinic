@@ -62,7 +62,7 @@ export default async function AssistantPicker({
           <Card className="p-4">
             <form className="relative">
               <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <Input name="q" defaultValue={query} placeholder="ابحث عن مريض..." className="pr-10" />
+              <Input name="q" defaultValue={query} placeholder={t("dental.searchPatient", locale)} className="pr-10" />
             </form>
           </Card>
 

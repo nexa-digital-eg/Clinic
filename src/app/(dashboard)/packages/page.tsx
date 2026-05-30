@@ -40,7 +40,7 @@ export default async function PackagesPage() {
               <div className="flex flex-col items-center py-12 text-center">
                 <PackageIcon className="mb-3 h-10 w-10 text-slate-300" />
                 <p className="text-sm font-medium text-slate-600">{t("pkg.noPackages", locale)}</p>
-                <p className="mt-1 text-xs text-slate-400">أنشئ أول باقة من النموذج</p>
+                <p className="mt-1 text-xs text-slate-400">{t("pkg.newPackage", locale)}</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2">

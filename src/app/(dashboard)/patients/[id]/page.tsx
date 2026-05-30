@@ -78,8 +78,8 @@ export default async function PatientProfile({
             <Badge color="blue">{patient.code}</Badge>
           </div>
           <p className="text-sm text-slate-500">
-            {patient.gender === "MALE" ? "ذكر" : patient.gender === "FEMALE" ? "أنثى" : ""}
-            {age !== null && ` • ${age} سنة`}
+            {patient.gender === "MALE" ? t("form.male", locale) : patient.gender === "FEMALE" ? t("form.female", locale) : ""}
+            {age !== null && ` • ${age} ${t("common.years", locale)}`}
           </p>
         </div>
         <Card className="px-5 py-3 text-center">
@@ -182,7 +182,7 @@ export default async function PatientProfile({
               <Card key={p.id} className="p-4">
                 <div className="mb-2 flex items-center justify-between">
                   <p className="text-sm text-slate-500">
-                    {p.doctor ? `د. ${p.doctor.user.name}` : "روشتة"}
+                    {p.doctor ? `${p.doctor.user.name}` : t("rx.label", locale)}
                   </p>
                   <div className="flex items-center gap-3">
                     <a

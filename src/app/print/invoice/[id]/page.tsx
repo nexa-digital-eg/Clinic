@@ -4,6 +4,8 @@ import { getClinicSettings } from "@/server/clinic";
 import { ClinicHeader } from "@/components/clinic-header";
 import { PrintButton } from "../../print-button";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { getLocale } from "@/lib/locale";
+import { t } from "@/lib/i18n";
 
 export default async function PrintInvoice({
   params,
@@ -11,12 +13,13 @@ export default async function PrintInvoice({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [invoice, clinic] = await Promise.all([
+  const [invoice, clinic, locale] = await Promise.all([
     db.invoice.findUnique({
       where: { id },
       include: { patient: true, items: true },
     }),
     getClinicSettings(),
+    getLocale(),
   ]);
   if (!invoice) notFound();
 
@@ -32,23 +35,23 @@ export default async function PrintInvoice({
 
       <div className="mt-6 flex items-start justify-between">
         <div>
-          <h2 className="text-lg font-bold text-slate-800">فاتورة</h2>
+          <h2 className="text-lg font-bold text-slate-800">{t("print.invoice", locale)}</h2>
           <p className="font-mono text-sm text-slate-500">{invoice.number}</p>
         </div>
         <div className="text-left text-sm text-slate-600">
-          <p>التاريخ: {formatDate(invoice.createdAt)}</p>
-          <p>المريض: {invoice.patient.firstName} {invoice.patient.lastName}</p>
-          <p>كود: {invoice.patient.code}</p>
+          <p>{t("print.date", locale)}: {formatDate(invoice.createdAt)}</p>
+          <p>{t("print.patient", locale)}: {invoice.patient.firstName} {invoice.patient.lastName}</p>
+          <p>{t("print.code", locale)}: {invoice.patient.code}</p>
         </div>
       </div>
 
       <table className="mt-6 w-full text-sm">
         <thead className="border-b-2 border-slate-200 text-right text-xs text-slate-500">
           <tr>
-            <th className="py-2">البند</th>
-            <th className="py-2">الكمية</th>
-            <th className="py-2">سعر الوحدة</th>
-            <th className="py-2">الإجمالي</th>
+            <th className="py-2">{t("print.item", locale)}</th>
+            <th className="py-2">{t("col.qty", locale)}</th>
+            <th className="py-2">{t("col.unitPrice", locale)}</th>
+            <th className="py-2">{t("col.total", locale)}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100">
@@ -65,13 +68,13 @@ export default async function PrintInvoice({
 
       <div className="mt-6 flex justify-end">
         <div className="w-64 space-y-1 text-sm">
-          <div className="flex justify-between"><span className="text-slate-500">الإجمالي</span><span className="font-medium">{formatCurrency(invoice.total)}</span></div>
-          <div className="flex justify-between"><span className="text-slate-500">المدفوع</span><span className="font-medium text-green-600">{formatCurrency(invoice.paidAmount)}</span></div>
-          <div className="flex justify-between border-t border-slate-200 pt-1"><span className="font-semibold">المتبقي</span><span className="font-bold text-red-600">{formatCurrency(due > 0 ? due : 0)}</span></div>
+          <div className="flex justify-between"><span className="text-slate-500">{t("col.total", locale)}</span><span className="font-medium">{formatCurrency(invoice.total)}</span></div>
+          <div className="flex justify-between"><span className="text-slate-500">{t("col.paid", locale)}</span><span className="font-medium text-green-600">{formatCurrency(invoice.paidAmount)}</span></div>
+          <div className="flex justify-between border-t border-slate-200 pt-1"><span className="font-semibold">{t("col.due", locale)}</span><span className="font-bold text-red-600">{formatCurrency(due > 0 ? due : 0)}</span></div>
         </div>
       </div>
 
-      <p className="mt-10 text-center text-xs text-slate-400">شكراً لزيارتكم — {clinic.name}</p>
+      <p className="mt-10 text-center text-xs text-slate-400">{t("print.thanks", locale)} — {clinic.name}</p>
     </div>
   );
 }

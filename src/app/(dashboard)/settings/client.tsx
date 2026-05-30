@@ -249,7 +249,7 @@ export function StaffToggle({ id, isActive, self }: { id: string; isActive: bool
   return (
     <button
       onClick={() => startTransition(() => toggleStaff(id, !isActive))}
-      title={isActive ? "تعطيل" : "تفعيل"}
+      title={isActive ? tr("set.deactivate") : tr("set.activate")}
       className={`rounded p-1.5 ${isActive ? "text-slate-400 hover:bg-slate-100" : "text-green-600 hover:bg-green-50"}`}
     >
       {isActive ? <Power className="h-4 w-4" /> : <Check className="h-4 w-4" />}

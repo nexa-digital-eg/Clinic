@@ -84,7 +84,7 @@ export function AssistantChat({ patientId }: { patientId: string }) {
     setInput("");
     startTransition(async () => {
       const res = await chatAssistant(patientId, next);
-      setMessages([...next, { role: "assistant", content: res.error ? `خطأ: ${res.error}` : res.text }]);
+      setMessages([...next, { role: "assistant", content: res.error ? `${tr("common.error")}: ${res.error}` : res.text }]);
     });
   };
 
@@ -125,7 +125,7 @@ export function AssistantChat({ patientId }: { patientId: string }) {
         {supported && (
           <button
             onClick={toggle}
-            title="إدخال صوتي"
+            title={tr("ai.voiceInput")}
             className={`rounded-lg p-2 ${listening ? "bg-red-100 text-red-600" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
           >
             {listening ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
@@ -166,7 +166,7 @@ export function VoicePanel({ patientId }: { patientId: string }) {
     if (!text.trim()) return;
     startTransition(async () => {
       const res = await addDataByVoice(patientId, text);
-      setResult(res.error ? `خطأ: ${res.error}` : `تم تحديث: ${res.applied}`);
+      setResult(res.error ? `${tr("common.error")}: ${res.error}` : `${tr("ai.updated")}: ${res.applied}`);
       if (res.ok) setText("");
     });
   };
@@ -181,7 +181,7 @@ export function VoicePanel({ patientId }: { patientId: string }) {
         {supported && (
           <button
             onClick={toggle}
-            title="تسجيل صوتي"
+            title={tr("ai.voiceRecord")}
             className={`rounded-lg p-2 ${listening ? "bg-red-100 text-red-600" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
           >
             {listening ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
@@ -216,7 +216,7 @@ export function ReportPanel({ patientId }: { patientId: string }) {
     setMsg(null);
     startTransition(async () => {
       const res = await generateReport(patientId);
-      setMsg(res.error ? `خطأ: ${res.error}` : tr("ai.reportDone"));
+      setMsg(res.error ? `${tr("common.error")}: ${res.error}` : tr("ai.reportDone"));
     });
   };
 
@@ -261,7 +261,7 @@ export function PrescriptionBuilder({ patientId }: { patientId: string }) {
             <div key={r.id} className="grid grid-cols-1 gap-2 rounded-lg border border-slate-200 p-3 sm:grid-cols-12">
               <div className="sm:col-span-3">
                 <Label>{tr("ai.drug")}</Label>
-                <Input name="drugName" placeholder="اسم الدواء" />
+                <Input name="drugName" placeholder={tr("ai.drugName")} />
               </div>
               <div className="sm:col-span-2">
                 <Label>{tr("ai.dose")}</Label>
@@ -269,15 +269,15 @@ export function PrescriptionBuilder({ patientId }: { patientId: string }) {
               </div>
               <div className="sm:col-span-2">
                 <Label>{tr("ai.freq")}</Label>
-                <Input name="frequency" placeholder="مرتين يومياً" />
+                <Input name="frequency" />
               </div>
               <div className="sm:col-span-2">
                 <Label>{tr("ai.dur")}</Label>
-                <Input name="duration" placeholder="5 أيام" />
+                <Input name="duration" />
               </div>
               <div className="sm:col-span-2">
                 <Label>{tr("ai.alt")}</Label>
-                <Input name="alternatives" placeholder="بديل اختياري" />
+                <Input name="alternatives" placeholder={tr("ai.altPlaceholder")} />
               </div>
               <div className="flex items-end sm:col-span-1">
                 <button

@@ -131,7 +131,7 @@ export function MessageActions({ id, status }: { id: string; status: string }) {
     <div className="flex items-center gap-1">
       {status === "FAILED" && (
         <button
-          title="إعادة المحاولة"
+          title={tr("common.retry")}
           onClick={() => startTransition(() => retryMessage(id))}
           className="rounded p-1.5 text-brand-600 hover:bg-brand-50"
         >
@@ -139,7 +139,7 @@ export function MessageActions({ id, status }: { id: string; status: string }) {
         </button>
       )}
       <button
-        title="حذف"
+        title={tr("common.delete")}
         onClick={() => {
           if (confirm(tr("wa.confirmDel"))) startTransition(() => deleteMessage(id));
         }}

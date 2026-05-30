@@ -176,7 +176,7 @@ export default async function AppointmentsPage({
                           key={a.id}
                           href={`/patients/${a.patientId}?tab=appointments`}
                           className="block truncate rounded bg-brand-50 px-1.5 py-0.5 text-[11px] text-brand-700 hover:bg-brand-100"
-                          title={`${a.patient.firstName} ${a.patient.lastName} - د.${a.doctor.user.name}`}
+                          title={`${a.patient.firstName} ${a.patient.lastName} - ${a.doctor.user.name}`}
                         >
                           {new Date(a.startsAt).toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" })}
                           {" "}
