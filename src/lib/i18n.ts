@@ -314,6 +314,7 @@ const DICT: Record<string, { ar: string; en: string }> = {
   // نماذج الإعدادات
   "set.clinicName": { ar: "اسم العيادة", en: "Clinic name" },
   "set.currency": { ar: "العملة", en: "Currency" },
+  "set.logo": { ar: "شعار العيادة", en: "Clinic logo" },
   "set.logoUrl": { ar: "رابط الشعار (Logo URL)", en: "Logo URL" },
   "set.logoHint": { ar: "يظهر في القائمة وصفحة الدخول والمطبوعات", en: "Shown in the sidebar, login & printed documents" },
   "set.uploadLogo": { ar: "رفع شعار", en: "Upload logo" },

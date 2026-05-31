@@ -25,10 +25,12 @@ export function ClinicForm({
 }) {
   const [state, action, pending] = useActionState(updateClinic, undefined);
   const tr = useT();
-  const [logoUrl, setLogoUrl] = useState(clinic.logoUrl);
+  const [logoUrl, setLogoUrl] = useState<string | null>(clinic.logoUrl || null);
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [logoError, setLogoError] = useState<string | null>(null);
 
   const onLogo = async (file: File) => {
+    setLogoError(null);
     setUploadingLogo(true);
     try {
       const blob = await upload(file.name, file, {
@@ -37,8 +39,8 @@ export function ClinicForm({
         clientPayload: JSON.stringify({ logo: true }),
       });
       setLogoUrl(blob.url);
-    } catch {
-      /* فشل الرفع */
+    } catch (e) {
+      setLogoError((e as Error).message || "Upload failed");
     } finally {
       setUploadingLogo(false);
     }
@@ -69,18 +71,17 @@ export function ClinicForm({
         <Input id="address" name="address" defaultValue={clinic.address} />
       </div>
       <div>
-        <Label htmlFor="logoUrl">{tr("set.logoUrl")}</Label>
+        <Label>{tr("set.logo")}</Label>
+        {/* الرابط يُحفظ تلقائياً بعد الرفع */}
+        <input type="hidden" name="logoUrl" value={logoUrl ?? ""} />
         <div className="flex items-center gap-3">
           {logoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={logoUrl} alt="logo" className="h-12 w-12 rounded-lg border border-slate-200 object-contain" />
+            <img src={logoUrl} alt="logo" className="h-16 w-16 rounded-lg border border-slate-200 object-contain" />
           ) : (
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-dashed border-slate-300 text-slate-300">🦷</div>
+            <div className="flex h-16 w-16 items-center justify-center rounded-lg border border-dashed border-slate-300 text-2xl text-slate-300">🦷</div>
           )}
-          <div className="flex-1">
-            <Input id="logoUrl" name="logoUrl" dir="ltr" value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} placeholder="https://..." />
-          </div>
-          <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200">
+          <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700">
             <Upload className="h-4 w-4" />
             {uploadingLogo ? tr("set.uploadingLogo") : tr("set.uploadLogo")}
             <input
@@ -94,8 +95,18 @@ export function ClinicForm({
               }}
             />
           </label>
+          {logoUrl && (
+            <button
+              type="button"
+              onClick={() => setLogoUrl(null)}
+              className="rounded-lg px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50"
+            >
+              {tr("common.delete")}
+            </button>
+          )}
         </div>
         <p className="mt-1 text-xs text-slate-400">{tr("set.logoHint")}</p>
+        {logoError && <p className="mt-1 text-xs text-red-600">{logoError}</p>}
       </div>
       {state?.error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{state.error}</p>}
       {state?.ok && <p className="rounded-lg bg-green-50 px-3 py-2 text-sm text-green-600">{tr("set.saved")}</p>}
