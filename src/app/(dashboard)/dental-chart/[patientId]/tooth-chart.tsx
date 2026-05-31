@@ -189,7 +189,11 @@ function ToothSVG({
       className="h-14 w-11 cursor-pointer transition-transform hover:scale-105"
       onClick={onPick}
     >
-      <g transform={flip ? "rotate(180 22 29)" : undefined}>{body}</g>
+      <g transform={flip ? "rotate(180 22 29)" : undefined}>
+        {body}
+        {/* لمعة لإحساس ثلاثي الأبعاد */}
+        <ellipse cx="17" cy="12" rx="4.5" ry="3" fill="#ffffff" opacity="0.4" />
+      </g>
     </svg>
   );
 }
@@ -229,7 +233,8 @@ function ToothUnit({
     />
   );
   const wheel = <SurfaceWheel fillFor={fillFor} onPick={(s) => onPick(num, s)} />;
-  const label = <span className="text-xs font-medium text-slate-500">{num}</span>;
+  // العرض بترقيم 1-8 لكل ربع (مع الاحتفاظ برقم FDI داخلياً للبيانات)
+  const label = <span className="text-xs font-medium text-slate-500">{num % 10}</span>;
 
   return (
     <div
