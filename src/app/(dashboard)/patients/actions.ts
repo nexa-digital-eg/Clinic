@@ -113,11 +113,13 @@ export async function deletePatientFile(id: string) {
   if (!session) return;
   const file = await db.patientFile.findUnique({ where: { id } });
   if (!file) return;
-  // احذف من التخزين السحابي (تجاهل الخطأ لو غير متاح)
-  try {
-    await del(file.url);
-  } catch {
-    // ignore
+  // احذف من التخزين السحابي فقط لو كان رابطاً خارجياً (وليس data URL مخزّن بالقاعدة)
+  if (file.url.startsWith("http")) {
+    try {
+      await del(file.url);
+    } catch {
+      // ignore
+    }
   }
   await db.patientFile.delete({ where: { id } });
   revalidatePath(`/patients/${file.patientId}`);

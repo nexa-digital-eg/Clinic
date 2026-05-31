@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
-import { upload } from "@vercel/blob/client";
 import { recordPatientFile, deletePatientFile } from "../actions";
 import { Card, Button, Label, Select, EmptyState } from "@/components/ui";
 import { useT } from "@/lib/i18n-client";
@@ -20,18 +19,15 @@ type FileItem = {
 export function PatientFiles({
   patientId,
   files,
-  enabled,
 }: {
   patientId: string;
   files: FileItem[];
-  enabled: boolean;
 }) {
   const tr = useT();
   const [items, setItems] = useState<FileItem[]>(files);
   const inputRef = useRef<HTMLInputElement>(null);
   const [category, setCategory] = useState("xray");
   const [uploading, setUploading] = useState(false);
-  const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [, startTransition] = useTransition();
 
@@ -104,11 +100,6 @@ export function PatientFiles({
   return (
     <div className="space-y-4">
       <Card className="p-5">
-        {!enabled && (
-          <p className="mb-3 rounded-lg bg-yellow-50 px-3 py-2 text-xs text-yellow-700">
-            {tr("files.disabledHint")}
-          </p>
-        )}
         <div className="flex flex-wrap items-end gap-3">
           <div className="w-40">
             <Label htmlFor="category">{tr("files.category")}</Label>
@@ -125,7 +116,7 @@ export function PatientFiles({
               ref={inputRef}
               type="file"
               accept="image/*,application/pdf,video/mp4"
-              disabled={!enabled || uploading}
+              disabled={uploading}
               onChange={(e) => {
                 const f = e.target.files?.[0];
                 if (f) onPick(f);
@@ -136,7 +127,7 @@ export function PatientFiles({
           {uploading && (
             <span className="flex items-center gap-1.5 text-sm text-brand-600">
               <Upload className="h-4 w-4 animate-pulse" />
-              {tr("files.uploading")} {progress}%
+              {tr("files.uploading")}
             </span>
           )}
         </div>

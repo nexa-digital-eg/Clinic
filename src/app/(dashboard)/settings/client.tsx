@@ -15,7 +15,32 @@ import { Button, Input, Label, Select, Textarea, Badge } from "@/components/ui";
 import { formatCurrency } from "@/lib/utils";
 import { Check, Power, Upload } from "lucide-react";
 import { useT } from "@/lib/i18n-client";
-import { upload } from "@vercel/blob/client";
+
+// يصغّر الصورة ويحوّلها إلى data URL (تُخزَّن في قاعدة البيانات مباشرة)
+function fileToDataUrl(file: File, maxDim = 400): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+        const w = Math.round(img.width * scale);
+        const h = Math.round(img.height * scale);
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return resolve(reader.result as string);
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL("image/png"));
+      };
+      img.onerror = () => resolve(reader.result as string);
+      img.src = reader.result as string;
+    };
+    reader.onerror = () => reject(new Error("read error"));
+    reader.readAsDataURL(file);
+  });
+}
 
 /* ===== بيانات العيادة ===== */
 export function ClinicForm({
@@ -33,12 +58,8 @@ export function ClinicForm({
     setLogoError(null);
     setUploadingLogo(true);
     try {
-      const blob = await upload(file.name, file, {
-        access: "public",
-        handleUploadUrl: "/api/files/upload",
-        clientPayload: JSON.stringify({ logo: true }),
-      });
-      setLogoUrl(blob.url);
+      const dataUrl = await fileToDataUrl(file, 400);
+      setLogoUrl(dataUrl);
     } catch (e) {
       setLogoError((e as Error).message || "Upload failed");
     } finally {

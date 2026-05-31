@@ -354,6 +354,7 @@ const DICT: Record<string, { ar: string; en: string }> = {
     en: "Storage not enabled. Enable Vercel Blob from the Storage tab in Vercel.",
   },
   "files.error": { ar: "فشل الرفع", en: "Upload failed" },
+  "files.tooLarge": { ar: "الملف كبير جداً (الحد 5 ميجا). صغّر الصورة أو الملف.", en: "File too large (max 5MB). Please use a smaller file." },
 
   // قائمة إجراءات الحجز
   "apptAct.complete": { ar: "تم الكشف", en: "Mark completed" },

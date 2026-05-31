@@ -30,7 +30,6 @@ export default async function PatientProfile({
   const { id } = await params;
   const { tab = "overview" } = await searchParams;
   const locale = await getLocale();
-  const blobEnabled = !!process.env.BLOB_READ_WRITE_TOKEN;
 
   const patient = await db.patient.findUnique({
     where: { id },
@@ -297,7 +296,6 @@ export default async function PatientProfile({
       {tab === "files" && (
         <PatientFiles
           patientId={patient.id}
-          enabled={blobEnabled}
           files={patient.files.map((f) => ({
             id: f.id,
             name: f.name,
