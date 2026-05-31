@@ -62,15 +62,15 @@ export default async function BillingPage({
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Card className="p-5">
           <p className="text-sm text-slate-500">{t("billing.totalBilled", locale)}</p>
-          <p className="mt-1 text-2xl font-bold text-slate-800">{formatCurrency(totalBilled)}</p>
+          <p className="mt-1 text-2xl font-bold text-slate-800">{formatCurrency(totalBilled, locale)}</p>
         </Card>
         <Card className="p-5">
           <p className="text-sm text-slate-500">{t("billing.collected", locale)}</p>
-          <p className="mt-1 text-2xl font-bold text-green-600">{formatCurrency(totalPaid)}</p>
+          <p className="mt-1 text-2xl font-bold text-green-600">{formatCurrency(totalPaid, locale)}</p>
         </Card>
         <Card className="p-5">
           <p className="text-sm text-slate-500">{t("billing.remaining", locale)}</p>
-          <p className="mt-1 text-2xl font-bold text-red-600">{formatCurrency(totalDue)}</p>
+          <p className="mt-1 text-2xl font-bold text-red-600">{formatCurrency(totalDue, locale)}</p>
         </Card>
       </div>
 
@@ -99,7 +99,7 @@ export default async function BillingPage({
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="border-b border-slate-200 text-right text-xs text-slate-500">
+              <thead className="border-b border-slate-200 text-start text-xs text-slate-500">
                 <tr>
                   <th className="px-4 py-3 font-medium">{t("col.number", locale)}</th>
                   <th className="px-4 py-3 font-medium">{t("col.patient", locale)}</th>
@@ -125,10 +125,10 @@ export default async function BillingPage({
                           {inv.patient.firstName} {inv.patient.lastName}
                         </Link>
                       </td>
-                      <td className="px-4 py-3 text-slate-500">{formatDate(inv.createdAt)}</td>
-                      <td className="px-4 py-3 font-medium">{formatCurrency(inv.total)}</td>
-                      <td className="px-4 py-3 text-green-600">{formatCurrency(inv.paidAmount)}</td>
-                      <td className="px-4 py-3 text-red-600">{formatCurrency(due > 0 ? due : 0)}</td>
+                      <td className="px-4 py-3 text-slate-500">{formatDate(inv.createdAt, locale)}</td>
+                      <td className="px-4 py-3 font-medium">{formatCurrency(inv.total, locale)}</td>
+                      <td className="px-4 py-3 text-green-600">{formatCurrency(inv.paidAmount, locale)}</td>
+                      <td className="px-4 py-3 text-red-600">{formatCurrency(due > 0 ? due : 0, locale)}</td>
                       <td className="px-4 py-3"><Badge color={STATUS_COLOR[inv.status]}>{t(`invStatus.${inv.status}`, locale)}</Badge></td>
                     </tr>
                   );

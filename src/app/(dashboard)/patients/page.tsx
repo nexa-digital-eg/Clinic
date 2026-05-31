@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { Card, Input, LinkButton, Badge } from "@/components/ui";
-import { formatDate, calcAge } from "@/lib/utils";
+import { formatDate, calcAge, formatCurrency } from "@/lib/utils";
 import { Plus, Search, UserRound } from "lucide-react";
 import Link from "next/link";
 import type { Prisma } from "@prisma/client";
@@ -48,12 +48,12 @@ export default async function PatientsPage({
 
       <Card className="p-4">
         <form className="relative">
-          <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Search className="absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <Input
             name="q"
             defaultValue={query}
             placeholder={t("patients.searchPlaceholder", locale)}
-            className="pr-10"
+            className="pe-10"
           />
         </form>
       </Card>
@@ -74,7 +74,7 @@ export default async function PatientsPage({
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="border-b border-slate-200 text-right text-xs text-slate-500">
+              <thead className="border-b border-slate-200 text-start text-xs text-slate-500">
                 <tr>
                   <th className="px-4 py-3 font-medium">{t("col.code", locale)}</th>
                   <th className="px-4 py-3 font-medium">{t("col.name", locale)}</th>
@@ -112,11 +112,11 @@ export default async function PatientsPage({
                         {age !== null ? `${age} ${t("common.years", locale)}` : "—"}
                       </td>
                       <td className="px-4 py-3 text-slate-500">
-                        {formatDate(p.createdAt)}
+                        {formatDate(p.createdAt, locale)}
                       </td>
                       <td className="px-4 py-3">
                         <Badge color={p.balance >= 0 ? "green" : "red"}>
-                          {p.balance.toLocaleString("ar-EG")} ج.م
+                          {formatCurrency(p.balance, locale)}
                         </Badge>
                       </td>
                     </tr>

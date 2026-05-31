@@ -54,7 +54,7 @@ export default async function InvoiceDetail({
           <Link href={`/patients/${invoice.patientId}`} className="text-sm text-brand-600 hover:underline">
             {invoice.patient.firstName} {invoice.patient.lastName}
           </Link>
-          <span className="mr-2 text-sm text-slate-400">• {formatDate(invoice.createdAt)}</span>
+          <span className="mr-2 text-sm text-slate-400">• {formatDate(invoice.createdAt, locale)}</span>
         </div>
         <a
           href={`/print/invoice/${invoice.id}`}
@@ -68,15 +68,15 @@ export default async function InvoiceDetail({
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Card className="p-5">
           <p className="text-sm text-slate-500">{t("col.total", locale)}</p>
-          <p className="mt-1 text-2xl font-bold text-slate-800">{formatCurrency(invoice.total)}</p>
+          <p className="mt-1 text-2xl font-bold text-slate-800">{formatCurrency(invoice.total, locale)}</p>
         </Card>
         <Card className="p-5">
           <p className="text-sm text-slate-500">{t("col.paid", locale)}</p>
-          <p className="mt-1 text-2xl font-bold text-green-600">{formatCurrency(invoice.paidAmount)}</p>
+          <p className="mt-1 text-2xl font-bold text-green-600">{formatCurrency(invoice.paidAmount, locale)}</p>
         </Card>
         <Card className="p-5">
           <p className="text-sm text-slate-500">{t("col.due", locale)}</p>
-          <p className="mt-1 text-2xl font-bold text-red-600">{formatCurrency(due > 0 ? due : 0)}</p>
+          <p className="mt-1 text-2xl font-bold text-red-600">{formatCurrency(due > 0 ? due : 0, locale)}</p>
         </Card>
       </div>
 
@@ -92,7 +92,7 @@ export default async function InvoiceDetail({
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
-                  <thead className="border-b border-slate-200 text-right text-xs text-slate-500">
+                  <thead className="border-b border-slate-200 text-start text-xs text-slate-500">
                     <tr>
                       <th className="px-4 py-2 font-medium">{t("col.description", locale)}</th>
                       <th className="px-4 py-2 font-medium">{t("col.qty", locale)}</th>
@@ -131,9 +131,9 @@ export default async function InvoiceDetail({
                 {invoice.payments.map((p) => (
                   <div key={p.id} className="flex items-center justify-between px-5 py-3">
                     <div>
-                      <p className="font-medium text-green-600">{formatCurrency(p.amount)}</p>
+                      <p className="font-medium text-green-600">{formatCurrency(p.amount, locale)}</p>
                       <p className="text-xs text-slate-400">
-                        {t(`method.${p.method}`, locale)} • {formatDateTime(p.createdAt)}
+                        {t(`method.${p.method}`, locale)} • {formatDateTime(p.createdAt, locale)}
                       </p>
                     </div>
                     {p.note && <span className="text-sm text-slate-500">{p.note}</span>}

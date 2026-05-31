@@ -1,26 +1,31 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import type { Locale } from "@/lib/i18n";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat("ar-EG", {
+// الأرقام والتواريخ دائماً بالإنجليزية (لاتيني) في النسختين العربية والإنجليزية
+// (نُبقي على وسيط locale للتوافق مع مواضع الاستدعاء)
+const NUM_LOCALE = "en-GB";
+
+export function formatCurrency(amount: number, _locale: Locale = "ar"): string {
+  return new Intl.NumberFormat(NUM_LOCALE, {
     style: "currency",
     currency: "EGP",
     maximumFractionDigits: 0,
   }).format(amount);
 }
 
-export function formatDate(date: Date | string): string {
-  return new Intl.DateTimeFormat("ar-EG", {
+export function formatDate(date: Date | string, _locale: Locale = "ar"): string {
+  return new Intl.DateTimeFormat(NUM_LOCALE, {
     dateStyle: "medium",
   }).format(new Date(date));
 }
 
-export function formatDateTime(date: Date | string): string {
-  return new Intl.DateTimeFormat("ar-EG", {
+export function formatDateTime(date: Date | string, _locale: Locale = "ar"): string {
+  return new Intl.DateTimeFormat(NUM_LOCALE, {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(new Date(date));

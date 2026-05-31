@@ -137,10 +137,10 @@ export default async function WhatsAppPage({
                           {m.error && <p className="mt-0.5 text-xs text-red-500">{m.error}</p>}
                           <p className="mt-0.5 text-xs text-slate-400">
                             {m.scheduledAt
-                              ? `${t("waStatus.SCHEDULED", locale)}: ${m.scheduledAt.toLocaleString(locale === "ar" ? "ar-EG" : "en-GB")}`
+                              ? `${t("waStatus.SCHEDULED", locale)}: ${m.scheduledAt.toLocaleString("en-GB")}`
                               : m.sentAt
-                                ? `${t("waStatus.SENT", locale)}: ${m.sentAt.toLocaleString(locale === "ar" ? "ar-EG" : "en-GB")}`
-                                : m.createdAt.toLocaleString(locale === "ar" ? "ar-EG" : "en-GB")}
+                                ? `${t("waStatus.SENT", locale)}: ${m.sentAt.toLocaleString("en-GB")}`
+                                : m.createdAt.toLocaleString("en-GB")}
                           </p>
                         </div>
                         <MessageActions id={m.id} status={m.status} />

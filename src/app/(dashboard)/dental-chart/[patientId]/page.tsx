@@ -61,10 +61,10 @@ export default async function PatientDentalChart({
               <p className="text-sm text-slate-600">{t("dent.currentInvoice", locale)}</p>
               <p className="font-mono text-xs text-slate-400">{openInvoice.number}</p>
             </div>
-            <div className="text-left">
+            <div className="text-end">
               <p className="text-xs text-slate-500">{t("col.total", locale)}</p>
               <p className="text-xl font-bold text-brand-700">
-                {formatCurrency(openInvoice.total)}
+                {formatCurrency(openInvoice.total, locale)}
               </p>
             </div>
           </Card>

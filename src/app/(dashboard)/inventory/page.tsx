@@ -36,7 +36,7 @@ export default async function InventoryPage() {
         </Card>
         <Card className="p-5">
           <p className="text-sm text-slate-500">{t("inventory.stockValue", locale)}</p>
-          <p className="mt-1 text-2xl font-bold text-slate-800">{formatCurrency(totalValue)}</p>
+          <p className="mt-1 text-2xl font-bold text-slate-800">{formatCurrency(totalValue, locale)}</p>
         </Card>
         <Card className="p-5">
           <p className="text-sm text-slate-500">{t("inventory.lowStock", locale)}</p>
@@ -59,7 +59,7 @@ export default async function InventoryPage() {
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
-                  <thead className="border-b border-slate-200 text-right text-xs text-slate-500">
+                  <thead className="border-b border-slate-200 text-start text-xs text-slate-500">
                     <tr>
                       <th className="px-4 py-2 font-medium">المنتج</th>
                       <th className="px-4 py-2 font-medium">الكمية</th>

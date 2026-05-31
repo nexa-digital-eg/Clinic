@@ -100,9 +100,9 @@ export default async function ReportsPage({
 
       {/* بطاقات مالية */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard icon={Wallet} color="bg-green-50 text-green-600" label={t("rep.collected", locale)} value={formatCurrency(totalPaid)} sub={`${paymentsAgg._count} ${t("rep.payments", locale)}`} />
-        <StatCard icon={TrendingUp} color="bg-brand-50 text-brand-600" label={t("rep.billed", locale)} value={formatCurrency(billed)} />
-        <StatCard icon={Wallet} color="bg-yellow-50 text-yellow-600" label={t("rep.remaining", locale)} value={formatCurrency(due > 0 ? due : 0)} />
+        <StatCard icon={Wallet} color="bg-green-50 text-green-600" label={t("rep.collected", locale)} value={formatCurrency(totalPaid, locale)} sub={`${paymentsAgg._count} ${t("rep.payments", locale)}`} />
+        <StatCard icon={TrendingUp} color="bg-brand-50 text-brand-600" label={t("rep.billed", locale)} value={formatCurrency(billed, locale)} />
+        <StatCard icon={Wallet} color="bg-yellow-50 text-yellow-600" label={t("rep.remaining", locale)} value={formatCurrency(due > 0 ? due : 0, locale)} />
         <StatCard icon={Users} color="bg-purple-50 text-purple-600" label={t("rep.newPatients", locale)} value={`${newPatients}`} sub={`${t("rep.totalLabel", locale)} ${totalPatients}`} />
       </div>
 
@@ -124,7 +124,7 @@ export default async function ReportsPage({
                     <div key={m.method}>
                       <div className="flex justify-between text-sm">
                         <span className="text-slate-600">{t(`method.${m.method}`, locale)}</span>
-                        <span className="font-medium">{formatCurrency(amt)} ({pct}%)</span>
+                        <span className="font-medium">{formatCurrency(amt, locale)} ({pct}%)</span>
                       </div>
                       <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-slate-100">
                         <div className="h-full bg-green-500" style={{ width: `${pct}%` }} />
@@ -192,7 +192,7 @@ export default async function ReportsPage({
                 {topProcedures.map((p) => (
                   <li key={p.name} className="flex items-center justify-between text-sm">
                     <span className="text-slate-700">{p.name} <span className="text-xs text-slate-400">×{p.count}</span></span>
-                    <span className="font-medium text-brand-700">{formatCurrency(p.revenue)}</span>
+                    <span className="font-medium text-brand-700">{formatCurrency(p.revenue, locale)}</span>
                   </li>
                 ))}
               </ul>
@@ -206,7 +206,7 @@ export default async function ReportsPage({
         <div className="flex items-center gap-2 border-b border-slate-200 px-5 py-3">
           <Boxes className="h-5 w-5 text-slate-400" />
           <h2 className="font-semibold text-slate-800">{t("rep.inventory", locale)}</h2>
-          <span className="mr-auto text-sm text-slate-500">{t("rep.stockValue", locale)}: {formatCurrency(stockValue)}</span>
+          <span className="mr-auto text-sm text-slate-500">{t("rep.stockValue", locale)}: {formatCurrency(stockValue, locale)}</span>
         </div>
         <div className="p-5">
           {lowStock.length === 0 ? (

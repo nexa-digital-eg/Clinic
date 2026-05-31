@@ -25,7 +25,7 @@ export default async function DashboardLayout({
         <header className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-3">
           <LanguageToggle locale={locale} />
           <div className="flex items-center gap-4">
-            <div className={locale === "ar" ? "text-left" : "text-right"}>
+            <div className={locale === "ar" ? "text-end" : "text-start"}>
               <p className="text-sm font-medium text-slate-800">
                 {session.name}
               </p>

@@ -38,15 +38,15 @@ export default async function PrintInvoice({
           <h2 className="text-lg font-bold text-slate-800">{t("print.invoice", locale)}</h2>
           <p className="font-mono text-sm text-slate-500">{invoice.number}</p>
         </div>
-        <div className="text-left text-sm text-slate-600">
-          <p>{t("print.date", locale)}: {formatDate(invoice.createdAt)}</p>
+        <div className="text-end text-sm text-slate-600">
+          <p>{t("print.date", locale)}: {formatDate(invoice.createdAt, locale)}</p>
           <p>{t("print.patient", locale)}: {invoice.patient.firstName} {invoice.patient.lastName}</p>
           <p>{t("print.code", locale)}: {invoice.patient.code}</p>
         </div>
       </div>
 
       <table className="mt-6 w-full text-sm">
-        <thead className="border-b-2 border-slate-200 text-right text-xs text-slate-500">
+        <thead className="border-b-2 border-slate-200 text-start text-xs text-slate-500">
           <tr>
             <th className="py-2">{t("print.item", locale)}</th>
             <th className="py-2">{t("col.qty", locale)}</th>
@@ -59,8 +59,8 @@ export default async function PrintInvoice({
             <tr key={it.id}>
               <td className="py-2 text-slate-800">{it.description}</td>
               <td className="py-2 text-slate-600">{it.quantity}</td>
-              <td className="py-2 text-slate-600">{formatCurrency(it.unitPrice)}</td>
-              <td className="py-2 font-medium">{formatCurrency(it.total)}</td>
+              <td className="py-2 text-slate-600">{formatCurrency(it.unitPrice, locale)}</td>
+              <td className="py-2 font-medium">{formatCurrency(it.total, locale)}</td>
             </tr>
           ))}
         </tbody>
@@ -68,9 +68,9 @@ export default async function PrintInvoice({
 
       <div className="mt-6 flex justify-end">
         <div className="w-64 space-y-1 text-sm">
-          <div className="flex justify-between"><span className="text-slate-500">{t("col.total", locale)}</span><span className="font-medium">{formatCurrency(invoice.total)}</span></div>
-          <div className="flex justify-between"><span className="text-slate-500">{t("col.paid", locale)}</span><span className="font-medium text-green-600">{formatCurrency(invoice.paidAmount)}</span></div>
-          <div className="flex justify-between border-t border-slate-200 pt-1"><span className="font-semibold">{t("col.due", locale)}</span><span className="font-bold text-red-600">{formatCurrency(due > 0 ? due : 0)}</span></div>
+          <div className="flex justify-between"><span className="text-slate-500">{t("col.total", locale)}</span><span className="font-medium">{formatCurrency(invoice.total, locale)}</span></div>
+          <div className="flex justify-between"><span className="text-slate-500">{t("col.paid", locale)}</span><span className="font-medium text-green-600">{formatCurrency(invoice.paidAmount, locale)}</span></div>
+          <div className="flex justify-between border-t border-slate-200 pt-1"><span className="font-semibold">{t("col.due", locale)}</span><span className="font-bold text-red-600">{formatCurrency(due > 0 ? due : 0, locale)}</span></div>
         </div>
       </div>
 

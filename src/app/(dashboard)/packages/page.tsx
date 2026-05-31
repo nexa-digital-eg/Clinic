@@ -55,7 +55,7 @@ export default async function PackagesPage() {
                     )}
                     <div className="mt-3 flex items-center justify-between">
                       <Badge color="blue">{pkg.sessionCount} {t("pkg.session", locale)}</Badge>
-                      <span className="font-bold text-brand-700">{formatCurrency(pkg.price)}</span>
+                      <span className="font-bold text-brand-700">{formatCurrency(pkg.price, locale)}</span>
                     </div>
                   </div>
                 ))}
@@ -87,7 +87,7 @@ export default async function PackagesPage() {
                           </p>
                           <p className="text-xs text-slate-400">{pp.package.name}</p>
                         </div>
-                        <div className="text-left">
+                        <div className="text-end">
                           {pp.isActive ? (
                             <Badge color="green">{t("pkg.active", locale)}</Badge>
                           ) : (

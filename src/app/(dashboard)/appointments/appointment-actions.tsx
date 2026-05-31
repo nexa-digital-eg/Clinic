@@ -72,7 +72,7 @@ function MenuItem({
   return (
     <button
       onClick={onClick}
-      className={`flex w-full items-center gap-2 px-3 py-1.5 text-right text-sm hover:bg-slate-50 ${active ? "bg-slate-50 font-medium" : ""}`}
+      className={`flex w-full items-center gap-2 px-3 py-1.5 text-start text-sm hover:bg-slate-50 ${active ? "bg-slate-50 font-medium" : ""}`}
     >
       {icon}
       {label}

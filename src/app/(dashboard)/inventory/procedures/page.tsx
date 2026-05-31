@@ -42,7 +42,7 @@ export default async function ProcedureLinksPage() {
           <Card key={proc.id} className="p-5">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="font-semibold text-slate-800">{proc.name}</h3>
-              <span className="text-sm text-slate-400">{formatCurrency(proc.price)}</span>
+              <span className="text-sm text-slate-400">{formatCurrency(proc.price, locale)}</span>
             </div>
             {proc.products.length === 0 ? (
               <p className="text-sm text-slate-400">{t("inv.noLinked", locale)}</p>

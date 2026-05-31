@@ -53,7 +53,7 @@ export default async function DashboardPage() {
     },
     {
       label: t("dashboard.outstanding", locale),
-      value: formatCurrency(due),
+      value: formatCurrency(due, locale),
       icon: Receipt,
       href: "/billing",
       color: "bg-yellow-50 text-yellow-600",
@@ -120,7 +120,7 @@ export default async function DashboardPage() {
                   </p>
                 </div>
                 <span className="text-sm text-slate-500">
-                  {formatDateTime(a.startsAt)}
+                  {formatDateTime(a.startsAt, locale)}
                 </span>
               </div>
             ))}

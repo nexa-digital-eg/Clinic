@@ -40,8 +40,8 @@ export default async function PrintPrescription({
             <p className="text-sm text-slate-500">{prescription.doctor.user.name}{prescription.doctor.specialty ? ` — ${prescription.doctor.specialty}` : ""}</p>
           )}
         </div>
-        <div className="text-left text-sm text-slate-600">
-          <p>{t("print.date", locale)}: {formatDate(prescription.createdAt)}</p>
+        <div className="text-end text-sm text-slate-600">
+          <p>{t("print.date", locale)}: {formatDate(prescription.createdAt, locale)}</p>
           <p>{t("print.patient", locale)}: {prescription.patient.firstName} {prescription.patient.lastName}</p>
           {age !== null && <p>{t("print.age", locale)}: {age} {t("common.years", locale)}</p>}
         </div>

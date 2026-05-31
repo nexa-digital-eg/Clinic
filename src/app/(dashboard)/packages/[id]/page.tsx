@@ -52,9 +52,9 @@ export default async function PatientPackageDetail({
               {pp.usedSessions} / {pp.totalSessions} {t("pkg.session", locale)}
             </p>
           </div>
-          <div className="text-left">
+          <div className="text-end">
             <p className="text-sm text-slate-500">{t("pkg.packagePrice", locale)}</p>
-            <p className="text-xl font-bold text-brand-700">{formatCurrency(pp.package.price)}</p>
+            <p className="text-xl font-bold text-brand-700">{formatCurrency(pp.package.price, locale)}</p>
           </div>
         </div>
         <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-slate-100">

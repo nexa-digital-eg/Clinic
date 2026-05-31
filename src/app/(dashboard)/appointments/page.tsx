@@ -178,7 +178,7 @@ export default async function AppointmentsPage({
                           className="block truncate rounded bg-brand-50 px-1.5 py-0.5 text-[11px] text-brand-700 hover:bg-brand-100"
                           title={`${a.patient.firstName} ${a.patient.lastName} - ${a.doctor.user.name}`}
                         >
-                          {new Date(a.startsAt).toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" })}
+                          {new Date(a.startsAt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}
                           {" "}
                           {a.patient.firstName}
                         </Link>
@@ -209,7 +209,7 @@ export default async function AppointmentsPage({
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="border-b border-slate-200 text-right text-xs text-slate-500">
+              <thead className="border-b border-slate-200 text-start text-xs text-slate-500">
                 <tr>
                   <th className="px-4 py-3 font-medium">{t("col.datetime", locale)}</th>
                   <th className="px-4 py-3 font-medium">{t("col.patient", locale)}</th>
@@ -224,7 +224,7 @@ export default async function AppointmentsPage({
                   return (
                     <tr key={a.id} className="hover:bg-slate-50">
                       <td className="px-4 py-3 whitespace-nowrap text-slate-600">
-                        {new Date(a.startsAt).toLocaleString(locale === "ar" ? "ar-EG" : "en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                        {new Date(a.startsAt).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
                         {a.isOnline && <Badge color="blue" className="mr-2">{t("appt.online", locale)}</Badge>}
                       </td>
                       <td className="px-4 py-3">

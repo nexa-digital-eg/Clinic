@@ -87,7 +87,7 @@ export default async function PatientProfile({
           <p
             className={`text-lg font-bold ${patient.balance >= 0 ? "text-green-600" : "text-red-600"}`}
           >
-            {formatCurrency(patient.balance)}
+            {formatCurrency(patient.balance, locale)}
           </p>
         </Card>
       </div>
@@ -163,7 +163,7 @@ export default async function PatientProfile({
                 <Card key={d.id} className="p-4">
                   <div className="flex items-center justify-between">
                     <p className="font-medium text-slate-800">{d.title}</p>
-                    <span className="text-xs text-slate-400">{formatDate(d.createdAt)}</span>
+                    <span className="text-xs text-slate-400">{formatDate(d.createdAt, locale)}</span>
                   </div>
                   {d.details && <p className="mt-1 text-sm text-slate-600">{d.details}</p>}
                 </Card>
@@ -192,7 +192,7 @@ export default async function PatientProfile({
                     >
                       طباعة / PDF
                     </a>
-                    <span className="text-xs text-slate-400">{formatDate(p.createdAt)}</span>
+                    <span className="text-xs text-slate-400">{formatDate(p.createdAt, locale)}</span>
                   </div>
                 </div>
                 <ul className="space-y-1 text-sm">
@@ -215,7 +215,7 @@ export default async function PatientProfile({
             <EmptyState title={t("profile.noAppointments", locale)} />
           ) : (
             <table className="w-full text-sm">
-              <thead className="border-b border-slate-200 text-right text-xs text-slate-500">
+              <thead className="border-b border-slate-200 text-start text-xs text-slate-500">
                 <tr>
                   <th className="px-4 py-3 font-medium">{t("col.datetime", locale)}</th>
                   <th className="px-4 py-3 font-medium">{t("col.doctor", locale)}</th>
@@ -226,7 +226,7 @@ export default async function PatientProfile({
               <tbody className="divide-y divide-slate-100">
                 {patient.appointments.map((a) => (
                   <tr key={a.id}>
-                    <td className="px-4 py-3">{formatDateTime(a.startsAt)}</td>
+                    <td className="px-4 py-3">{formatDateTime(a.startsAt, locale)}</td>
                     <td className="px-4 py-3">{a.doctor.user.name}</td>
                     <td className="px-4 py-3 text-slate-600">{a.reason ?? "—"}</td>
                     <td className="px-4 py-3"><AppointmentStatusBadge status={a.status} locale={locale} /></td>
@@ -269,7 +269,7 @@ export default async function PatientProfile({
                 <EmptyState title={t("profile.noPayments", locale)} />
               ) : (
                 <table className="w-full text-sm">
-                  <thead className="border-b border-slate-200 text-right text-xs text-slate-500">
+                  <thead className="border-b border-slate-200 text-start text-xs text-slate-500">
                     <tr>
                       <th className="px-4 py-3 font-medium">{t("col.date", locale)}</th>
                       <th className="px-4 py-3 font-medium">{t("col.amount", locale)}</th>
@@ -280,8 +280,8 @@ export default async function PatientProfile({
                   <tbody className="divide-y divide-slate-100">
                     {patient.payments.map((p) => (
                       <tr key={p.id}>
-                        <td className="px-4 py-3 text-slate-500">{formatDate(p.createdAt)}</td>
-                        <td className="px-4 py-3 font-medium text-green-600">{formatCurrency(p.amount)}</td>
+                        <td className="px-4 py-3 text-slate-500">{formatDate(p.createdAt, locale)}</td>
+                        <td className="px-4 py-3 font-medium text-green-600">{formatCurrency(p.amount, locale)}</td>
                         <td className="px-4 py-3">{t(`method.${p.method}`, locale)}</td>
                         <td className="px-4 py-3 text-slate-600">{p.note ?? "—"}</td>
                       </tr>
@@ -338,7 +338,7 @@ export default async function PatientProfile({
                     </Badge>
                   </div>
                   {c.details && <p className="mt-1 text-sm text-slate-600">{c.details}</p>}
-                  <p className="mt-2 text-xs text-slate-400">{formatDate(c.createdAt)}</p>
+                  <p className="mt-2 text-xs text-slate-400">{formatDate(c.createdAt, locale)}</p>
                 </Card>
               ))
             )}
@@ -361,7 +361,7 @@ export default async function PatientProfile({
             <EmptyState title={t("profile.noTeeth", locale)} />
           ) : (
             <table className="w-full text-sm">
-              <thead className="border-b border-slate-200 text-right text-xs text-slate-500">
+              <thead className="border-b border-slate-200 text-start text-xs text-slate-500">
                 <tr>
                   <th className="px-4 py-3 font-medium">{t("col.tooth", locale)}</th>
                   <th className="px-4 py-3 font-medium">{t("col.surface", locale)}</th>
@@ -376,7 +376,7 @@ export default async function PatientProfile({
                     <td className="px-4 py-3 font-mono">{tooth.toothNumber}</td>
                     <td className="px-4 py-3 text-slate-600">{tooth.surface ?? "—"}</td>
                     <td className="px-4 py-3">{tooth.procedure?.name ?? "—"}</td>
-                    <td className="px-4 py-3">{formatCurrency(tooth.price)}</td>
+                    <td className="px-4 py-3">{formatCurrency(tooth.price, locale)}</td>
                     <td className="px-4 py-3">
                       <Badge color={tooth.status === "done" ? "green" : "yellow"}>
                         {tooth.status === "done" ? t("tooth.done", locale) : t("tooth.planned", locale)}

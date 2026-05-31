@@ -20,7 +20,7 @@ export function ClinicHeader({
           {clinic.address && <p className="text-xs text-slate-500">{clinic.address}</p>}
         </div>
       </div>
-      <div className="text-left text-xs text-slate-500">
+      <div className="text-end text-xs text-slate-500">
         {clinic.phone && <p dir="ltr">📞 {clinic.phone}</p>}
         {clinic.email && <p dir="ltr">✉ {clinic.email}</p>}
       </div>
