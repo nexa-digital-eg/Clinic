@@ -56,31 +56,36 @@ export function PatientFiles({
     }
   };
 
+  const readDataUrl = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result as string);
+      r.onerror = () => reject(new Error("read error"));
+      r.readAsDataURL(file);
+    });
+
   const onPick = async (picked: File) => {
     setError(null);
     setUploading(true);
-    setProgress(0);
     try {
       const file = await maybeCompress(picked);
-      const blob = await upload(file.name, file, {
-        access: "public",
-        handleUploadUrl: "/api/files/upload",
-        clientPayload: JSON.stringify({ patientId }),
-        onUploadProgress: (e) => setProgress(Math.round(e.percentage)),
-      });
+      if (file.size > 5 * 1024 * 1024) {
+        setError(tr("files.tooLarge"));
+        return;
+      }
+      const dataUrl = await readDataUrl(file);
       const rec = await recordPatientFile(patientId, {
         name: file.name,
-        url: blob.url,
+        url: dataUrl,
         mimeType: file.type,
         size: file.size,
         category,
       });
-      // أظهر الملف فوراً بدون إعادة تحميل الصفحة كاملة
       setItems((prev) => [
         {
-          id: rec?.id ?? blob.url,
+          id: rec?.id ?? `${Date.now()}`,
           name: file.name,
-          url: blob.url,
+          url: dataUrl,
           mimeType: file.type,
           category,
           createdAt: new Date().toISOString(),
@@ -131,14 +136,6 @@ export function PatientFiles({
             </span>
           )}
         </div>
-        {uploading && (
-          <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-slate-100">
-            <div
-              className="h-full bg-brand-500 transition-all"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-        )}
         {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
       </Card>
 
