@@ -34,17 +34,32 @@ const NAV = [
   { href: "/settings", key: "nav.settings", icon: Settings, adminOnly: true },
 ];
 
-export function Sidebar({ role, locale = "ar" }: { role?: string; locale?: Locale }) {
+export function Sidebar({
+  role,
+  locale = "ar",
+  clinicName = "Smart Clinic",
+  logoUrl,
+}: {
+  role?: string;
+  locale?: Locale;
+  clinicName?: string;
+  logoUrl?: string | null;
+}) {
   const pathname = usePathname();
   const nav = NAV.filter((n) => !n.adminOnly || role === "ADMIN");
 
   return (
     <aside className="flex w-64 flex-col border-l border-slate-200 bg-white">
       <div className="flex items-center gap-2 border-b border-slate-200 px-5 py-4">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-600 text-white">
-          <Stethoscope className="h-5 w-5" />
-        </div>
-        <span className="text-lg font-bold text-slate-800">Smart Clinic</span>
+        {logoUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={logoUrl} alt="logo" className="h-9 w-9 rounded-lg object-contain" />
+        ) : (
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-600 text-white">
+            <Stethoscope className="h-5 w-5" />
+          </div>
+        )}
+        <span className="truncate text-lg font-bold text-slate-800">{clinicName}</span>
       </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto p-3">

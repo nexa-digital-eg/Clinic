@@ -7,6 +7,7 @@ import { LogOut } from "lucide-react";
 import { getLocale } from "@/lib/locale";
 import { t } from "@/lib/i18n";
 import { LocaleProvider } from "@/lib/i18n-client";
+import { getClinicSettings } from "@/server/clinic";
 
 export default async function DashboardLayout({
   children,
@@ -16,11 +17,12 @@ export default async function DashboardLayout({
   const session = await getSession();
   if (!session) redirect("/login");
   const locale = await getLocale();
+  const clinic = await getClinicSettings();
 
   return (
     <LocaleProvider locale={locale}>
     <div className="flex h-screen overflow-hidden bg-slate-50">
-      <Sidebar role={session.role} locale={locale} />
+      <Sidebar role={session.role} locale={locale} clinicName={clinic.name} logoUrl={clinic.logoUrl} />
       <div className="flex flex-1 flex-col overflow-hidden">
         <header className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-3">
           <LanguageToggle locale={locale} />

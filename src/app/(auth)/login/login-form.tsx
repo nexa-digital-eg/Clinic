@@ -6,17 +6,30 @@ import { Button, Card, Input, Label } from "@/components/ui";
 import { Stethoscope } from "lucide-react";
 import { t, type Locale } from "@/lib/i18n";
 
-export function LoginForm({ locale }: { locale: Locale }) {
+export function LoginForm({
+  locale,
+  clinicName = "Smart Clinic",
+  logoUrl,
+}: {
+  locale: Locale;
+  clinicName?: string;
+  logoUrl?: string | null;
+}) {
   const [state, formAction, pending] = useActionState(login, undefined);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-brand-50 to-slate-100 p-4">
       <Card className="w-full max-w-md p-8">
         <div className="mb-6 flex flex-col items-center text-center">
-          <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-600 text-white">
-            <Stethoscope className="h-7 w-7" />
-          </div>
-          <h1 className="text-2xl font-bold text-slate-800">Smart Clinic</h1>
+          {logoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={logoUrl} alt="logo" className="mb-3 h-16 w-16 rounded-2xl object-contain" />
+          ) : (
+            <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-600 text-white">
+              <Stethoscope className="h-7 w-7" />
+            </div>
+          )}
+          <h1 className="text-2xl font-bold text-slate-800">{clinicName}</h1>
           <p className="mt-1 text-sm text-slate-500">
             {t("brand.tagline", locale)} — {t("login.title", locale)}
           </p>

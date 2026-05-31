@@ -10,13 +10,25 @@ const cairo = Cairo({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: "Smart Clinic — إدارة العيادات",
-  description: "نظام متكامل لإدارة عيادات الأسنان والمراكز الطبية",
-  manifest: "/manifest.webmanifest",
-  appleWebApp: { capable: true, title: "Smart Clinic", statusBarStyle: "default" },
-  icons: { icon: "/icon.svg", apple: "/icon.svg" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { getClinicSettings } = await import("@/server/clinic");
+  let name = "Smart Clinic";
+  let logo: string | null = null;
+  try {
+    const c = await getClinicSettings();
+    name = c.name;
+    logo = c.logoUrl;
+  } catch {
+    /* قاعدة البيانات غير متاحة وقت البناء */
+  }
+  return {
+    title: name,
+    description: "نظام متكامل لإدارة عيادات الأسنان والمراكز الطبية",
+    manifest: "/manifest.webmanifest",
+    appleWebApp: { capable: true, title: name, statusBarStyle: "default" },
+    icons: { icon: logo || "/icon.svg", apple: logo || "/icon.svg" },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: "#2563eb",

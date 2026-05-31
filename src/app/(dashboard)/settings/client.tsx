@@ -13,8 +13,9 @@ import {
 } from "./actions";
 import { Button, Input, Label, Select, Textarea, Badge } from "@/components/ui";
 import { formatCurrency } from "@/lib/utils";
-import { Check, Power } from "lucide-react";
+import { Check, Power, Upload } from "lucide-react";
 import { useT } from "@/lib/i18n-client";
+import { upload } from "@vercel/blob/client";
 
 /* ===== بيانات العيادة ===== */
 export function ClinicForm({
@@ -24,6 +25,25 @@ export function ClinicForm({
 }) {
   const [state, action, pending] = useActionState(updateClinic, undefined);
   const tr = useT();
+  const [logoUrl, setLogoUrl] = useState(clinic.logoUrl);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+
+  const onLogo = async (file: File) => {
+    setUploadingLogo(true);
+    try {
+      const blob = await upload(file.name, file, {
+        access: "public",
+        handleUploadUrl: "/api/files/upload",
+        clientPayload: JSON.stringify({ logo: true }),
+      });
+      setLogoUrl(blob.url);
+    } catch {
+      /* فشل الرفع */
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
+
   return (
     <form action={action} className="space-y-4">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -50,7 +70,31 @@ export function ClinicForm({
       </div>
       <div>
         <Label htmlFor="logoUrl">{tr("set.logoUrl")}</Label>
-        <Input id="logoUrl" name="logoUrl" dir="ltr" defaultValue={clinic.logoUrl} placeholder="https://..." />
+        <div className="flex items-center gap-3">
+          {logoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={logoUrl} alt="logo" className="h-12 w-12 rounded-lg border border-slate-200 object-contain" />
+          ) : (
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-dashed border-slate-300 text-slate-300">🦷</div>
+          )}
+          <div className="flex-1">
+            <Input id="logoUrl" name="logoUrl" dir="ltr" value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} placeholder="https://..." />
+          </div>
+          <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200">
+            <Upload className="h-4 w-4" />
+            {uploadingLogo ? tr("set.uploadingLogo") : tr("set.uploadLogo")}
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              disabled={uploadingLogo}
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) onLogo(f);
+              }}
+            />
+          </label>
+        </div>
         <p className="mt-1 text-xs text-slate-400">{tr("set.logoHint")}</p>
       </div>
       {state?.error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{state.error}</p>}
