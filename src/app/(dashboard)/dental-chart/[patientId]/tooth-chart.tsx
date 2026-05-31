@@ -35,7 +35,6 @@ const DONE = "#1d4ed8"; // أزرق
 const EMPTY = "#e5e7eb";
 const CENTER_EMPTY = "#eef2f7";
 const CROWN_EMPTY = "#fbf3da";
-const ROOT = "#ece3c8";
 const STROKE = "#94a3b8";
 
 function toothType(num: number): "anterior" | "premolar" | "molar" {
@@ -102,45 +101,95 @@ function SurfaceWheel({
   );
 }
 
-/* ===== شكل السن التشريحي ===== */
+/* ===== تعريفات التدرّجات (إحساس ثلاثي الأبعاد) ===== */
+function ChartDefs() {
+  return (
+    <svg width="0" height="0" className="absolute" aria-hidden>
+      <defs>
+        <radialGradient id="gCrownHealthy" cx="38%" cy="30%" r="75%">
+          <stop offset="0%" stopColor="#fffdf5" />
+          <stop offset="60%" stopColor="#f3e8c8" />
+          <stop offset="100%" stopColor="#e2d2a6" />
+        </radialGradient>
+        <radialGradient id="gCrownPlanned" cx="38%" cy="30%" r="75%">
+          <stop offset="0%" stopColor="#fed7aa" />
+          <stop offset="100%" stopColor="#ea580c" />
+        </radialGradient>
+        <radialGradient id="gCrownDone" cx="38%" cy="30%" r="75%">
+          <stop offset="0%" stopColor="#bfdbfe" />
+          <stop offset="100%" stopColor="#1d4ed8" />
+        </radialGradient>
+        <linearGradient id="gRoot" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#f5edd6" />
+          <stop offset="100%" stopColor="#d9c9a0" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
+function crownFillId(state: "none" | "planned" | "done"): string {
+  if (state === "planned") return "url(#gCrownPlanned)";
+  if (state === "done") return "url(#gCrownDone)";
+  return "url(#gCrownHealthy)";
+}
+
+/* ===== شكل السن التشريحي (تاج بحُديبات + جذور) ===== */
 function ToothSVG({
   type,
-  crownColor,
+  state,
   flip,
   onPick,
 }: {
   type: "anterior" | "premolar" | "molar";
-  crownColor: string;
+  state: "none" | "planned" | "done";
   flip: boolean;
   onPick: () => void;
 }) {
-  let crown: string;
-  let roots: string[];
+  const fill = crownFillId(state);
+  let body: React.ReactNode;
+
   if (type === "anterior") {
-    crown = "M15,25 L15,13 C15,4 29,4 29,13 L29,25 Z";
-    roots = ["M19,25 L21,52 C21.5,55 22.5,55 23,52 L25,25 Z"];
+    body = (
+      <>
+        {/* جذر واحد طويل */}
+        <path d="M18,26 C18,40 19,52 22,55 C25,52 26,40 26,26 Z" fill="url(#gRoot)" stroke={STROKE} strokeWidth={0.8} />
+        {/* تاج القاطع (حافة مستقيمة) */}
+        <path d="M13,26 L13,12 C13,5 18,3 22,3 C26,3 31,5 31,12 L31,26 Z" fill={fill} stroke={STROKE} strokeWidth={1} />
+        {/* خطوط النمو */}
+        <path d="M18,8 L18,24 M22,7 L22,24 M26,8 L26,24" stroke="#00000018" strokeWidth={0.8} fill="none" />
+      </>
+    );
   } else if (type === "premolar") {
-    crown = "M12,25 L12,13 C12,5 32,5 32,13 L32,25 Z";
-    roots = ["M19,25 L20.5,51 C21,54 23,54 23.5,51 L25,25 Z"];
+    body = (
+      <>
+        <path d="M18,26 C18,42 19,53 22,56 C25,53 26,42 26,26 Z" fill="url(#gRoot)" stroke={STROKE} strokeWidth={0.8} />
+        {/* تاج بحُديبتين */}
+        <path d="M11,25 L11,15 C11,9 14,6 17,6 C18.5,6 19.5,8 22,8 C24.5,8 25.5,6 27,6 C30,6 33,9 33,15 L33,25 Z" fill={fill} stroke={STROKE} strokeWidth={1} />
+        <path d="M22,9 L22,24 M16,12 L16,24 M28,12 L28,24" stroke="#00000018" strokeWidth={0.8} fill="none" />
+      </>
+    );
   } else {
-    crown = "M9,25 L9,13 C9,5 35,5 35,13 L35,25 Z";
-    roots = [
-      "M13,25 L11,49 C11,52 14,52 15,49 L17,25 Z",
-      "M27,25 L29,49 C29,52 32,52 33,49 L31,25 Z",
-    ];
+    body = (
+      <>
+        {/* جذرين متباعدين */}
+        <path d="M13,26 C12,40 10,50 12,54 C14,52 15,40 16,28 Z" fill="url(#gRoot)" stroke={STROKE} strokeWidth={0.8} />
+        <path d="M31,26 C32,40 34,50 32,54 C30,52 29,40 28,28 Z" fill="url(#gRoot)" stroke={STROKE} strokeWidth={0.8} />
+        {/* تاج عريض بأربع حُديبات */}
+        <path d="M8,26 L8,15 C8,9 11,6 14,6 C15.5,6 16.5,8 18.5,8 C20,8 20.5,6.5 22,6.5 C23.5,6.5 24,8 25.5,8 C27.5,8 28.5,6 30,6 C33,6 36,9 36,15 L36,26 Z" fill={fill} stroke={STROKE} strokeWidth={1} />
+        {/* أخدود الإطباق */}
+        <path d="M22,10 L22,25 M11,16 L33,16" stroke="#00000020" strokeWidth={0.9} fill="none" />
+      </>
+    );
   }
+
   return (
     <svg
-      viewBox="0 0 44 56"
-      className="h-12 w-10 cursor-pointer"
+      viewBox="0 0 44 58"
+      className="h-14 w-11 cursor-pointer transition-transform hover:scale-105"
       onClick={onPick}
     >
-      <g transform={flip ? "rotate(180 22 28)" : undefined}>
-        {roots.map((d, i) => (
-          <path key={i} d={d} fill={ROOT} stroke={STROKE} strokeWidth={0.8} />
-        ))}
-        <path d={crown} fill={crownColor} stroke={STROKE} strokeWidth={0.9} />
-      </g>
+      <g transform={flip ? "rotate(180 22 29)" : undefined}>{body}</g>
     </svg>
   );
 }
@@ -164,17 +213,17 @@ function ToothUnit({
     if (!rec) return surface === "occlusal" ? CENTER_EMPTY : EMPTY;
     return rec.status === "done" ? DONE : PLANNED;
   };
-  const crownColor = (() => {
+  const crownState: "none" | "planned" | "done" = (() => {
     const rec = records.find((r) => (r.surface || "whole") === "whole");
-    if (!rec) return CROWN_EMPTY;
-    return rec.status === "done" ? DONE : PLANNED;
+    if (!rec) return "none";
+    return rec.status === "done" ? "done" : "planned";
   })();
 
   const sel = selectedKey?.startsWith(`${num}-`);
   const tooth = (
     <ToothSVG
       type={toothType(num)}
-      crownColor={crownColor}
+      state={crownState}
       flip={!upper}
       onPick={() => onPick(num, "whole")}
     />
@@ -237,6 +286,7 @@ export function ToothChart({
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <ChartDefs />
       <div className="space-y-4 lg:col-span-2">
         <Card className="p-6">
           {/* تبديل دائمة / لبنية */}
