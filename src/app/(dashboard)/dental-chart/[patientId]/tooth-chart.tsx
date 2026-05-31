@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useState, useTransition, useEffect } from "react";
+import { useActionState, useState, useTransition, useEffect, useRef } from "react";
+import { teethPaths } from "@/lib/teeth-paths";
 import {
   addToothRecord,
   setToothStatus,
@@ -36,13 +37,6 @@ const EMPTY = "#e5e7eb";
 const CENTER_EMPTY = "#eef2f7";
 const CROWN_EMPTY = "#fbf3da";
 const STROKE = "#94a3b8";
-
-function toothType(num: number): "anterior" | "premolar" | "molar" {
-  const pos = num % 10;
-  if (pos <= 3) return "anterior";
-  if (pos <= 5) return "premolar";
-  return "molar";
-}
 
 /* ===== عجلة الأسطح (odontogram) ===== */
 function polar(cx: number, cy: number, r: number, deg: number) {
@@ -137,65 +131,75 @@ function crownFillId(state: "none" | "planned" | "done"): string {
   return "url(#gCrownHealthy)";
 }
 
-/* ===== شكل السن التشريحي (تاج بحُديبات + جذور) ===== */
-function ToothSVG({
-  type,
+/* ===== أشكال أسنان واقعية (react-odontogram, MIT) ===== */
+const POS_TYPE: Record<number, string> = {
+  1: "Central Incisor",
+  2: "Lateral Incisor",
+  3: "Canine",
+  4: "First Premolar",
+  5: "Second Premolar",
+  6: "First Molar",
+  7: "Second Molar",
+  8: "Third Molar",
+};
+function pathFor(num: number) {
+  const wanted = POS_TYPE[num % 10] ?? "First Molar";
+  return (
+    teethPaths.find((p) => p.type === wanted) ??
+    teethPaths.find((p) => p.type.includes("Molar")) ??
+    teethPaths[0]
+  );
+}
+
+function RealTooth({
+  num,
   state,
   flip,
   onPick,
 }: {
-  type: "anterior" | "premolar" | "molar";
+  num: number;
   state: "none" | "planned" | "done";
   flip: boolean;
   onPick: () => void;
 }) {
-  const fill = crownFillId(state);
-  let body: React.ReactNode;
+  const tp = pathFor(num);
+  const gref = useRef<SVGGElement>(null);
+  const [vb, setVb] = useState<string | undefined>();
+  const [center, setCenter] = useState<[number, number]>([0, 0]);
 
-  if (type === "anterior") {
-    body = (
-      <>
-        {/* جذر واحد طويل */}
-        <path d="M18,26 C18,40 19,52 22,55 C25,52 26,40 26,26 Z" fill="url(#gRoot)" stroke={STROKE} strokeWidth={0.8} />
-        {/* تاج القاطع (حافة مستقيمة) */}
-        <path d="M13,26 L13,12 C13,5 18,3 22,3 C26,3 31,5 31,12 L31,26 Z" fill={fill} stroke={STROKE} strokeWidth={1} />
-        {/* خطوط النمو */}
-        <path d="M18,8 L18,24 M22,7 L22,24 M26,8 L26,24" stroke="#00000018" strokeWidth={0.8} fill="none" />
-      </>
-    );
-  } else if (type === "premolar") {
-    body = (
-      <>
-        <path d="M18,26 C18,42 19,53 22,56 C25,53 26,42 26,26 Z" fill="url(#gRoot)" stroke={STROKE} strokeWidth={0.8} />
-        {/* تاج بحُديبتين */}
-        <path d="M11,25 L11,15 C11,9 14,6 17,6 C18.5,6 19.5,8 22,8 C24.5,8 25.5,6 27,6 C30,6 33,9 33,15 L33,25 Z" fill={fill} stroke={STROKE} strokeWidth={1} />
-        <path d="M22,9 L22,24 M16,12 L16,24 M28,12 L28,24" stroke="#00000018" strokeWidth={0.8} fill="none" />
-      </>
-    );
-  } else {
-    body = (
-      <>
-        {/* جذرين متباعدين */}
-        <path d="M13,26 C12,40 10,50 12,54 C14,52 15,40 16,28 Z" fill="url(#gRoot)" stroke={STROKE} strokeWidth={0.8} />
-        <path d="M31,26 C32,40 34,50 32,54 C30,52 29,40 28,28 Z" fill="url(#gRoot)" stroke={STROKE} strokeWidth={0.8} />
-        {/* تاج عريض بأربع حُديبات */}
-        <path d="M8,26 L8,15 C8,9 11,6 14,6 C15.5,6 16.5,8 18.5,8 C20,8 20.5,6.5 22,6.5 C23.5,6.5 24,8 25.5,8 C27.5,8 28.5,6 30,6 C33,6 36,9 36,15 L36,26 Z" fill={fill} stroke={STROKE} strokeWidth={1} />
-        {/* أخدود الإطباق */}
-        <path d="M22,10 L22,25 M11,16 L33,16" stroke="#00000020" strokeWidth={0.9} fill="none" />
-      </>
-    );
-  }
+  useEffect(() => {
+    if (!gref.current) return;
+    try {
+      const b = gref.current.getBBox();
+      const pad = Math.max(b.width, b.height) * 0.07;
+      setVb(`${b.x - pad} ${b.y - pad} ${b.width + pad * 2} ${b.height + pad * 2}`);
+      setCenter([b.x + b.width / 2, b.y + b.height / 2]);
+    } catch {
+      /* getBBox غير متاح */
+    }
+  }, [tp]);
+
+  const fill = crownFillId(state);
+  const toArr = (v: string | string[] | undefined): string[] =>
+    v == null ? [] : Array.isArray(v) ? v : [v];
 
   return (
     <svg
-      viewBox="0 0 44 58"
-      className="h-14 w-11 cursor-pointer transition-transform hover:scale-105"
+      viewBox={vb}
+      preserveAspectRatio="xMidYMid meet"
+      className="h-16 w-12 cursor-pointer transition-transform hover:scale-105"
       onClick={onPick}
     >
-      <g transform={flip ? "rotate(180 22 29)" : undefined}>
-        {body}
-        {/* لمعة لإحساس ثلاثي الأبعاد */}
-        <ellipse cx="17" cy="12" rx="4.5" ry="3" fill="#ffffff" opacity="0.4" />
+      <g ref={gref} transform={flip ? `rotate(180 ${center[0]} ${center[1]})` : undefined}>
+        {toArr(tp.outlinePath).map((d, i) => (
+          <path key={`o${i}`} d={d} fill={fill} stroke={STROKE} strokeWidth={1.4} strokeLinejoin="round" />
+        ))}
+        {toArr(tp.shadowPath).map((d, i) => (
+          <path key={`s${i}`} d={d} fill="#00000018" />
+        ))}
+        {toArr(tp.lineHighlightPath).map((d, i) => (
+          <path key={`h${i}`} d={d} fill="none" stroke="#ffffff" strokeOpacity={0.55} strokeWidth={1.6} strokeLinecap="round" />
+        ))}
       </g>
     </svg>
   );
@@ -229,8 +233,8 @@ function ToothUnit({
   const sel = selectedKey?.startsWith(`${num}-`);
   const selSurface = sel ? selectedKey!.slice(`${num}-`.length) : null;
   const tooth = (
-    <ToothSVG
-      type={toothType(num)}
+    <RealTooth
+      num={num}
       state={crownState}
       flip={!upper}
       onPick={() => onPick(num, "whole")}
