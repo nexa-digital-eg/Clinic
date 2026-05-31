@@ -69,20 +69,23 @@ const WHEEL_SEGMENTS: { surface: string; a0: number; a1: number }[] = [
 function SurfaceWheel({
   fillFor,
   onPick,
+  selectedSurface,
 }: {
   fillFor: (surface: string) => string;
   onPick: (surface: string) => void;
+  selectedSurface?: string | null;
 }) {
   const cx = 22, cy = 22, rIn = 9, rOut = 20;
+  const sel = (s: string) => selectedSurface === s;
   return (
-    <svg viewBox="0 0 44 44" className="h-10 w-10">
+    <svg viewBox="0 0 44 44" className="h-12 w-12">
       {WHEEL_SEGMENTS.map((s) => (
         <path
           key={s.surface}
           d={donutSeg(cx, cy, rIn, rOut, s.a0, s.a1)}
           fill={fillFor(s.surface)}
-          stroke={STROKE}
-          strokeWidth={0.7}
+          stroke={sel(s.surface) ? "#2563eb" : STROKE}
+          strokeWidth={sel(s.surface) ? 2.4 : 0.7}
           className="cursor-pointer transition-opacity hover:opacity-80"
           onClick={() => onPick(s.surface)}
         />
@@ -92,8 +95,8 @@ function SurfaceWheel({
         cy={cy}
         r={rIn}
         fill={fillFor("occlusal")}
-        stroke={STROKE}
-        strokeWidth={0.7}
+        stroke={sel("occlusal") ? "#2563eb" : STROKE}
+        strokeWidth={sel("occlusal") ? 2.4 : 0.7}
         className="cursor-pointer transition-opacity hover:opacity-80"
         onClick={() => onPick("occlusal")}
       />
@@ -224,6 +227,7 @@ function ToothUnit({
   })();
 
   const sel = selectedKey?.startsWith(`${num}-`);
+  const selSurface = sel ? selectedKey!.slice(`${num}-`.length) : null;
   const tooth = (
     <ToothSVG
       type={toothType(num)}
@@ -232,7 +236,7 @@ function ToothUnit({
       onPick={() => onPick(num, "whole")}
     />
   );
-  const wheel = <SurfaceWheel fillFor={fillFor} onPick={(s) => onPick(num, s)} />;
+  const wheel = <SurfaceWheel fillFor={fillFor} selectedSurface={selSurface} onPick={(s) => onPick(num, s)} />;
   // العرض بترقيم 1-8 لكل ربع (مع الاحتفاظ برقم FDI داخلياً للبيانات)
   const label = <span className="text-xs font-medium text-slate-500">{num % 10}</span>;
 
@@ -431,17 +435,27 @@ export function ToothChart({
               </div>
 
               <div>
-                <Label htmlFor="surface">{tr("dent.surface")}</Label>
-                <Select
-                  key={selectedKey ?? ""}
-                  id="surface"
-                  name="surface"
-                  defaultValue={selected.surface}
-                >
-                  {SURFACES.map((s) => (
-                    <option key={s.value} value={s.value}>{s.label}</option>
-                  ))}
-                </Select>
+                <Label>{tr("dent.surface")}</Label>
+                <input type="hidden" name="surface" value={selected.surface} />
+                <div className="flex flex-wrap gap-1.5">
+                  {SURFACES.map((s) => {
+                    const active = selected.surface === s.value;
+                    return (
+                      <button
+                        type="button"
+                        key={s.value}
+                        onClick={() => setSelected({ tooth: selected.tooth, surface: s.value })}
+                        className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors ${
+                          active
+                            ? "border-brand-600 bg-brand-600 text-white"
+                            : "border-slate-300 bg-white text-slate-600 hover:border-brand-400"
+                        }`}
+                      >
+                        {s.label}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
               <div>
