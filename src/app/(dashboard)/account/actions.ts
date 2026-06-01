@@ -1,7 +1,8 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
-import { getSession, hashPassword, verifyPassword } from "@/lib/auth";
+import { getSession, hashPassword, verifyPassword, createSession } from "@/lib/auth";
 
 export async function changeMyPassword(
   _prev: { error?: string; ok?: boolean } | undefined,
@@ -24,10 +25,32 @@ export async function changeMyPassword(
   const ok = await verifyPassword(current, user.passwordHash);
   if (!ok) return { error: "كلمة المرور الحالية غير صحيحة" };
 
+  // غيّر كلمة المرور وارفع إصدار الجلسة (يُسجّل خروج باقي الأجهزة)
+  const newVersion = user.sessionVersion + 1;
   await db.user.update({
     where: { id: user.id },
-    data: { passwordHash: await hashPassword(next) },
+    data: { passwordHash: await hashPassword(next), sessionVersion: newVersion },
   });
 
+  // سجّل الحدث ليظهر للأدمن
+  await db.auditLog.create({
+    data: {
+      type: "PASSWORD_CHANGE",
+      userId: user.id,
+      userName: user.name,
+      detail: "قام المستخدم بتغيير كلمة مروره",
+    },
+  });
+
+  // جدّد جلسة الجهاز الحالي بالإصدار الجديد حتى لا يُسجَّل خروجه هو
+  await createSession({
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    sessionVersion: newVersion,
+  });
+
+  revalidatePath("/settings");
   return { ok: true };
 }

@@ -30,6 +30,7 @@ export async function login(
     name: user.name,
     email: user.email,
     role: user.role,
+    sessionVersion: user.sessionVersion,
   });
 
   redirect("/dashboard");

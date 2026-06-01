@@ -3,7 +3,7 @@ import { getSession } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getClinicSettings } from "@/server/clinic";
 import { Card, Badge } from "@/components/ui";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, formatDateTime } from "@/lib/utils";
 import Link from "next/link";
 import {
   ClinicForm,
@@ -45,7 +45,7 @@ export default async function SettingsPage({
   const { tab = "clinic" } = await searchParams;
   const locale = await getLocale();
 
-  const [clinic, procedures, branches, staff, medCount, medSample] = await Promise.all([
+  const [clinic, procedures, branches, staff, medCount, medSample, securityLogs] = await Promise.all([
     getClinicSettings(),
     db.procedure.findMany({ orderBy: { name: "asc" } }),
     db.branch.findMany({ orderBy: { createdAt: "asc" } }),
@@ -56,6 +56,7 @@ export default async function SettingsPage({
     }),
     db.medication.count(),
     db.medication.findMany({ orderBy: { name: "asc" }, take: 60, select: { name: true } }),
+    db.auditLog.findMany({ where: { type: "PASSWORD_CHANGE" }, orderBy: { createdAt: "desc" }, take: 15 }),
   ]);
 
   return (
@@ -187,7 +188,28 @@ export default async function SettingsPage({
               </div>
             </Card>
           </div>
-          <StaffForm branches={branches.map((b) => ({ id: b.id, name: b.name }))} />
+          <div className="space-y-6">
+            <StaffForm branches={branches.map((b) => ({ id: b.id, name: b.name }))} />
+            <Card>
+              <div className="border-b border-slate-200 px-5 py-3">
+                <h2 className="font-semibold text-slate-800">{t("set.securityLog", locale)}</h2>
+              </div>
+              {securityLogs.length === 0 ? (
+                <p className="py-6 text-center text-sm text-slate-400">{t("set.noSecurityLog", locale)}</p>
+              ) : (
+                <div className="divide-y divide-slate-100">
+                  {securityLogs.map((log) => (
+                    <div key={log.id} className="flex items-center justify-between px-5 py-2.5 text-sm">
+                      <span className="text-slate-700">
+                        <span className="font-medium">{log.userName}</span> — {t("set.changedPassword", locale)}
+                      </span>
+                      <span className="text-xs text-slate-400">{formatDateTime(log.createdAt, locale)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Card>
+          </div>
         </div>
       )}
 

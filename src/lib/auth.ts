@@ -21,6 +21,7 @@ export interface SessionUser {
   name: string;
   email: string;
   role: Role;
+  sessionVersion: number;
 }
 
 export async function hashPassword(password: string): Promise<string> {
@@ -62,6 +63,7 @@ export async function getSession(): Promise<SessionUser | null> {
       name: payload.name as string,
       email: payload.email as string,
       role: payload.role as Role,
+      sessionVersion: (payload.sessionVersion as number) ?? 0,
     };
   } catch {
     return null;

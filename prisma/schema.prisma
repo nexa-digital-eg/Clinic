@@ -33,12 +33,25 @@ model User {
   permissions  String[] // الأقسام المسموح بها لغير الأدمن
   phone        String?
   isActive     Boolean  @default(true)
+  sessionVersion Int    @default(0) // يزيد عند تغيير كلمة المرور لإبطال الجلسات القديمة
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
   doctor       Doctor?
   branchId     String?
   branch       Branch?  @relation(fields: [branchId], references: [id])
+}
+
+// سجل أحداث الأمان (تغيير كلمة المرور...) — يطّلع عليه الأدمن
+model AuditLog {
+  id        String   @id @default(cuid())
+  type      String // نوع الحدث (PASSWORD_CHANGE)
+  userId    String?
+  userName  String
+  detail    String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
 }
 
 // ============================================================

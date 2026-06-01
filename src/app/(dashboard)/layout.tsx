@@ -27,9 +27,14 @@ export default async function DashboardLayout({
   // اجلب صلاحيات المستخدم الحالية من القاعدة (تتحدّث فوراً عند تعديل الأدمن)
   const me = await db.user.findUnique({
     where: { id: session.id },
-    select: { role: true, title: true, permissions: true, isActive: true },
+    select: { role: true, title: true, permissions: true, isActive: true, sessionVersion: true },
   });
   if (!me || !me.isActive) redirect("/login");
+
+  // إبطال الجلسات القديمة بعد تغيير كلمة المرور (تسجيل خروج تلقائي لباقي الأجهزة)
+  if (me.sessionVersion !== session.sessionVersion) {
+    await logout();
+  }
 
   // افرض الصلاحية على المسار الحالي
   const pathname = (await headers()).get("x-pathname") ?? "";
