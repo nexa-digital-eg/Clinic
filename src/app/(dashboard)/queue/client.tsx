@@ -10,7 +10,7 @@ import {
   lookupPhone,
   queueSnapshot,
 } from "./actions";
-import { Card, Button, Input, Label, Select, Textarea, Badge } from "@/components/ui";
+import { Card, Button, Input, Label, Textarea, Badge } from "@/components/ui";
 import { useT } from "@/lib/i18n-client";
 import { Play, Check, Trash2, UserCheck, Phone, ExternalLink, Bell, BellRing } from "lucide-react";
 
@@ -88,11 +88,7 @@ export function QueueAlerts({ initialCount }: { initialCount: number }) {
   );
 }
 
-export function AddToQueueForm({
-  doctors,
-}: {
-  doctors: { id: string; name: string }[];
-}) {
+export function AddToQueueForm() {
   const tr = useT();
   const [state, action, pending] = useActionState(addToQueue, undefined);
   const [phone, setPhone] = useState("");
@@ -175,17 +171,6 @@ export function AddToQueueForm({
           <Label htmlFor="reason">{tr("queue.reason")}</Label>
           <Textarea id="reason" name="reason" rows={2} />
         </div>
-        <div>
-          <Label htmlFor="doctorId">{tr("queue.doctor")}</Label>
-          <Select id="doctorId" name="doctorId" defaultValue="">
-            <option value="">{tr("queue.anyDoctor")}</option>
-            {doctors.map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.name}
-              </option>
-            ))}
-          </Select>
-        </div>
         {state?.error && (
           <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{state.error}</p>
         )}
@@ -206,7 +191,6 @@ export function QueueRow({
   status,
   patientId,
   patientCode,
-  doctorName,
 }: {
   id: string;
   position: number | null;
@@ -216,7 +200,6 @@ export function QueueRow({
   status: string;
   patientId: string | null;
   patientCode: string | null;
-  doctorName: string | null;
 }) {
   const tr = useT();
   const [pending, startTransition] = useTransition();
@@ -244,7 +227,6 @@ export function QueueRow({
             {phone}
           </p>
           {reason && <p className="text-xs text-slate-400">{reason}</p>}
-          {doctorName && <p className="text-xs text-brand-600">{doctorName}</p>}
         </div>
       </div>
 

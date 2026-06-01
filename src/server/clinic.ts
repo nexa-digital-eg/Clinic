@@ -6,3 +6,9 @@ export async function getClinicSettings() {
   if (existing) return existing;
   return db.clinicSettings.create({ data: { id: "clinic" } });
 }
+
+// العيادة بطبيب واحد — نحضر معرّفه تلقائياً بدل اختياره يدوياً
+export async function getDefaultDoctor() {
+  return db.doctor.findFirst({ orderBy: { createdAt: "asc" } });
+}
+

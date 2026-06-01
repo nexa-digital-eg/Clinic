@@ -6,14 +6,11 @@ import { t } from "@/lib/i18n";
 import { AddToQueueForm, QueueRow, QueueAlerts } from "./client";
 
 export default async function QueuePage() {
-  const [entries, doctors] = await Promise.all([
-    db.queueEntry.findMany({
-      where: { status: { in: ["WAITING", "IN_PROGRESS"] } },
-      orderBy: { createdAt: "asc" },
-      include: { patient: true, doctor: { include: { user: true } } },
-    }),
-    db.doctor.findMany({ include: { user: true } }),
-  ]);
+  const entries = await db.queueEntry.findMany({
+    where: { status: { in: ["WAITING", "IN_PROGRESS"] } },
+    orderBy: { createdAt: "asc" },
+    include: { patient: true },
+  });
   const locale = await getLocale();
 
   const waiting = entries.filter((e) => e.status === "WAITING");
@@ -49,7 +46,6 @@ export default async function QueuePage() {
                     status={e.status}
                     patientId={e.patientId}
                     patientCode={e.patient?.code ?? null}
-                    doctorName={e.doctor ? e.doctor.user.name : null}
                   />
                 ))}
               </div>
@@ -79,7 +75,6 @@ export default async function QueuePage() {
                     status={e.status}
                     patientId={e.patientId}
                     patientCode={e.patient?.code ?? null}
-                    doctorName={e.doctor ? e.doctor.user.name : null}
                   />
                 ))}
               </div>
@@ -87,9 +82,7 @@ export default async function QueuePage() {
           </Card>
         </div>
 
-        <AddToQueueForm
-          doctors={doctors.map((d) => ({ id: d.id, name: d.user.name }))}
-        />
+        <AddToQueueForm />
       </div>
     </div>
   );

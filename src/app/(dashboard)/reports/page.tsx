@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { Card, Badge } from "@/components/ui";
 import { formatCurrency } from "@/lib/utils";
-import { TrendingUp, TrendingDown, Users, CalendarDays, Boxes, Wallet, Stethoscope, FileSpreadsheet, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { TrendingUp, TrendingDown, Users, CalendarDays, Boxes, Wallet, FileSpreadsheet, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { getLocale } from "@/lib/locale";
 import { t } from "@/lib/i18n";
 
@@ -33,8 +33,6 @@ export default async function ReportsPage({
     paymentsByMethod,
     invoicesAgg,
     apptByStatus,
-    apptByDoctor,
-    doctors,
     newPatients,
     totalPatients,
     products,
@@ -48,8 +46,6 @@ export default async function ReportsPage({
     db.payment.groupBy({ by: ["method"], _sum: { amount: true }, where: { createdAt: range } }),
     db.invoice.aggregate({ _sum: { total: true, paidAmount: true }, where: { createdAt: range } }),
     db.appointment.groupBy({ by: ["status"], _count: true, where: { startsAt: range } }),
-    db.appointment.groupBy({ by: ["doctorId"], _count: true, where: { startsAt: range } }),
-    db.doctor.findMany({ include: { user: true } }),
     db.patient.count({ where: { createdAt: range } }),
     db.patient.count(),
     db.product.findMany(),
@@ -81,9 +77,6 @@ export default async function ReportsPage({
   const prevNet = prevIncome - prevExpense;
   const pctChange = (cur: number, prev: number): number | null =>
     prev === 0 ? (cur === 0 ? 0 : null) : Math.round(((cur - prev) / Math.abs(prev)) * 100);
-
-  const doctorName = (id: string) =>
-    doctors.find((d) => d.id === id)?.user.name ?? "—";
 
   // أعلى الإجراءات
   const procMap = new Map<string, { name: string; count: number; revenue: number }>();
@@ -210,28 +203,6 @@ export default async function ReportsPage({
                   <p className="text-xs text-slate-500">{t(`apptStatus.${s.status}`, locale)}</p>
                 </div>
               ))
-            )}
-          </div>
-        </Card>
-
-        {/* أداء الأطباء */}
-        <Card>
-          <div className="flex items-center gap-2 border-b border-slate-200 px-5 py-3">
-            <Stethoscope className="h-5 w-5 text-slate-400" />
-            <h2 className="font-semibold text-slate-800">{t("rep.doctorPerf", locale)}</h2>
-          </div>
-          <div className="p-5">
-            {apptByDoctor.length === 0 ? (
-              <p className="py-4 text-center text-sm text-slate-400">{t("rep.noData", locale)}</p>
-            ) : (
-              <ul className="space-y-2">
-                {apptByDoctor.map((d) => (
-                  <li key={d.doctorId} className="flex items-center justify-between text-sm">
-                    <span className="text-slate-700">{doctorName(d.doctorId)}</span>
-                    <Badge color="blue">{d._count} {t("rep.apptCount", locale)}</Badge>
-                  </li>
-                ))}
-              </ul>
             )}
           </div>
         </Card>

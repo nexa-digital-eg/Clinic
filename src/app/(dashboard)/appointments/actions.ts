@@ -5,11 +5,11 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { getDefaultDoctor } from "@/server/clinic";
 import type { AppointmentStatus } from "@prisma/client";
 
 const schema = z.object({
   patientId: z.string().min(1, "اختر المريض"),
-  doctorId: z.string().min(1, "اختر الطبيب"),
   branchId: z.string().optional().or(z.literal("")),
   date: z.string().min(1, "اختر التاريخ"),
   time: z.string().min(1, "اختر الوقت"),
@@ -31,6 +31,10 @@ export async function createAppointment(
   }
   const d = parsed.data;
 
+  // العيادة بطبيب واحد — يُعيَّن تلقائياً
+  const doctor = await getDefaultDoctor();
+  if (!doctor) return { error: "لا يوجد طبيب مسجّل في النظام" };
+
   const startsAt = new Date(`${d.date}T${d.time}`);
   if (isNaN(startsAt.getTime())) return { error: "تاريخ أو وقت غير صحيح" };
 
@@ -40,7 +44,7 @@ export async function createAppointment(
   await db.appointment.create({
     data: {
       patientId: d.patientId,
-      doctorId: d.doctorId,
+      doctorId: doctor.id,
       branchId: d.branchId || null,
       startsAt,
       endsAt,

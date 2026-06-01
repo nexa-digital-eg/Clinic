@@ -2,17 +2,13 @@
 
 import { useActionState } from "react";
 import { bookOnline } from "./actions";
-import { Button, Card, Input, Label, Select } from "@/components/ui";
+import { Button, Card, Input, Label } from "@/components/ui";
 import { CalendarCheck, CheckCircle2 } from "lucide-react";
 import { useT } from "@/lib/i18n-client";
 
-type DoctorOpt = { id: string; name: string; specialty: string; branch: string };
-
 export function BookingForm({
-  doctors,
   clinicName,
 }: {
-  doctors: DoctorOpt[];
   clinicName: string;
 }) {
   const [state, formAction, pending] = useActionState(bookOnline, undefined);
@@ -63,20 +59,6 @@ export function BookingForm({
           <div>
             <Label htmlFor="phone">{tr("form.phone")} *</Label>
             <Input id="phone" name="phone" dir="ltr" placeholder="01XXXXXXXXX" required />
-          </div>
-
-          <div>
-            <Label htmlFor="doctorId">{tr("form.doctor")} *</Label>
-            <Select id="doctorId" name="doctorId" required>
-              <option value="">{tr("form.chooseDoctor")}</option>
-              {doctors.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.name}
-                  {d.specialty ? ` - ${d.specialty}` : ""}
-                  {d.branch ? ` (${d.branch})` : ""}
-                </option>
-              ))}
-            </Select>
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

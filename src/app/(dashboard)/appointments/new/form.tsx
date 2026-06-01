@@ -12,12 +12,10 @@ type PatientOpt = Opt & { code: string; phone: string };
 
 export function NewAppointmentForm({
   patients,
-  doctors,
   branches,
   defaultPatientId,
 }: {
   patients: PatientOpt[];
-  doctors: Opt[];
   branches: Opt[];
   defaultPatientId?: string;
 }) {
@@ -52,15 +50,6 @@ export function NewAppointmentForm({
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <Label htmlFor="doctorId">{tr("form.doctor")} *</Label>
-              <Select id="doctorId" name="doctorId" required>
-                <option value="">{tr("form.choose")}</option>
-                {doctors.map((d) => (
-                  <option key={d.id} value={d.id}>{d.name}</option>
-                ))}
-              </Select>
-            </div>
             <div>
               <Label htmlFor="branchId">{tr("form.branch")}</Label>
               <Select id="branchId" name="branchId" defaultValue={branches[0]?.id ?? ""}>

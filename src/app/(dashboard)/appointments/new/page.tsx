@@ -7,9 +7,8 @@ export default async function NewAppointmentPage({
   searchParams: Promise<{ patientId?: string }>;
 }) {
   const sp = await searchParams;
-  const [patients, doctors, branches] = await Promise.all([
+  const [patients, branches] = await Promise.all([
     db.patient.findMany({ orderBy: { createdAt: "desc" }, take: 200 }),
-    db.doctor.findMany({ include: { user: true } }),
     db.branch.findMany(),
   ]);
 
@@ -21,7 +20,6 @@ export default async function NewAppointmentPage({
         code: p.code,
         phone: p.phone,
       }))}
-      doctors={doctors.map((d) => ({ id: d.id, name: d.user.name }))}
       branches={branches.map((b) => ({ id: b.id, name: b.name }))}
       defaultPatientId={sp.patientId}
     />

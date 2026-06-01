@@ -7,7 +7,6 @@ const schema = z.object({
   firstName: z.string().min(1, "الاسم الأول مطلوب"),
   lastName: z.string().min(1, "اسم العائلة مطلوب"),
   phone: z.string().min(6, "رقم الهاتف مطلوب"),
-  doctorId: z.string().min(1, "اختر الطبيب"),
   date: z.string().min(1, "اختر التاريخ"),
   time: z.string().min(1, "اختر الوقت"),
   reason: z.string().optional(),
@@ -45,13 +44,14 @@ export async function bookOnline(
     });
   }
 
-  const doctor = await db.doctor.findUnique({ where: { id: d.doctorId } });
-  if (!doctor) return { error: "الطبيب غير موجود" };
+  // العيادة بطبيب واحد — يُعيَّن تلقائياً
+  const doctor = await db.doctor.findFirst({ orderBy: { createdAt: "asc" } });
+  if (!doctor) return { error: "لا يوجد طبيب مسجّل" };
 
   await db.appointment.create({
     data: {
       patientId: patient.id,
-      doctorId: d.doctorId,
+      doctorId: doctor.id,
       branchId: doctor.branchId,
       startsAt,
       endsAt: new Date(startsAt.getTime() + 30 * 60 * 1000),

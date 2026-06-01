@@ -31,7 +31,7 @@ function pad(n: number) {
 export default async function AppointmentsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ month?: string; doctorId?: string; branchId?: string }>;
+  searchParams: Promise<{ month?: string; branchId?: string }>;
 }) {
   const sp = await searchParams;
   const locale = await getLocale();
@@ -45,17 +45,15 @@ export default async function AppointmentsPage({
 
   const where: Prisma.AppointmentWhereInput = {
     startsAt: { gte: monthStart, lt: monthEnd },
-    ...(sp.doctorId ? { doctorId: sp.doctorId } : {}),
     ...(sp.branchId ? { branchId: sp.branchId } : {}),
   };
 
-  const [appointments, doctors, branches] = await Promise.all([
+  const [appointments, branches] = await Promise.all([
     db.appointment.findMany({
       where,
       orderBy: { startsAt: "asc" },
-      include: { patient: true, doctor: { include: { user: true } } },
+      include: { patient: true },
     }),
-    db.doctor.findMany({ include: { user: true } }),
     db.branch.findMany(),
   ]);
 
@@ -80,7 +78,6 @@ export default async function AppointmentsPage({
   const mkMonthLink = (dt: Date) => {
     const q = new URLSearchParams();
     q.set("month", `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}`);
-    if (sp.doctorId) q.set("doctorId", sp.doctorId);
     if (sp.branchId) q.set("branchId", sp.branchId);
     return `/appointments?${q.toString()}`;
   };
@@ -124,16 +121,6 @@ export default async function AppointmentsPage({
         <form className="flex flex-wrap items-center gap-2" method="get">
           <input type="hidden" name="month" value={`${year}-${pad(month + 1)}`} />
           <select
-            name="doctorId"
-            defaultValue={sp.doctorId ?? ""}
-            className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm"
-          >
-            <option value="">{t("appt.allDoctors", locale)}</option>
-            {doctors.map((d) => (
-              <option key={d.id} value={d.id}>{d.user.name}</option>
-            ))}
-          </select>
-          <select
             name="branchId"
             defaultValue={sp.branchId ?? ""}
             className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm"
@@ -176,7 +163,7 @@ export default async function AppointmentsPage({
                           key={a.id}
                           href={`/patients/${a.patientId}?tab=appointments`}
                           className="block truncate rounded bg-brand-50 px-1.5 py-0.5 text-[11px] text-brand-700 hover:bg-brand-100"
-                          title={`${a.patient.firstName} ${a.patient.lastName} - ${a.doctor.user.name}`}
+                          title={`${a.patient.firstName} ${a.patient.lastName}`}
                         >
                           {new Date(a.startsAt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}
                           {" "}
@@ -213,7 +200,6 @@ export default async function AppointmentsPage({
                 <tr>
                   <th className="px-4 py-3 font-medium">{t("col.datetime", locale)}</th>
                   <th className="px-4 py-3 font-medium">{t("col.patient", locale)}</th>
-                  <th className="px-4 py-3 font-medium">{t("col.doctor", locale)}</th>
                   <th className="px-4 py-3 font-medium">{t("col.reason", locale)}</th>
                   <th className="px-4 py-3 font-medium">{t("col.status", locale)}</th>
                   <th className="px-4 py-3 font-medium">{t("col.actions", locale)}</th>
@@ -232,7 +218,6 @@ export default async function AppointmentsPage({
                           {a.patient.firstName} {a.patient.lastName}
                         </Link>
                       </td>
-                      <td className="px-4 py-3 text-slate-600">{a.doctor.user.name}</td>
                       <td className="px-4 py-3 text-slate-500">{a.reason ?? "—"}</td>
                       <td className="px-4 py-3"><Badge color={STATUS_COLOR[a.status]}>{t(`apptStatus.${a.status}`, locale)}</Badge></td>
                       <td className="px-4 py-3"><AppointmentActions id={a.id} status={a.status} /></td>
