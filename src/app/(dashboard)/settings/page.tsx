@@ -13,6 +13,7 @@ import {
   BranchToggle,
   StaffForm,
   StaffToggle,
+  StaffAccessEditor,
   MedicationsManager,
 } from "./client";
 import { getLocale } from "@/lib/locale";
@@ -156,20 +157,31 @@ export default async function SettingsPage({
               </div>
               <div className="divide-y divide-slate-100">
                 {staff.map((u) => (
-                  <div key={u.id} className="flex items-center justify-between px-5 py-3">
-                    <div>
-                      <p className="font-medium text-slate-800">
-                        {u.name}
-                        {!u.isActive && <Badge color="red" className="mr-2">{t("set.disabled", locale)}</Badge>}
-                      </p>
-                      <p className="text-xs text-slate-400" dir="ltr">{u.email}</p>
+                  <div key={u.id} className="px-5 py-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-slate-800">
+                          {u.name}
+                          {u.title && <span className="mr-2 text-sm font-normal text-slate-500">— {u.title}</span>}
+                          {!u.isActive && <Badge color="red" className="mr-2">{t("set.disabled", locale)}</Badge>}
+                        </p>
+                        <p className="text-xs text-slate-400" dir="ltr">{u.email}</p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Badge color={u.role === "ADMIN" ? "blue" : u.role === "DOCTOR" ? "green" : "slate"}>
+                          {t(`role.${u.role}`, locale)}
+                        </Badge>
+                        <StaffToggle id={u.id} isActive={u.isActive} self={u.id === session.id} />
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <Badge color={u.role === "ADMIN" ? "blue" : u.role === "DOCTOR" ? "green" : "slate"}>
-                        {t(`role.${u.role}`, locale)}
-                      </Badge>
-                      <StaffToggle id={u.id} isActive={u.isActive} self={u.id === session.id} />
-                    </div>
+                    {u.role !== "ADMIN" && (
+                      <StaffAccessEditor
+                        id={u.id}
+                        role={u.role}
+                        title={u.title}
+                        permissions={u.permissions}
+                      />
+                    )}
                   </div>
                 ))}
               </div>

@@ -29,6 +29,8 @@ model User {
   email        String   @unique
   passwordHash String
   role         Role     @default(RECEPTIONIST)
+  title        String? // المسمى الوظيفي (يحدده الأدمن)
+  permissions  String[] // الأقسام المسموح بها لغير الأدمن
   phone        String?
   isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())

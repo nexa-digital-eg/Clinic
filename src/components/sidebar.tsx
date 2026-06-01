@@ -22,35 +22,44 @@ import {
 } from "lucide-react";
 
 const NAV = [
-  { href: "/dashboard", key: "nav.dashboard", icon: LayoutDashboard },
-  { href: "/patients", key: "nav.patients", icon: Users },
-  { href: "/appointments", key: "nav.appointments", icon: CalendarDays },
-  { href: "/queue", key: "nav.queue", icon: ListOrdered },
-  { href: "/dental-chart", key: "nav.dentalChart", icon: Stethoscope },
-  { href: "/billing", key: "nav.billing", icon: Receipt },
-  { href: "/treasury", key: "nav.treasury", icon: Wallet },
-  { href: "/packages", key: "nav.packages", icon: Package },
-  { href: "/reminders", key: "nav.reminders", icon: Bell },
-  { href: "/inventory", key: "nav.inventory", icon: Boxes },
-  { href: "/whatsapp", key: "nav.whatsapp", icon: MessageCircle },
-  { href: "/assistant", key: "nav.assistant", icon: Brain },
-  { href: "/reports", key: "nav.reports", icon: BarChart3 },
+  { href: "/dashboard", key: "nav.dashboard", icon: LayoutDashboard, section: "dashboard" },
+  { href: "/patients", key: "nav.patients", icon: Users, section: "patients" },
+  { href: "/appointments", key: "nav.appointments", icon: CalendarDays, section: "appointments" },
+  { href: "/queue", key: "nav.queue", icon: ListOrdered, section: "queue" },
+  { href: "/dental-chart", key: "nav.dentalChart", icon: Stethoscope, section: "dental-chart" },
+  { href: "/billing", key: "nav.billing", icon: Receipt, section: "billing" },
+  { href: "/treasury", key: "nav.treasury", icon: Wallet, section: "treasury" },
+  { href: "/packages", key: "nav.packages", icon: Package, section: "packages" },
+  { href: "/reminders", key: "nav.reminders", icon: Bell, section: "reminders" },
+  { href: "/inventory", key: "nav.inventory", icon: Boxes, section: "inventory" },
+  { href: "/whatsapp", key: "nav.whatsapp", icon: MessageCircle, section: "whatsapp" },
+  { href: "/assistant", key: "nav.assistant", icon: Brain, section: "assistant" },
+  { href: "/reports", key: "nav.reports", icon: BarChart3, section: "reports" },
   { href: "/settings", key: "nav.settings", icon: Settings, adminOnly: true },
 ];
 
 export function Sidebar({
   role,
+  permissions = [],
   locale = "ar",
   clinicName = "Smart Clinic",
   logoUrl,
 }: {
   role?: string;
+  permissions?: string[];
   locale?: Locale;
   clinicName?: string;
   logoUrl?: string | null;
 }) {
   const pathname = usePathname();
-  const nav = NAV.filter((n) => !n.adminOnly || role === "ADMIN");
+  const isAdmin = role === "ADMIN";
+  const nav = NAV.filter((n) => {
+    if (isAdmin) return true;
+    if (n.adminOnly) return false;
+    // dashboard متاح دائماً، والباقي حسب الصلاحيات
+    if (n.section === "dashboard" || !n.section) return true;
+    return permissions.includes(n.section);
+  });
 
   return (
     <aside className="flex w-64 flex-col border-l border-slate-200 bg-white">

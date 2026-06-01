@@ -1,5 +1,8 @@
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { getSession } from "@/lib/auth";
+import { db } from "@/lib/db";
+import { canAccessPath } from "@/lib/permissions";
 import { Sidebar } from "@/components/sidebar";
 import { LanguageToggle } from "@/components/language-toggle";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -20,10 +23,23 @@ export default async function DashboardLayout({
   const locale = await getLocale();
   const clinic = await getClinicSettings();
 
+  // اجلب صلاحيات المستخدم الحالية من القاعدة (تتحدّث فوراً عند تعديل الأدمن)
+  const me = await db.user.findUnique({
+    where: { id: session.id },
+    select: { role: true, title: true, permissions: true, isActive: true },
+  });
+  if (!me || !me.isActive) redirect("/login");
+
+  // افرض الصلاحية على المسار الحالي
+  const pathname = (await headers()).get("x-pathname") ?? "";
+  if (pathname && !canAccessPath(pathname, me.role, me.permissions)) {
+    redirect("/dashboard");
+  }
+
   return (
     <LocaleProvider locale={locale}>
     <div className="flex h-screen overflow-hidden bg-slate-50">
-      <Sidebar role={session.role} locale={locale} clinicName={clinic.name} logoUrl={clinic.logoUrl} />
+      <Sidebar role={me.role} permissions={me.permissions} locale={locale} clinicName={clinic.name} logoUrl={clinic.logoUrl} />
       <div className="flex flex-1 flex-col overflow-hidden">
         <header className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-3">
           <div className="flex items-center gap-1">
@@ -36,7 +52,7 @@ export default async function DashboardLayout({
                 {session.name}
               </p>
               <p className="text-xs text-slate-400">
-                {t(`role.${session.role}`, locale)}
+                {me.title || t(`role.${me.role}`, locale)}
               </p>
             </div>
             <form action={logout}>

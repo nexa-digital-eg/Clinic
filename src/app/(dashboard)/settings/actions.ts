@@ -111,6 +111,7 @@ const staffSchema = z.object({
   email: z.string().email("بريد غير صحيح"),
   password: z.string().min(6, "كلمة المرور 6 أحرف على الأقل"),
   role: z.enum(["ADMIN", "DOCTOR", "RECEPTIONIST"]),
+  title: z.string().optional(),
   specialty: z.string().optional(),
   branchId: z.string().optional(),
 });
@@ -127,12 +128,17 @@ export async function createStaff(
   const exists = await db.user.findUnique({ where: { email: d.email.toLowerCase() } });
   if (exists) return { error: "البريد مستخدم بالفعل" };
 
+  // الأقسام المسموح بها (تأتي كقيم متعددة باسم permissions)
+  const permissions = formData.getAll("permissions").map(String).filter(Boolean);
+
   const user = await db.user.create({
     data: {
       name: d.name,
       email: d.email.toLowerCase(),
       passwordHash: await hashPassword(d.password),
       role: d.role as Role,
+      title: d.title?.trim() || null,
+      permissions,
       branchId: d.branchId || null,
     },
   });
@@ -158,6 +164,23 @@ export async function toggleStaff(id: string, isActive: boolean) {
   if (session.id === id) return; // لا يعطّل نفسه
   await db.user.update({ where: { id }, data: { isActive } });
   revalidatePath("/settings");
+}
+
+// تعديل المسمّى والصلاحيات لمستخدم قائم
+export async function updateStaffAccess(
+  id: string,
+  _prev: { error?: string; ok?: boolean } | undefined,
+  formData: FormData,
+): Promise<{ error?: string; ok?: boolean }> {
+  if (!(await requireAdmin())) return { error: "غير مصرح" };
+  const title = String(formData.get("title") ?? "").trim();
+  const permissions = formData.getAll("permissions").map(String).filter(Boolean);
+  await db.user.update({
+    where: { id },
+    data: { title: title || null, permissions },
+  });
+  revalidatePath("/settings");
+  return { ok: true };
 }
 
 /* ===== قائمة الأدوية (استيراد من إكسيل/CSV) ===== */

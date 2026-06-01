@@ -10,13 +10,15 @@ import {
   toggleBranch,
   createStaff,
   toggleStaff,
+  updateStaffAccess,
   importMedications,
   clearMedications,
 } from "./actions";
 import { Button, Card, Input, Label, Select, Textarea, Badge } from "@/components/ui";
 import { formatCurrency } from "@/lib/utils";
-import { Check, Power, Upload, Pill, Trash2, FileSpreadsheet } from "lucide-react";
+import { Check, Power, Upload, Pill, Trash2, FileSpreadsheet, ShieldCheck, ChevronDown } from "lucide-react";
 import { useT } from "@/lib/i18n-client";
+import { GRANTABLE_SECTIONS } from "@/lib/permissions";
 
 // يصغّر الصورة ويحوّلها إلى data URL (تُخزَّن في قاعدة البيانات مباشرة)
 function fileToDataUrl(file: File, maxDim = 400): Promise<string> {
@@ -269,6 +271,27 @@ export function BranchToggle({ id, isActive }: { id: string; isActive: boolean }
 }
 
 /* ===== المستخدمون ===== */
+// قائمة اختيار الأقسام المسموح بها
+function PermissionChecklist({ selected }: { selected?: string[] }) {
+  const tr = useT();
+  return (
+    <div className="grid grid-cols-2 gap-1.5 rounded-lg border border-slate-200 p-3">
+      {GRANTABLE_SECTIONS.map((s) => (
+        <label key={s.key} className="flex items-center gap-2 text-sm text-slate-600">
+          <input
+            type="checkbox"
+            name="permissions"
+            value={s.key}
+            defaultChecked={selected?.includes(s.key)}
+            className="h-4 w-4 rounded border-slate-300"
+          />
+          {tr(s.navKey)}
+        </label>
+      ))}
+    </div>
+  );
+}
+
 export function StaffForm({ branches }: { branches: { id: string; name: string }[] }) {
   const [state, action, pending] = useActionState(createStaff, undefined);
   const [role, setRole] = useState("RECEPTIONIST");
@@ -280,6 +303,10 @@ export function StaffForm({ branches }: { branches: { id: string; name: string }
         <div>
           <Label htmlFor="sname">{tr("col.name")}</Label>
           <Input id="sname" name="name" required />
+        </div>
+        <div>
+          <Label htmlFor="stitle">{tr("set.jobTitle")}</Label>
+          <Input id="stitle" name="title" placeholder={tr("set.jobTitleHint")} />
         </div>
         <div>
           <Label htmlFor="semail">{tr("form.email")}</Label>
@@ -312,10 +339,70 @@ export function StaffForm({ branches }: { branches: { id: string; name: string }
             ))}
           </Select>
         </div>
+        <div>
+          <Label>{tr("set.permissions")}</Label>
+          {role === "ADMIN" ? (
+            <p className="rounded-lg bg-brand-50 px-3 py-2 text-xs text-brand-700">{tr("set.adminAll")}</p>
+          ) : (
+            <>
+              <PermissionChecklist />
+              <p className="mt-1 text-xs text-slate-400">{tr("set.permHint")}</p>
+            </>
+          )}
+        </div>
         {state?.error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{state.error}</p>}
         {state?.ok && <p className="rounded-lg bg-green-50 px-3 py-2 text-sm text-green-600">{tr("set.userCreated")}</p>}
         <Button type="submit" className="w-full" disabled={pending}>{pending ? "..." : tr("set.createUser")}</Button>
       </form>
+    </div>
+  );
+}
+
+// محرّر المسمّى والصلاحيات لمستخدم قائم (قابل للطي)
+export function StaffAccessEditor({
+  id,
+  role,
+  title,
+  permissions,
+}: {
+  id: string;
+  role: string;
+  title: string | null;
+  permissions: string[];
+}) {
+  const tr = useT();
+  const [open, setOpen] = useState(false);
+  const bound = updateStaffAccess.bind(null, id);
+  const [state, action, pending] = useActionState(bound, undefined);
+
+  return (
+    <div className="mt-2">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-1 text-xs font-medium text-brand-600 hover:text-brand-700"
+      >
+        <ShieldCheck className="h-3.5 w-3.5" />
+        {tr("set.editAccess")}
+        <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        <form action={action} className="mt-2 space-y-2 rounded-lg bg-slate-50 p-3">
+          <div>
+            <Label htmlFor={`title-${id}`}>{tr("set.jobTitle")}</Label>
+            <Input id={`title-${id}`} name="title" defaultValue={title ?? ""} placeholder={tr("set.jobTitleHint")} />
+          </div>
+          {role === "ADMIN" ? (
+            <p className="rounded-lg bg-brand-50 px-3 py-2 text-xs text-brand-700">{tr("set.adminAll")}</p>
+          ) : (
+            <PermissionChecklist selected={permissions} />
+          )}
+          {state?.ok && <p className="text-xs text-green-600">{tr("set.saved")}</p>}
+          <Button type="submit" variant="secondary" className="w-full" disabled={pending}>
+            {pending ? "..." : tr("common.save")}
+          </Button>
+        </form>
+      )}
     </div>
   );
 }

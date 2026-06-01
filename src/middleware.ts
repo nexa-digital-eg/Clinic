@@ -41,7 +41,10 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  return NextResponse.next();
+  // مرّر المسار الحالي لمكوّنات الخادم لفرض الصلاحيات
+  const headers = new Headers(req.headers);
+  headers.set("x-pathname", pathname);
+  return NextResponse.next({ request: { headers } });
 }
 
 export const config = {
