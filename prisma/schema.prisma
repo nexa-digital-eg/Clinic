@@ -70,6 +70,7 @@ model Doctor {
   appointments  Appointment[]
   diagnoses     Diagnosis[]
   prescriptions Prescription[]
+  queueEntries  QueueEntry[]
 }
 
 // ============================================================
@@ -112,6 +113,7 @@ model Patient {
   reports        MedicalReport[]
   reminders      Reminder[]
   whatsappMessages WhatsAppMessage[]
+  queueEntries     QueueEntry[]
 
   @@index([phone])
   @@index([firstName, lastName])
@@ -514,4 +516,31 @@ model WhatsAppMessage {
 
   @@index([status, scheduledAt])
   @@index([patientId])
+}
+
+// ============================================================
+// قائمة الانتظار (Waiting Queue)
+// ============================================================
+
+enum QueueStatus {
+  WAITING // في الانتظار
+  IN_PROGRESS // جاري الكشف
+  DONE // تم
+  CANCELLED // ملغي
+}
+
+model QueueEntry {
+  id        String      @id @default(cuid())
+  patientId String?
+  patient   Patient?    @relation(fields: [patientId], references: [id])
+  name      String
+  phone     String
+  reason    String?
+  status    QueueStatus @default(WAITING)
+  doctorId  String?
+  doctor    Doctor?     @relation(fields: [doctorId], references: [id])
+  createdAt DateTime    @default(now())
+  calledAt  DateTime?
+
+  @@index([status, createdAt])
 }
