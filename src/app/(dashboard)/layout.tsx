@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
+import Link from "next/link";
 import { getSession } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { canAccessPath } from "@/lib/permissions";
@@ -47,14 +48,14 @@ export default async function DashboardLayout({
             <ThemeToggle />
           </div>
           <div className="flex items-center gap-4">
-            <div className={locale === "ar" ? "text-end" : "text-start"}>
+            <Link href="/account" className={`rounded-lg px-1 transition-colors hover:opacity-80 ${locale === "ar" ? "text-end" : "text-start"}`}>
               <p className="text-sm font-medium text-slate-800">
                 {session.name}
               </p>
               <p className="text-xs text-slate-400">
                 {me.title || t(`role.${me.role}`, locale)}
               </p>
-            </div>
+            </Link>
             <form action={logout}>
               <button
                 type="submit"
