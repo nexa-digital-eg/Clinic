@@ -227,6 +227,18 @@ const DICT: Record<string, { ar: string; en: string }> = {
   "settings.tabProcedures": { ar: "الإجراءات والأسعار", en: "Procedures & Prices" },
   "settings.tabBranches": { ar: "الفروع", en: "Branches" },
   "settings.tabStaff": { ar: "الأطباء والمستخدمين", en: "Doctors & Users" },
+  "settings.tabMedications": { ar: "قائمة الأدوية", en: "Medications" },
+  "med.title": { ar: "قائمة الأدوية", en: "Medications List" },
+  "med.desc": { ar: "ارفع شيت إكسيل بأسماء الأدوية لتظهر كاقتراحات أثناء كتابة الروشتة. ارفع الشيت في أي وقت لإضافة أدوية جديدة.", en: "Upload an Excel sheet of drug names to power autocomplete while writing prescriptions. Upload anytime to add more." },
+  "med.count": { ar: "عدد الأدوية المسجلة", en: "Registered medications" },
+  "med.upload": { ar: "رفع شيت إكسيل (.xlsx)", en: "Upload Excel sheet (.xlsx)" },
+  "med.uploading": { ar: "جارٍ الرفع والمعالجة...", en: "Uploading & processing..." },
+  "med.imported": { ar: "تمت إضافة/تحديث {n} دواء — الإجمالي الآن {total}", en: "Imported/updated {n} drugs — total now {total}" },
+  "med.clear": { ar: "حذف كل الأدوية", en: "Clear all" },
+  "med.clearConfirm": { ar: "حذف كل الأدوية المسجلة؟", en: "Delete all registered medications?" },
+  "med.cols": { ar: "الأعمدة المقبولة: اسم الدواء (إلزامي) — الشكل — التركيز — ملاحظات", en: "Accepted columns: drug name (required) — form — strength — notes" },
+  "med.sample": { ar: "عيّنة من الأدوية المسجلة", en: "Sample of registered medications" },
+  "med.none": { ar: "لا توجد أدوية مسجلة بعد", en: "No medications registered yet" },
 
   // مخطط الأسنان
   "dental.title": { ar: "مخطط الأسنان", en: "Dental Chart" },

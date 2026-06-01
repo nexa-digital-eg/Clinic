@@ -16,16 +16,18 @@ export default async function AssistantWorkspace({
   const { patientId } = await params;
   const locale = await getLocale();
 
-  const [patient, reports] = await Promise.all([
+  const [patient, reports, meds] = await Promise.all([
     db.patient.findUnique({ where: { id: patientId } }),
     db.medicalReport.findMany({
       where: { patientId },
       orderBy: { createdAt: "desc" },
       take: 5,
     }),
+    db.medication.findMany({ orderBy: { name: "asc" }, select: { name: true } }),
   ]);
 
   if (!patient) notFound();
+  const medications = meds.map((m) => m.name);
 
   return (
     <div className="space-y-6">
@@ -64,7 +66,7 @@ export default async function AssistantWorkspace({
       </div>
 
       {/* بناء روشتة */}
-      <PrescriptionBuilder patientId={patient.id} />
+      <PrescriptionBuilder patientId={patient.id} medications={medications} />
 
       {/* التقارير الأخيرة */}
       <Card>

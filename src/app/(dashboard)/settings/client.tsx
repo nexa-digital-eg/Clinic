@@ -10,10 +10,12 @@ import {
   toggleBranch,
   createStaff,
   toggleStaff,
+  importMedications,
+  clearMedications,
 } from "./actions";
-import { Button, Input, Label, Select, Textarea, Badge } from "@/components/ui";
+import { Button, Card, Input, Label, Select, Textarea, Badge } from "@/components/ui";
 import { formatCurrency } from "@/lib/utils";
-import { Check, Power, Upload } from "lucide-react";
+import { Check, Power, Upload, Pill, Trash2, FileSpreadsheet } from "lucide-react";
 import { useT } from "@/lib/i18n-client";
 
 // يصغّر الصورة ويحوّلها إلى data URL (تُخزَّن في قاعدة البيانات مباشرة)
@@ -330,5 +332,93 @@ export function StaffToggle({ id, isActive, self }: { id: string; isActive: bool
     >
       {isActive ? <Power className="h-4 w-4" /> : <Check className="h-4 w-4" />}
     </button>
+  );
+}
+
+export function MedicationsManager({
+  count,
+  sample,
+}: {
+  count: number;
+  sample: string[];
+}) {
+  const tr = useT();
+  const [state, action, pending] = useActionState(importMedications, undefined);
+  const [, startTransition] = useTransition();
+
+  return (
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <Card className="p-6 lg:col-span-1">
+        <div className="mb-3 flex items-center gap-2">
+          <Pill className="h-5 w-5 text-brand-600" />
+          <h2 className="font-semibold text-slate-800">{tr("med.title")}</h2>
+        </div>
+        <p className="mb-4 text-sm text-slate-500">{tr("med.desc")}</p>
+
+        <div className="mb-4 rounded-lg bg-brand-50 px-4 py-3">
+          <p className="text-xs text-slate-500">{tr("med.count")}</p>
+          <p className="text-2xl font-bold text-brand-700" dir="ltr">{count}</p>
+        </div>
+
+        <form action={action} className="space-y-3">
+          <Label htmlFor="file">{tr("med.upload")}</Label>
+          <input
+            id="file"
+            name="file"
+            type="file"
+            accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv"
+            required
+            className="block w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-600 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-brand-700"
+          />
+          <p className="text-xs text-slate-400">{tr("med.cols")}</p>
+          <Button type="submit" className="w-full" disabled={pending}>
+            <Upload className="h-4 w-4" />
+            {pending ? tr("med.uploading") : tr("med.upload")}
+          </Button>
+        </form>
+
+        {state?.error && (
+          <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{state.error}</p>
+        )}
+        {state?.ok && (
+          <p className="mt-3 rounded-lg bg-green-50 px-3 py-2 text-sm text-green-600">
+            {tr("med.imported")
+              .replace("{n}", String(state.added ?? 0))
+              .replace("{total}", String(state.total ?? 0))}
+          </p>
+        )}
+
+        {count > 0 && (
+          <button
+            type="button"
+            onClick={() => {
+              if (confirm(tr("med.clearConfirm"))) startTransition(() => clearMedications());
+            }}
+            className="mt-3 flex items-center gap-1.5 text-sm text-slate-400 hover:text-red-600"
+          >
+            <Trash2 className="h-4 w-4" />
+            {tr("med.clear")}
+          </button>
+        )}
+      </Card>
+
+      <Card className="p-6 lg:col-span-2">
+        <div className="mb-3 flex items-center gap-2">
+          <FileSpreadsheet className="h-5 w-5 text-slate-400" />
+          <h3 className="font-semibold text-slate-800">{tr("med.sample")}</h3>
+        </div>
+        {sample.length === 0 ? (
+          <p className="py-8 text-center text-sm text-slate-400">{tr("med.none")}</p>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {sample.map((n) => (
+              <span key={n} className="rounded-full bg-slate-100 px-3 py-1 text-sm text-slate-700">
+                {n}
+              </span>
+            ))}
+          </div>
+        )}
+      </Card>
+    </div>
   );
 }

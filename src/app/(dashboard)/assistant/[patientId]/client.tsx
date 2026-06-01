@@ -238,7 +238,13 @@ export function ReportPanel({ patientId }: { patientId: string }) {
 /* ============ بناء روشتة + بدائل + نموذج ============ */
 type Row = { id: number };
 
-export function PrescriptionBuilder({ patientId }: { patientId: string }) {
+export function PrescriptionBuilder({
+  patientId,
+  medications = [],
+}: {
+  patientId: string;
+  medications?: string[];
+}) {
   const tr = useT();
   const [state, action, pending] = useActionState(createPrescription, undefined);
   const [rows, setRows] = useState<Row[]>([{ id: 1 }]);
@@ -253,6 +259,14 @@ export function PrescriptionBuilder({ patientId }: { patientId: string }) {
   return (
     <Card className="p-5">
       <h3 className="mb-3 font-semibold text-slate-800">{tr("ai.newRx")}</h3>
+      {/* قائمة الاقتراح التلقائي لأسماء الأدوية (مرفوعة من شيت الإكسيل) */}
+      {medications.length > 0 && (
+        <datalist id="med-options">
+          {medications.map((m) => (
+            <option key={m} value={m} />
+          ))}
+        </datalist>
+      )}
       <form ref={formRef} action={action} className="space-y-3">
         <input type="hidden" name="patientId" value={patientId} />
 
@@ -261,7 +275,7 @@ export function PrescriptionBuilder({ patientId }: { patientId: string }) {
             <div key={r.id} className="grid grid-cols-1 gap-2 rounded-lg border border-slate-200 p-3 sm:grid-cols-12">
               <div className="sm:col-span-3">
                 <Label>{tr("ai.drug")}</Label>
-                <Input name="drugName" placeholder={tr("ai.drugName")} />
+                <Input name="drugName" placeholder={tr("ai.drugName")} list="med-options" autoComplete="off" />
               </div>
               <div className="sm:col-span-2">
                 <Label>{tr("ai.dose")}</Label>

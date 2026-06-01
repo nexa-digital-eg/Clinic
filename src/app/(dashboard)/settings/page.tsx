@@ -13,6 +13,7 @@ import {
   BranchToggle,
   StaffForm,
   StaffToggle,
+  MedicationsManager,
 } from "./client";
 import { getLocale } from "@/lib/locale";
 import { t } from "@/lib/i18n";
@@ -20,6 +21,7 @@ import { t } from "@/lib/i18n";
 const TABS = [
   { key: "clinic", labelKey: "settings.tabClinic" },
   { key: "procedures", labelKey: "settings.tabProcedures" },
+  { key: "medications", labelKey: "settings.tabMedications" },
   { key: "branches", labelKey: "settings.tabBranches" },
   { key: "staff", labelKey: "settings.tabStaff" },
 ];
@@ -42,7 +44,7 @@ export default async function SettingsPage({
   const { tab = "clinic" } = await searchParams;
   const locale = await getLocale();
 
-  const [clinic, procedures, branches, staff] = await Promise.all([
+  const [clinic, procedures, branches, staff, medCount, medSample] = await Promise.all([
     getClinicSettings(),
     db.procedure.findMany({ orderBy: { name: "asc" } }),
     db.branch.findMany({ orderBy: { createdAt: "asc" } }),
@@ -51,6 +53,8 @@ export default async function SettingsPage({
       orderBy: { createdAt: "asc" },
       include: { branch: true, doctor: true },
     }),
+    db.medication.count(),
+    db.medication.findMany({ orderBy: { name: "asc" }, take: 60, select: { name: true } }),
   ]);
 
   return (
@@ -173,6 +177,13 @@ export default async function SettingsPage({
           </div>
           <StaffForm branches={branches.map((b) => ({ id: b.id, name: b.name }))} />
         </div>
+      )}
+
+      {tab === "medications" && (
+        <MedicationsManager
+          count={medCount}
+          sample={medSample.map((m) => m.name)}
+        />
       )}
     </div>
   );

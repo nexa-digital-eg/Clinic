@@ -56,6 +56,14 @@ export default async function PatientProfile({
 
   if (!patient) notFound();
 
+  // أسماء الأدوية للاقتراح التلقائي في الروشتة
+  const medications =
+    tab === "prescriptions"
+      ? (await db.medication.findMany({ orderBy: { name: "asc" }, select: { name: true } })).map(
+          (m) => m.name,
+        )
+      : [];
+
   const age = calcAge(patient.birthDate);
   const addComplaintBound = addComplaint.bind(null, patient.id);
   const addDiagnosisBound = addDiagnosis.bind(null, patient.id);
@@ -175,7 +183,7 @@ export default async function PatientProfile({
 
       {tab === "prescriptions" && (
         <div className="space-y-4">
-          <PrescriptionBuilder patientId={patient.id} />
+          <PrescriptionBuilder patientId={patient.id} medications={medications} />
           {patient.prescriptions.length === 0 ? (
             <EmptyState title={t("profile.noPrescriptions", locale)} />
           ) : (

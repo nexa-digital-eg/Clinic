@@ -159,3 +159,85 @@ export async function toggleStaff(id: string, isActive: boolean) {
   await db.user.update({ where: { id }, data: { isActive } });
   revalidatePath("/settings");
 }
+
+/* ===== قائمة الأدوية (استيراد من إكسيل/CSV) ===== */
+
+// يقرأ شيت إكسيل (xlsx/xls) أو CSV ويستخرج صفوف الأدوية
+// الأعمدة المتوقعة (عربي أو إنجليزي): اسم الدواء/name، الشكل/form، التركيز/strength، ملاحظات/notes
+async function parseMedicationSheet(
+  file: File,
+): Promise<{ name: string; form?: string; strength?: string; notes?: string }[]> {
+  const XLSX = await import("xlsx");
+  const buf = Buffer.from(await file.arrayBuffer());
+  const wb = XLSX.read(buf, { type: "buffer" });
+  const sheet = wb.Sheets[wb.SheetNames[0]];
+  if (!sheet) return [];
+  const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: "" });
+
+  const pick = (row: Record<string, unknown>, keys: string[]): string => {
+    for (const k of Object.keys(row)) {
+      const norm = k.trim().toLowerCase();
+      if (keys.some((c) => norm === c || norm.includes(c))) {
+        const v = String(row[k] ?? "").trim();
+        if (v) return v;
+      }
+    }
+    return "";
+  };
+
+  const out: { name: string; form?: string; strength?: string; notes?: string }[] = [];
+  for (const row of rows) {
+    const name = pick(row, ["name", "الدواء", "اسم", "drug", "medication"]);
+    if (!name) continue;
+    out.push({
+      name,
+      form: pick(row, ["form", "الشكل", "شكل"]) || undefined,
+      strength: pick(row, ["strength", "التركيز", "تركيز", "dose"]) || undefined,
+      notes: pick(row, ["notes", "ملاحظات", "ملاحظة"]) || undefined,
+    });
+  }
+  return out;
+}
+
+export async function importMedications(
+  _prev: { error?: string; ok?: boolean; added?: number; total?: number } | undefined,
+  formData: FormData,
+): Promise<{ error?: string; ok?: boolean; added?: number; total?: number }> {
+  if (!(await requireAdmin())) return { error: "غير مصرح (للمدير فقط)" };
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) return { error: "اختر ملف إكسيل أولاً" };
+
+  let parsed: { name: string; form?: string; strength?: string; notes?: string }[];
+  try {
+    parsed = await parseMedicationSheet(file);
+  } catch {
+    return { error: "تعذّر قراءة الملف — تأكد أنه إكسيل (.xlsx) صحيح" };
+  }
+  if (parsed.length === 0) return { error: "لم يتم العثور على أعمدة أدوية في الملف" };
+
+  let added = 0;
+  for (const m of parsed) {
+    const name = m.name.trim();
+    if (!name) continue;
+    try {
+      await db.medication.upsert({
+        where: { name },
+        update: { form: m.form || null, strength: m.strength || null, notes: m.notes || null },
+        create: { name, form: m.form || null, strength: m.strength || null, notes: m.notes || null },
+      });
+      added++;
+    } catch {
+      // تجاهل الصفوف المكررة/غير الصالحة
+    }
+  }
+
+  const total = await db.medication.count();
+  revalidatePath("/settings");
+  return { ok: true, added, total };
+}
+
+export async function clearMedications() {
+  if (!(await requireAdmin())) return;
+  await db.medication.deleteMany();
+  revalidatePath("/settings");
+}

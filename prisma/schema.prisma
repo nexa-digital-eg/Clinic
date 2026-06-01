@@ -205,6 +205,18 @@ model PrescriptionTemplate {
   createdAt DateTime @default(now())
 }
 
+// قائمة الأدوية (للاقتراح التلقائي أثناء كتابة الروشتة) — تُرفع من شيت إكسيل
+model Medication {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  form      String? // الشكل الدوائي (أقراص/شراب/حقن...)
+  strength  String? // التركيز (مثال 500mg)
+  notes     String?
+  createdAt DateTime @default(now())
+
+  @@index([name])
+}
+
 // إعدادات العيادة (سجل واحد)
 model ClinicSettings {
   id        String   @id @default("clinic")
