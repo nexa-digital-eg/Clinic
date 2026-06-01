@@ -19,13 +19,13 @@ async function main() {
   });
 
   // مستخدم المدير
-  const adminPass = await bcrypt.hash("admin123", 10);
+  const adminPass = await bcrypt.hash("ahmedsaid00@!!", 10);
   await db.user.upsert({
-    where: { email: "admin@clinic.com" },
+    where: { email: "ahmedelsaidy847@gmail.com" },
     update: {},
     create: {
       name: "مدير النظام",
-      email: "admin@clinic.com",
+      email: "ahmedelsaidy847@gmail.com",
       passwordHash: adminPass,
       role: "ADMIN",
       branchId: branch.id,
