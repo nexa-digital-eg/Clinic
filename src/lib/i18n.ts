@@ -278,7 +278,7 @@ const DICT: Record<string, { ar: string; en: string }> = {
   "booking.title": { ar: "احجز موعدك أونلاين", en: "Book Your Appointment Online" },
   "booking.subtitle": { ar: "املأ البيانات وسنتواصل معك للتأكيد", en: "Fill in your details and we'll confirm" },
   "booking.successTitle": { ar: "تم استلام طلب الحجز ✅", en: "Booking request received ✅" },
-  "booking.successMsg": { ar: "سيتم التواصل معك لتأكيد الموعد. شكراً لاختيارك Smart Clinic.", en: "We'll contact you to confirm. Thank you for choosing Smart Clinic." },
+  "booking.successMsg": { ar: "سيتم التواصل معك لتأكيد الموعد. شكراً لاختيارك {name}.", en: "We'll contact you to confirm. Thank you for choosing {name}." },
   "booking.another": { ar: "حجز موعد آخر", en: "Book another" },
   "booking.confirm": { ar: "تأكيد الحجز", en: "Confirm Booking" },
   "booking.sending": { ar: "جارٍ الإرسال...", en: "Sending..." },

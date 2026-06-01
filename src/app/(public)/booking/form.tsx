@@ -8,7 +8,13 @@ import { useT } from "@/lib/i18n-client";
 
 type DoctorOpt = { id: string; name: string; specialty: string; branch: string };
 
-export function BookingForm({ doctors }: { doctors: DoctorOpt[] }) {
+export function BookingForm({
+  doctors,
+  clinicName,
+}: {
+  doctors: DoctorOpt[];
+  clinicName: string;
+}) {
   const [state, formAction, pending] = useActionState(bookOnline, undefined);
   const today = new Date().toISOString().slice(0, 10);
   const tr = useT();
@@ -18,7 +24,9 @@ export function BookingForm({ doctors }: { doctors: DoctorOpt[] }) {
       <Card className="p-10 text-center">
         <CheckCircle2 className="mx-auto mb-4 h-14 w-14 text-green-500" />
         <h1 className="text-xl font-bold text-slate-800">{tr("booking.successTitle")}</h1>
-        <p className="mt-2 text-sm text-slate-500">{tr("booking.successMsg")}</p>
+        <p className="mt-2 text-sm text-slate-500">
+          {tr("booking.successMsg").replace("{name}", clinicName)}
+        </p>
         <a
           href="/booking"
           className="mt-6 inline-block rounded-lg bg-brand-600 px-5 py-2 text-sm font-medium text-white hover:bg-brand-700"
