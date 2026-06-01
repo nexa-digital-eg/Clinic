@@ -317,6 +317,11 @@ const DICT: Record<string, { ar: string; en: string }> = {
   // مريض جديد
   "patientNew.title": { ar: "مريض جديد", en: "New Patient" },
   "patientNew.subtitle": { ar: "إضافة ملف مريض", en: "Add a patient record" },
+  "patientEdit.title": { ar: "تعديل بيانات المريض", en: "Edit Patient" },
+  "patientEdit.subtitle": { ar: "تحديث بيانات ملف المريض", en: "Update the patient record" },
+  "patientDelete.confirm": { ar: "هل تريد حذف هذا المريض وكل سجلاته نهائياً؟", en: "Delete this patient and all their records permanently?" },
+  "act.PATIENT_UPDATE": { ar: "عدّل بيانات مريض", en: "updated a patient" },
+  "act.PATIENT_DELETE": { ar: "حذف مريضاً", en: "deleted a patient" },
   "patientNew.save": { ar: "حفظ المريض", en: "Save Patient" },
 
   // حجز جديد

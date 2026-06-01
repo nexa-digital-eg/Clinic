@@ -4,7 +4,8 @@ import { Card, Badge, Button, Input, Label, Textarea, Select, EmptyState } from 
 import { formatDate, formatDateTime, formatCurrency, calcAge } from "@/lib/utils";
 import { addComplaint, addDiagnosis, addPayment } from "../actions";
 import Link from "next/link";
-import { ArrowRight, Phone, Mail, MapPin, Droplet } from "lucide-react";
+import { ArrowRight, Phone, Mail, MapPin, Droplet, Pencil } from "lucide-react";
+import { DeletePatientButton } from "./patient-actions";
 import { getLocale } from "@/lib/locale";
 import { t, type Locale } from "@/lib/i18n";
 import { PatientFiles } from "./patient-files";
@@ -98,6 +99,19 @@ export default async function PatientProfile({
             {formatCurrency(patient.balance, locale)}
           </p>
         </Card>
+        <div className="flex items-center gap-1">
+          <Link
+            href={`/patients/${patient.id}/edit`}
+            title={t("common.edit", locale)}
+            className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-brand-600"
+          >
+            <Pencil className="h-5 w-5" />
+          </Link>
+          <DeletePatientButton
+            id={patient.id}
+            name={`${patient.firstName} ${patient.lastName}`}
+          />
+        </div>
       </div>
 
       {/* بطاقة المعلومات السريعة */}

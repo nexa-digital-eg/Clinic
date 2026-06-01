@@ -62,6 +62,54 @@ export async function createPatient(
   redirect(`/patients/${patient.id}`);
 }
 
+export async function updatePatient(
+  id: string,
+  _prev: { error?: string } | undefined,
+  formData: FormData,
+): Promise<{ error?: string }> {
+  const session = await getSession();
+  if (!session) return { error: "غير مصرح" };
+
+  const parsed = patientSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) {
+    return { error: parsed.error.errors[0]?.message ?? "بيانات غير صحيحة" };
+  }
+  const d = parsed.data;
+
+  await db.patient.update({
+    where: { id },
+    data: {
+      firstName: d.firstName,
+      lastName: d.lastName,
+      phone: d.phone,
+      email: d.email || null,
+      gender: d.gender ? (d.gender as "MALE" | "FEMALE") : null,
+      birthDate: d.birthDate ? new Date(d.birthDate) : null,
+      address: d.address || null,
+      bloodType: d.bloodType || null,
+      allergies: d.allergies || null,
+      chronicConditions: d.chronicConditions || null,
+      notes: d.notes || null,
+    },
+  });
+
+  await logActivity("PATIENT_UPDATE", `${d.firstName} ${d.lastName}`);
+  revalidatePath(`/patients/${id}`);
+  revalidatePath("/patients");
+  redirect(`/patients/${id}`);
+}
+
+export async function deletePatient(id: string) {
+  const session = await getSession();
+  if (!session) return;
+  const patient = await db.patient.findUnique({ where: { id } });
+  if (!patient) return;
+  await db.patient.delete({ where: { id } });
+  await logActivity("PATIENT_DELETE", `${patient.firstName} ${patient.lastName}`);
+  revalidatePath("/patients");
+  redirect("/patients");
+}
+
 export async function addComplaint(patientId: string, formData: FormData) {
   const title = String(formData.get("title") ?? "").trim();
   if (!title) return;
