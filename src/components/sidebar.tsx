@@ -35,7 +35,7 @@ const NAV = [
   { href: "/whatsapp", key: "nav.whatsapp", icon: MessageCircle, section: "whatsapp" },
   { href: "/assistant", key: "nav.assistant", icon: Brain, section: "assistant" },
   { href: "/reports", key: "nav.reports", icon: BarChart3, section: "reports" },
-  { href: "/settings", key: "nav.settings", icon: Settings, adminOnly: true },
+  { href: "/settings", key: "nav.settings", icon: Settings, staffManager: true },
 ];
 
 export function Sidebar({
@@ -55,7 +55,8 @@ export function Sidebar({
   const isAdmin = role === "ADMIN";
   const nav = NAV.filter((n) => {
     if (isAdmin) return true;
-    if (n.adminOnly) return false;
+    // إدارة المستخدمين متاحة للطبيب أيضاً
+    if (n.staffManager) return role === "DOCTOR";
     // dashboard متاح دائماً، والباقي حسب الصلاحيات
     if (n.section === "dashboard" || !n.section) return true;
     return permissions.includes(n.section);

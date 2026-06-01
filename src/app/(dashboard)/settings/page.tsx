@@ -34,7 +34,8 @@ export default async function SettingsPage({
 }) {
   const session = await getSession();
   if (!session) redirect("/login");
-  if (session.role !== "ADMIN") {
+  const isAdmin = session.role === "ADMIN";
+  if (!isAdmin && session.role !== "DOCTOR") {
     return (
       <Card className="p-10 text-center">
         <p className="text-sm font-medium text-slate-600">For administrators only — هذه الصفحة متاحة للمدير فقط</p>
@@ -42,7 +43,9 @@ export default async function SettingsPage({
     );
   }
 
-  const { tab = "clinic" } = await searchParams;
+  // الطبيب يرى تبويب المستخدمين فقط
+  const tabs = isAdmin ? TABS : TABS.filter((t) => t.key === "staff");
+  const { tab = isAdmin ? "clinic" : "staff" } = await searchParams;
   const locale = await getLocale();
 
   const [clinic, procedures, branches, staff, medCount, medSample, securityLogs] = await Promise.all([
@@ -67,7 +70,7 @@ export default async function SettingsPage({
       </div>
 
       <div className="flex flex-wrap gap-1 border-b border-slate-200">
-        {TABS.map((tab2) => (
+        {tabs.map((tab2) => (
           <Link
             key={tab2.key}
             href={`/settings?tab=${tab2.key}`}
@@ -175,12 +178,15 @@ export default async function SettingsPage({
                         <StaffToggle id={u.id} isActive={u.isActive} self={u.id === session.id} />
                       </div>
                     </div>
-                    {u.role !== "ADMIN" && (
+                    {(isAdmin || u.role !== "ADMIN") && (
                       <StaffAccessEditor
                         id={u.id}
+                        name={u.name}
+                        email={u.email}
                         role={u.role}
                         title={u.title}
                         permissions={u.permissions}
+                        isSelf={u.id === session.id}
                       />
                     )}
                   </div>

@@ -51,6 +51,6 @@ export function canAccessPath(
   const section = pathToSection(pathname);
   if (section === null) return true; // مسار عام (غير مقيّد)
   if (section === "dashboard") return true; // متاح دائماً
-  if (section === "settings") return false; // للأدمن فقط
+  if (section === "settings") return role === "DOCTOR"; // المدير (أعلاه) أو الطبيب
   return permissions.includes(section);
 }

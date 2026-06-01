@@ -10,7 +10,8 @@ import {
   toggleBranch,
   createStaff,
   toggleStaff,
-  updateStaffAccess,
+  updateStaff,
+  deleteStaff,
   importMedications,
   clearMedications,
 } from "./actions";
@@ -358,22 +359,30 @@ export function StaffForm({ branches }: { branches: { id: string; name: string }
   );
 }
 
-// محرّر المسمّى والصلاحيات لمستخدم قائم (قابل للطي)
+// محرّر بيانات المستخدم (الاسم/البريد/الدور/المسمى/الصلاحيات) + الحذف
 export function StaffAccessEditor({
   id,
+  name,
+  email,
   role,
   title,
   permissions,
+  isSelf,
 }: {
   id: string;
+  name: string;
+  email: string;
   role: string;
   title: string | null;
   permissions: string[];
+  isSelf: boolean;
 }) {
   const tr = useT();
   const [open, setOpen] = useState(false);
-  const bound = updateStaffAccess.bind(null, id);
+  const [curRole, setCurRole] = useState(role);
+  const bound = updateStaff.bind(null, id);
   const [state, action, pending] = useActionState(bound, undefined);
+  const [deleting, startDelete] = useTransition();
 
   return (
     <div className="mt-2">
@@ -383,24 +392,63 @@ export function StaffAccessEditor({
         className="flex items-center gap-1 text-xs font-medium text-brand-600 hover:text-brand-700"
       >
         <ShieldCheck className="h-3.5 w-3.5" />
-        {tr("set.editAccess")}
+        {tr("set.editUser")}
         <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
       {open && (
         <form action={action} className="mt-2 space-y-2 rounded-lg bg-slate-50 p-3">
-          <div>
-            <Label htmlFor={`title-${id}`}>{tr("set.jobTitle")}</Label>
-            <Input id={`title-${id}`} name="title" defaultValue={title ?? ""} placeholder={tr("set.jobTitleHint")} />
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <div>
+              <Label htmlFor={`name-${id}`}>{tr("col.name")}</Label>
+              <Input id={`name-${id}`} name="name" defaultValue={name} required />
+            </div>
+            <div>
+              <Label htmlFor={`email-${id}`}>{tr("form.email")}</Label>
+              <Input id={`email-${id}`} name="email" type="email" dir="ltr" defaultValue={email} required />
+            </div>
+            <div>
+              <Label htmlFor={`role-${id}`}>{tr("set.userRole")}</Label>
+              <Select id={`role-${id}`} name="role" value={curRole} onChange={(e) => setCurRole(e.target.value)}>
+                <option value="RECEPTIONIST">{tr("role.RECEPTIONIST")}</option>
+                <option value="DOCTOR">{tr("role.DOCTOR")}</option>
+                <option value="ADMIN">{tr("role.ADMIN")}</option>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor={`title-${id}`}>{tr("set.jobTitle")}</Label>
+              <Input id={`title-${id}`} name="title" defaultValue={title ?? ""} placeholder={tr("set.jobTitleHint")} />
+            </div>
           </div>
-          {role === "ADMIN" ? (
+          {curRole === "ADMIN" ? (
             <p className="rounded-lg bg-brand-50 px-3 py-2 text-xs text-brand-700">{tr("set.adminAll")}</p>
           ) : (
             <PermissionChecklist selected={permissions} />
           )}
+          {state?.error && <p className="text-xs text-red-600">{state.error}</p>}
           {state?.ok && <p className="text-xs text-green-600">{tr("set.saved")}</p>}
-          <Button type="submit" variant="secondary" className="w-full" disabled={pending}>
-            {pending ? "..." : tr("common.save")}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button type="submit" variant="secondary" className="flex-1" disabled={pending}>
+              {pending ? "..." : tr("common.save")}
+            </Button>
+            {!isSelf && (
+              <button
+                type="button"
+                disabled={deleting}
+                onClick={() => {
+                  if (confirm(`${tr("set.deleteUserConfirm")}\n${name}`)) {
+                    startDelete(async () => {
+                      const res = await deleteStaff(id);
+                      if (res?.error) alert(res.error);
+                    });
+                  }
+                }}
+                className="flex items-center gap-1 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-100 disabled:opacity-50"
+              >
+                <Trash2 className="h-4 w-4" />
+                {tr("common.delete")}
+              </button>
+            )}
+          </div>
         </form>
       )}
     </div>

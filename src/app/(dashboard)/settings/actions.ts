@@ -13,6 +13,13 @@ async function requireAdmin() {
   return session;
 }
 
+// إدارة المستخدمين متاحة للمدير والطبيب
+async function requireStaffManager() {
+  const session = await getSession();
+  if (!session || (session.role !== "ADMIN" && session.role !== "DOCTOR")) return null;
+  return session;
+}
+
 /* ===== بيانات العيادة ===== */
 export async function updateClinic(
   _prev: { error?: string; ok?: boolean } | undefined,
@@ -122,10 +129,13 @@ export async function createStaff(
   _prev: { error?: string; ok?: boolean } | undefined,
   formData: FormData,
 ): Promise<{ error?: string; ok?: boolean }> {
-  if (!(await requireAdmin())) return { error: "غير مصرح" };
+  const actor = await requireStaffManager();
+  if (!actor) return { error: "غير مصرح" };
   const parsed = staffSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: parsed.error.errors[0]?.message ?? "بيانات غير صحيحة" };
   const d = parsed.data;
+  // الطبيب لا يستطيع إنشاء مدير
+  if (actor.role !== "ADMIN" && d.role === "ADMIN") return { error: "لا يمكنك إنشاء مدير" };
 
   const exists = await db.user.findUnique({ where: { email: d.email.toLowerCase() } });
   if (exists) return { error: "البريد مستخدم بالفعل" };
@@ -162,27 +172,90 @@ export async function createStaff(
 }
 
 export async function toggleStaff(id: string, isActive: boolean) {
-  const session = await requireAdmin();
-  if (!session) return;
-  if (session.id === id) return; // لا يعطّل نفسه
+  const actor = await requireStaffManager();
+  if (!actor) return;
+  if (actor.id === id) return; // لا يعطّل نفسه
+  const target = await db.user.findUnique({ where: { id }, select: { role: true } });
+  if (!target) return;
+  if (actor.role !== "ADMIN" && target.role === "ADMIN") return; // الطبيب لا يدير المدير
   await db.user.update({ where: { id }, data: { isActive } });
+  await logActivity("STAFF_TOGGLE", isActive ? "تفعيل" : "تعطيل");
   revalidatePath("/settings");
 }
 
-// تعديل المسمّى والصلاحيات لمستخدم قائم
-export async function updateStaffAccess(
+// تعديل اسم/بريد/دور المستخدم
+const editStaffSchema = z.object({
+  name: z.string().min(1, "الاسم مطلوب"),
+  email: z.string().email("بريد غير صحيح"),
+  role: z.enum(["ADMIN", "DOCTOR", "RECEPTIONIST"]),
+  title: z.string().optional(),
+});
+
+export async function updateStaff(
   id: string,
   _prev: { error?: string; ok?: boolean } | undefined,
   formData: FormData,
 ): Promise<{ error?: string; ok?: boolean }> {
-  if (!(await requireAdmin())) return { error: "غير مصرح" };
-  const title = String(formData.get("title") ?? "").trim();
+  const actor = await requireStaffManager();
+  if (!actor) return { error: "غير مصرح" };
+  const target = await db.user.findUnique({ where: { id } });
+  if (!target) return { error: "المستخدم غير موجود" };
+  if (actor.role !== "ADMIN" && target.role === "ADMIN") return { error: "لا يمكنك تعديل مدير" };
+
+  const parsed = editStaffSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { error: parsed.error.errors[0]?.message ?? "بيانات غير صحيحة" };
+  const d = parsed.data;
+
+  // منع الطبيب من ترقية أي مستخدم لمدير
+  let role: "ADMIN" | "DOCTOR" | "RECEPTIONIST" = d.role;
+  if (actor.role !== "ADMIN" && role === "ADMIN" && target.role !== "PATIENT") {
+    role = target.role as "ADMIN" | "DOCTOR" | "RECEPTIONIST";
+  }
+
+  const email = d.email.toLowerCase();
+  if (email !== target.email) {
+    const exists = await db.user.findUnique({ where: { email } });
+    if (exists) return { error: "البريد مستخدم بالفعل" };
+  }
+
   const permissions = formData.getAll("permissions").map(String).filter(Boolean);
+
   await db.user.update({
     where: { id },
-    data: { title: title || null, permissions },
+    data: {
+      name: d.name,
+      email,
+      title: d.title?.trim() || null,
+      role: role as Role,
+      permissions,
+    },
   });
-  await logActivity("STAFF_ACCESS");
+
+  // لو أصبح طبيباً ولا يملك سجل طبيب، أنشئه
+  if (role === "DOCTOR") {
+    const doc = await db.doctor.findUnique({ where: { userId: id } });
+    if (!doc) await db.doctor.create({ data: { userId: id } });
+  }
+
+  await logActivity("STAFF_UPDATE", d.name);
+  revalidatePath("/settings");
+  return { ok: true };
+}
+
+export async function deleteStaff(id: string): Promise<{ error?: string; ok?: boolean }> {
+  const actor = await requireStaffManager();
+  if (!actor) return { error: "غير مصرح" };
+  if (actor.id === id) return { error: "لا يمكنك حذف حسابك" };
+  const target = await db.user.findUnique({ where: { id } });
+  if (!target) return { error: "المستخدم غير موجود" };
+  if (actor.role !== "ADMIN" && target.role === "ADMIN") return { error: "لا يمكنك حذف مدير" };
+
+  try {
+    await db.user.delete({ where: { id } });
+  } catch {
+    return { error: "تعذّر الحذف — لدى المستخدم سجلات مرتبطة (حجوزات/تشخيصات). يمكنك تعطيله بدلاً من حذفه." };
+  }
+  await logActivity("STAFF_DELETE", target.name);
   revalidatePath("/settings");
   return { ok: true };
 }
