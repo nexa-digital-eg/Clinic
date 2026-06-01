@@ -21,3 +21,67 @@ body {
   background: #cbd5e1;
   border-radius: 4px;
 }
+
+/* ============================================================
+   الوضع الداكن (Dark Mode) — يُطبَّق بإضافة class="dark" على <html>
+   نُعيد تعيين ألوان الـ utilities الشائعة دفعة واحدة لتغطية كل الصفحات
+   ============================================================ */
+.dark {
+  --background: #0b1120;
+  --foreground: #e2e8f0;
+  color-scheme: dark;
+}
+
+/* الخلفيات */
+.dark .bg-white { background-color: #1e293b !important; }
+.dark .bg-slate-50 { background-color: #0f172a !important; }
+.dark .bg-slate-100 { background-color: #334155 !important; }
+
+/* النصوص */
+.dark .text-slate-800 { color: #f1f5f9 !important; }
+.dark .text-slate-700 { color: #e2e8f0 !important; }
+.dark .text-slate-600 { color: #cbd5e1 !important; }
+.dark .text-slate-500 { color: #94a3b8 !important; }
+.dark .text-slate-400 { color: #64748b !important; }
+
+/* الحدود */
+.dark .border-slate-100 { border-color: #1e293b !important; }
+.dark .border-slate-200 { border-color: #334155 !important; }
+.dark .border-slate-300 { border-color: #475569 !important; }
+.dark .divide-slate-100 > * + * { border-color: #1e293b !important; }
+.dark .divide-slate-200 > * + * { border-color: #334155 !important; }
+
+/* الفواصل والظلال */
+.dark .shadow-sm { box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.4) !important; }
+
+/* حقول الإدخال */
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: #0f172a !important;
+  border-color: #475569 !important;
+  color: #e2e8f0 !important;
+}
+.dark input::placeholder,
+.dark textarea::placeholder { color: #64748b !important; }
+
+/* حالات hover الشائعة */
+.dark .hover\:bg-slate-50:hover { background-color: #1e293b !important; }
+.dark .hover\:bg-slate-100:hover { background-color: #334155 !important; }
+.dark .hover\:bg-slate-200:hover { background-color: #475569 !important; }
+
+/* تلوينات العلامات (badges/alerts) الخفيفة على خلفية داكنة */
+.dark .bg-brand-50 { background-color: rgba(37, 99, 235, 0.18) !important; }
+.dark .bg-brand-100 { background-color: rgba(37, 99, 235, 0.28) !important; }
+.dark .hover\:bg-brand-50:hover { background-color: rgba(37, 99, 235, 0.22) !important; }
+.dark .hover\:bg-brand-100:hover { background-color: rgba(37, 99, 235, 0.32) !important; }
+.dark .bg-green-50 { background-color: rgba(22, 163, 74, 0.18) !important; }
+.dark .bg-green-100 { background-color: rgba(22, 163, 74, 0.28) !important; }
+.dark .hover\:bg-green-50:hover { background-color: rgba(22, 163, 74, 0.22) !important; }
+.dark .bg-yellow-100 { background-color: rgba(202, 138, 4, 0.28) !important; }
+.dark .bg-red-50 { background-color: rgba(220, 38, 38, 0.18) !important; }
+.dark .bg-red-100 { background-color: rgba(220, 38, 38, 0.28) !important; }
+.dark .hover\:bg-red-50:hover { background-color: rgba(220, 38, 38, 0.22) !important; }
+
+/* شريط التمرير في الوضع الداكن */
+.dark ::-webkit-scrollbar-thumb { background: #475569; }

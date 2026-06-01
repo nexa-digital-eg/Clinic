@@ -42,6 +42,14 @@ export default async function RootLayout({
   const locale = await getLocale();
   return (
     <html lang={locale} dir={dirFor(locale)}>
+      <head>
+        {/* يطبّق الوضع المحفوظ قبل الرسم لمنع وميض الشاشة */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{if(localStorage.getItem('theme')==='dark'){document.documentElement.classList.add('dark')}}catch(e){}})();`,
+          }}
+        />
+      </head>
       <body className={`${cairo.variable} font-sans antialiased`}>
         {children}
       </body>

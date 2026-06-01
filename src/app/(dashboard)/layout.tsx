@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { Sidebar } from "@/components/sidebar";
 import { LanguageToggle } from "@/components/language-toggle";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { logout } from "../(auth)/actions";
 import { LogOut } from "lucide-react";
 import { getLocale } from "@/lib/locale";
@@ -25,7 +26,10 @@ export default async function DashboardLayout({
       <Sidebar role={session.role} locale={locale} clinicName={clinic.name} logoUrl={clinic.logoUrl} />
       <div className="flex flex-1 flex-col overflow-hidden">
         <header className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-3">
-          <LanguageToggle locale={locale} />
+          <div className="flex items-center gap-1">
+            <LanguageToggle locale={locale} />
+            <ThemeToggle />
+          </div>
           <div className="flex items-center gap-4">
             <div className={locale === "ar" ? "text-end" : "text-start"}>
               <p className="text-sm font-medium text-slate-800">
