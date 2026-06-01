@@ -1,8 +1,23 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { getSession, hashPassword, verifyPassword, createSession } from "@/lib/auth";
+import { getSession, hashPassword, verifyPassword, createSession, destroySession } from "@/lib/auth";
+import { logActivity } from "@/server/audit";
+
+// تسجيل الخروج فوراً من كل الأجهزة (يبطل كل الجلسات بما فيها الحالية)
+export async function logoutEverywhere() {
+  const session = await getSession();
+  if (!session) redirect("/login");
+  await db.user.update({
+    where: { id: session.id },
+    data: { sessionVersion: { increment: 1 } },
+  });
+  await logActivity("LOGOUT_ALL");
+  await destroySession();
+  redirect("/login");
+}
 
 export async function changeMyPassword(
   _prev: { error?: string; ok?: boolean } | undefined,
