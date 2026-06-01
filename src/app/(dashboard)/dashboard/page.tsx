@@ -20,6 +20,7 @@ import Link from "next/link";
 import { getLocale } from "@/lib/locale";
 import { getSession } from "@/lib/auth";
 import { t } from "@/lib/i18n";
+import { CountUp } from "@/components/count-up";
 
 export const dynamic = "force-dynamic";
 
@@ -102,10 +103,10 @@ export default async function DashboardPage() {
   const firstName = session?.name?.split(" ")[0] ?? "";
 
   const stats = [
-    { label: t("dashboard.totalPatients", locale), value: patientCount, icon: Users, href: "/patients", grad: "from-blue-500 to-indigo-600" },
-    { label: t("dashboard.todayAppointments", locale), value: todayAppointments, icon: CalendarDays, href: "/appointments", grad: "from-emerald-500 to-teal-600" },
-    { label: t("dashboard.waiting", locale), value: waitingCount, icon: ListOrdered, href: "/queue", grad: "from-violet-500 to-purple-600" },
-    { label: t("dashboard.outstanding", locale), value: formatCurrency(due, locale), icon: Receipt, href: "/billing", grad: "from-amber-500 to-orange-600" },
+    { label: t("dashboard.totalPatients", locale), value: patientCount, currency: false, icon: Users, href: "/patients", grad: "from-blue-500 to-indigo-600" },
+    { label: t("dashboard.todayAppointments", locale), value: todayAppointments, currency: false, icon: CalendarDays, href: "/appointments", grad: "from-emerald-500 to-teal-600" },
+    { label: t("dashboard.waiting", locale), value: waitingCount, currency: false, icon: ListOrdered, href: "/queue", grad: "from-violet-500 to-purple-600" },
+    { label: t("dashboard.outstanding", locale), value: due, currency: true, icon: Receipt, href: "/billing", grad: "from-amber-500 to-orange-600" },
   ];
 
   return (
@@ -124,11 +125,11 @@ export default async function DashboardPage() {
           <p className="mt-1 text-white/80">{t("dashboard.welcome", locale)}</p>
 
           <div className="mt-5 flex flex-wrap gap-5">
-            <HeroStat label={t("dashboard.todayIncome", locale)} value={formatCurrency(todayIncome, locale)} />
+            <HeroStat label={t("dashboard.todayIncome", locale)} value={todayIncome} currency />
             <div className="w-px bg-white/20" />
-            <HeroStat label={t("dashboard.monthNet", locale)} value={formatCurrency(monthNet, locale)} />
+            <HeroStat label={t("dashboard.monthNet", locale)} value={monthNet} currency />
             <div className="w-px bg-white/20" />
-            <HeroStat label={t("dashboard.todayAppointments", locale)} value={String(todayAppointments)} />
+            <HeroStat label={t("dashboard.todayAppointments", locale)} value={todayAppointments} />
           </div>
         </div>
       </div>
@@ -143,7 +144,7 @@ export default async function DashboardPage() {
                 <s.icon className="h-6 w-6" />
               </div>
               <p className="mt-3 text-sm text-slate-500">{s.label}</p>
-              <p className="mt-0.5 text-2xl font-bold text-slate-800">{s.value}</p>
+              <CountUp value={s.value} currency={s.currency} className="mt-0.5 block text-2xl font-bold text-slate-800" />
             </Card>
           </Link>
         ))}
@@ -160,9 +161,9 @@ export default async function DashboardPage() {
           </div>
 
           <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <MiniFin icon={TrendingUp} color="text-emerald-600" bg="bg-emerald-50" label={t("dashboard.monthIncome", locale)} value={formatCurrency(monthIncome, locale)} />
-            <MiniFin icon={TrendingDown} color="text-red-600" bg="bg-red-50" label={t("dashboard.monthExpense", locale)} value={formatCurrency(monthExpense, locale)} />
-            <MiniFin icon={Wallet} color="text-brand-600" bg="bg-brand-50" label={t("dashboard.monthNet", locale)} value={formatCurrency(monthNet, locale)} />
+            <MiniFin icon={TrendingUp} color="text-emerald-600" bg="bg-emerald-50" label={t("dashboard.monthIncome", locale)} value={monthIncome} />
+            <MiniFin icon={TrendingDown} color="text-red-600" bg="bg-red-50" label={t("dashboard.monthExpense", locale)} value={monthExpense} />
+            <MiniFin icon={Wallet} color="text-brand-600" bg="bg-brand-50" label={t("dashboard.monthNet", locale)} value={monthNet} />
           </div>
 
           <p className="mb-2 text-xs font-medium text-slate-400">{t("dashboard.revenue6m", locale)}</p>
@@ -262,11 +263,11 @@ export default async function DashboardPage() {
   );
 }
 
-function HeroStat({ label, value }: { label: string; value: string }) {
+function HeroStat({ label, value, currency = false }: { label: string; value: number; currency?: boolean }) {
   return (
     <div>
       <p className="text-xs text-white/70">{label}</p>
-      <p className="mt-0.5 text-xl font-bold" dir="ltr">{value}</p>
+      <CountUp value={value} currency={currency} className="mt-0.5 block text-xl font-bold" />
     </div>
   );
 }
@@ -282,7 +283,7 @@ function MiniFin({
   color: string;
   bg: string;
   label: string;
-  value: string;
+  value: number;
 }) {
   return (
     <div className="rounded-xl border border-slate-100 p-4">
@@ -290,7 +291,7 @@ function MiniFin({
         <Icon className="h-5 w-5" />
       </div>
       <p className="mt-2 text-xs text-slate-500">{label}</p>
-      <p className="mt-0.5 text-lg font-bold text-slate-800" dir="ltr">{value}</p>
+      <CountUp value={value} currency className="mt-0.5 block text-lg font-bold text-slate-800" />
     </div>
   );
 }

@@ -67,21 +67,22 @@ export function Sidebar({
       </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto p-3">
-        {nav.map(({ href, key, icon: Icon }) => {
+        {nav.map(({ href, key, icon: Icon }, i) => {
           const active =
             pathname === href || pathname.startsWith(href + "/");
           return (
             <Link
               key={href}
               href={href}
+              style={{ animationDelay: `${0.04 * i + 0.05}s` }}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                "nav-item group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 hover:translate-x-[-3px]",
                 active
-                  ? "bg-brand-50 text-brand-700"
+                  ? "bg-brand-50 text-brand-700 shadow-sm"
                   : "text-slate-600 hover:bg-slate-50",
               )}
             >
-              <Icon className="h-5 w-5" />
+              <Icon className={cn("h-5 w-5 transition-transform duration-200 group-hover:scale-110", active && "scale-110")} />
               {t(key, locale)}
             </Link>
           );
