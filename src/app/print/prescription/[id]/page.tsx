@@ -40,7 +40,7 @@ export default async function PrintPrescription({
             <p className="text-sm text-slate-500">{prescription.doctor.user.name}{prescription.doctor.specialty ? ` — ${prescription.doctor.specialty}` : ""}</p>
           )}
         </div>
-        <div className="text-end text-sm text-slate-600">
+        <div className="text-end text-sm text-slate-800">
           <p>{t("print.date", locale)}: {formatDate(prescription.createdAt, locale)}</p>
           <p>{t("print.patient", locale)}: {prescription.patient.firstName} {prescription.patient.lastName}</p>
           {age !== null && <p>{t("print.age", locale)}: {age} {t("common.years", locale)}</p>}
@@ -51,30 +51,30 @@ export default async function PrintPrescription({
 
       <ol className="mt-2 space-y-3">
         {prescription.items.map((it, i) => (
-          <li key={it.id} className="border-b border-slate-100 pb-2">
+          <li key={it.id} className="border-b border-slate-200 pb-2">
             <div className="flex items-baseline gap-2">
-              <span className="text-slate-400">{i + 1}.</span>
-              <span className="font-semibold text-slate-800">{it.drugName}</span>
-              {it.dose && <span className="text-sm text-slate-600">{it.dose}</span>}
+              <span className="font-semibold text-black">{i + 1}.</span>
+              <span className="text-lg font-bold text-black">{it.drugName}</span>
+              {it.dose && <span className="text-sm font-medium text-black">{it.dose}</span>}
             </div>
-            <div className="mr-6 text-sm text-slate-500">
+            <div className="mr-6 text-sm font-medium text-black">
               {[it.frequency, it.duration].filter(Boolean).join(" — ")}
-              {it.alternatives && <span className="block text-xs text-slate-400">{t("ai.alt", locale)}: {it.alternatives}</span>}
+              {it.alternatives && <span className="block text-xs text-slate-700">{t("ai.alt", locale)}: {it.alternatives}</span>}
             </div>
           </li>
         ))}
       </ol>
 
       {prescription.notes && (
-        <div className="mt-4 rounded-lg bg-slate-50 p-3 text-sm text-slate-600">
+        <div className="mt-4 rounded-lg bg-slate-50 p-3 text-sm text-black">
           <span className="font-medium">{t("print.notes", locale)}: </span>{prescription.notes}
         </div>
       )}
 
       <div className="mt-12 flex justify-start">
         <div className="text-center">
-          <div className="h-10 border-b border-slate-300" style={{ width: "12rem" }} />
-          <p className="mt-1 text-xs text-slate-400">{t("print.doctorSign", locale)}</p>
+          <div className="h-10 border-b border-slate-400" style={{ width: "12rem" }} />
+          <p className="mt-1 text-xs text-slate-600">{t("print.doctorSign", locale)}</p>
         </div>
       </div>
     </div>
