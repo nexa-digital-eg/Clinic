@@ -111,9 +111,9 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* الهيدر الترحيبي المتدرّج */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-600 via-brand-700 to-indigo-800 p-7 text-white shadow-lg">
-        <div className="absolute -right-10 -top-10 h-48 w-48 rounded-full bg-white/10" />
-        <div className="absolute -bottom-16 -left-8 h-56 w-56 rounded-full bg-white/5" />
+      <div className="shimmer animate-gradient relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-600 via-brand-700 to-indigo-800 p-7 text-white shadow-lg">
+        <div className="animate-float absolute -right-10 -top-10 h-48 w-48 rounded-full bg-white/10" />
+        <div className="animate-float-slow absolute -bottom-16 -left-8 h-56 w-56 rounded-full bg-white/5" />
         <div className="relative">
           <p className="text-sm text-white/70">
             {now.toLocaleDateString(locale === "ar" ? "ar-EG" : "en-GB", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
@@ -167,12 +167,12 @@ export default async function DashboardPage() {
 
           <p className="mb-2 text-xs font-medium text-slate-400">{t("dashboard.revenue6m", locale)}</p>
           <div className="flex h-40 items-end justify-between gap-2">
-            {months.map((m) => (
+            {months.map((m, i) => (
               <div key={m.label} className="flex flex-1 flex-col items-center gap-1.5">
                 <div className="flex w-full flex-1 items-end">
                   <div
-                    className="w-full rounded-t-lg bg-gradient-to-t from-brand-600 to-brand-400 transition-all hover:from-brand-700 hover:to-brand-500"
-                    style={{ height: `${Math.max(4, (m.total / maxMonth) * 100)}%` }}
+                    className="bar-grow w-full rounded-t-lg bg-gradient-to-t from-brand-600 to-brand-400 transition-all hover:from-brand-700 hover:to-brand-500"
+                    style={{ height: `${Math.max(4, (m.total / maxMonth) * 100)}%`, animationDelay: `${0.4 + i * 0.08}s` }}
                     title={formatCurrency(m.total, locale)}
                   />
                 </div>
