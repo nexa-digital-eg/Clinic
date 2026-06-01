@@ -115,5 +115,6 @@ export async function removeFromQueue(id: string) {
   const session = await getSession();
   if (!session) return;
   await db.queueEntry.delete({ where: { id } });
+  await logActivity("QUEUE_REMOVE");
   revalidatePath("/queue");
 }

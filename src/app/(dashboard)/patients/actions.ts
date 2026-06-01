@@ -124,6 +124,7 @@ export async function deletePatientFile(id: string) {
     }
   }
   await db.patientFile.delete({ where: { id } });
+  await logActivity("FILE_DELETE", file.name);
   revalidatePath(`/patients/${file.patientId}`);
 }
 

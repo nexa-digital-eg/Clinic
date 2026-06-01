@@ -42,5 +42,6 @@ export async function deleteExpense(id: string) {
   const session = await getSession();
   if (!session) return;
   await db.expense.delete({ where: { id } });
+  await logActivity("EXPENSE_DELETE");
   revalidatePath("/treasury");
 }

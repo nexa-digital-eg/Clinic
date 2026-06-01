@@ -35,6 +35,7 @@ export async function updateClinic(
     create: { id: "clinic", ...data },
   });
 
+  await logActivity("CLINIC_UPDATE");
   revalidatePath("/settings");
   return { ok: true };
 }
@@ -181,6 +182,7 @@ export async function updateStaffAccess(
     where: { id },
     data: { title: title || null, permissions },
   });
+  await logActivity("STAFF_ACCESS");
   revalidatePath("/settings");
   return { ok: true };
 }

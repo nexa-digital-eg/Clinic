@@ -113,6 +113,7 @@ export async function setToothStatus(
   const session = await getSession();
   if (!session) return;
   await db.toothRecord.update({ where: { id }, data: { status } });
+  await logActivity("TOOTH_STATUS", status);
   revalidatePath(`/dental-chart/${patientId}`);
 }
 
@@ -136,6 +137,7 @@ export async function deleteToothRecord(id: string, patientId: string) {
     });
   }
   await db.toothRecord.delete({ where: { id } });
+  await logActivity("TOOTH_DELETE");
 
   revalidatePath(`/dental-chart/${patientId}`);
   revalidatePath(`/patients/${patientId}`);

@@ -67,6 +67,7 @@ export async function updateAppointmentStatus(
   const session = await getSession();
   if (!session) return;
   await db.appointment.update({ where: { id }, data: { status } });
+  await logActivity("APPOINTMENT_STATUS", status);
   revalidatePath("/appointments");
 }
 
@@ -74,5 +75,6 @@ export async function deleteAppointment(id: string) {
   const session = await getSession();
   if (!session) return;
   await db.appointment.delete({ where: { id } });
+  await logActivity("APPOINTMENT_DELETE");
   revalidatePath("/appointments");
 }
