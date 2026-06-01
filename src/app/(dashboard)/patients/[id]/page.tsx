@@ -8,6 +8,7 @@ import { ArrowRight, Phone, Mail, MapPin, Droplet } from "lucide-react";
 import { getLocale } from "@/lib/locale";
 import { t, type Locale } from "@/lib/i18n";
 import { PatientFiles } from "./patient-files";
+import { PrescriptionBuilder } from "../../assistant/[patientId]/client";
 
 const TABS = [
   { key: "overview", labelKey: "tab.overview" },
@@ -173,7 +174,8 @@ export default async function PatientProfile({
       )}
 
       {tab === "prescriptions" && (
-        <div className="space-y-3">
+        <div className="space-y-4">
+          <PrescriptionBuilder patientId={patient.id} />
           {patient.prescriptions.length === 0 ? (
             <EmptyState title={t("profile.noPrescriptions", locale)} />
           ) : (
