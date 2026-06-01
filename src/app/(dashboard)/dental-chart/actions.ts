@@ -4,7 +4,6 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth";
-import { toothName } from "@/lib/teeth";
 import { getOrCreateOpenInvoice, recalcInvoice } from "@/server/billing";
 
 const schema = z.object({
@@ -56,7 +55,7 @@ export async function addToothRecord(
     await db.invoiceItem.create({
       data: {
         invoiceId: invoice.id,
-        description: `${procedureName} — سن ${d.toothNumber} (${toothName(d.toothNumber)})`,
+        description: `${procedureName} — سن ${d.toothNumber}`,
         procedureId: d.procedureId,
         toothRecordId: record.id,
         quantity: 1,
