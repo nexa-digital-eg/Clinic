@@ -4,6 +4,7 @@ import { useActionState, useState, useTransition, useEffect, useRef } from "reac
 import { teethPaths } from "@/lib/teeth-paths";
 import {
   addToothRecord,
+  addToothRecordsBulk,
   setToothStatus,
   deleteToothRecord,
 } from "../actions";
@@ -211,12 +212,14 @@ function ToothUnit({
   upper,
   records,
   selectedKey,
+  multiActive,
   onPick,
 }: {
   num: number;
   upper: boolean;
   records: Rec[];
   selectedKey: string | null;
+  multiActive?: boolean;
   onPick: (tooth: number, surface: string) => void;
 }) {
   const fillFor = (surface: string) => {
@@ -230,8 +233,8 @@ function ToothUnit({
     return rec.status === "done" ? "done" : "planned";
   })();
 
-  const sel = selectedKey?.startsWith(`${num}-`);
-  const selSurface = sel ? selectedKey!.slice(`${num}-`.length) : null;
+  const sel = selectedKey?.startsWith(`${num}-`) || multiActive;
+  const selSurface = selectedKey?.startsWith(`${num}-`) ? selectedKey!.slice(`${num}-`.length) : null;
   const tooth = (
     <RealTooth
       num={num}
@@ -246,7 +249,7 @@ function ToothUnit({
 
   return (
     <div
-      className={`flex shrink-0 flex-col items-center gap-0.5 rounded-lg px-1 py-1 ${sel ? "bg-brand-50 ring-1 ring-brand-300" : ""}`}
+      className={`flex shrink-0 flex-col items-center gap-0.5 rounded-lg px-1 py-1 ${multiActive ? "bg-brand-100 ring-2 ring-brand-500" : sel ? "bg-brand-50 ring-1 ring-brand-300" : ""}`}
     >
       {upper ? (
         <>
@@ -281,6 +284,14 @@ export function ToothChart({
   const [state, formAction, pending] = useActionState(addToothRecord, undefined);
   const [, startTransition] = useTransition();
 
+  // وضع تحديد عدّة أسنان
+  const [multiMode, setMultiMode] = useState(false);
+  const [multi, setMulti] = useState<number[]>([]);
+  const [bulkSurface, setBulkSurface] = useState<string>("whole");
+  const [bulkProcedure, setBulkProcedure] = useState<string>("");
+  const [bulkNotes, setBulkNotes] = useState<string>("");
+  const [bulkPending, startBulk] = useTransition();
+
   const upperTeeth = dentition === "permanent" ? UPPER_TEETH : UPPER_PRIMARY_TEETH;
   const lowerTeeth = dentition === "permanent" ? LOWER_TEETH : LOWER_PRIMARY_TEETH;
 
@@ -295,15 +306,37 @@ export function ToothChart({
   }
 
   const selectedKey = selected ? `${selected.tooth}-${selected.surface}` : null;
-  const pick = (tooth: number, surface: string) => setSelected({ tooth, surface });
+  const pick = (tooth: number, surface: string) => {
+    if (multiMode) {
+      setMulti((prev) => (prev.includes(tooth) ? prev.filter((t) => t !== tooth) : [...prev, tooth]));
+    } else {
+      setSelected({ tooth, surface });
+    }
+  };
+
+  const submitBulk = () => {
+    if (multi.length === 0) return;
+    startBulk(async () => {
+      await addToothRecordsBulk(
+        patientId,
+        multi,
+        bulkSurface || null,
+        bulkProcedure || null,
+        bulkNotes || null,
+      );
+      setMulti([]);
+      setBulkNotes("");
+      setBulkProcedure("");
+    });
+  };
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
       <ChartDefs />
       <div className="space-y-4 lg:col-span-2">
         <Card className="p-6">
-          {/* تبديل دائمة / لبنية */}
-          <div className="mb-4 flex justify-center">
+          {/* تبديل دائمة / لبنية + وضع التحديد المتعدد */}
+          <div className="mb-4 flex flex-wrap items-center justify-center gap-3">
             <div className="inline-flex rounded-lg bg-slate-100 p-1">
               <button
                 onClick={() => { setDentition("permanent"); setSelected(null); }}
@@ -318,13 +351,19 @@ export function ToothChart({
                 {tr("dent.primary")}
               </button>
             </div>
+            <button
+              onClick={() => { setMultiMode((v) => !v); setMulti([]); setSelected(null); }}
+              className={`rounded-lg border px-4 py-1.5 text-sm font-medium transition-colors ${multiMode ? "border-brand-600 bg-brand-600 text-white" : "border-slate-300 text-slate-600 hover:border-brand-400"}`}
+            >
+              {multiMode ? tr("dent.multiOn") : tr("dent.multiSelect")}
+            </button>
           </div>
 
           {/* الفك العلوي */}
           <p className="mb-1 text-center text-xs text-slate-400">{tr("dent.upper")}</p>
           <div className="flex justify-start gap-0.5 overflow-x-auto pb-2 sm:justify-center">
             {upperTeeth.map((n) => (
-              <ToothUnit key={n} num={n} upper records={recordsByTooth.get(n) ?? []} selectedKey={selectedKey} onPick={pick} />
+              <ToothUnit key={n} num={n} upper records={recordsByTooth.get(n) ?? []} selectedKey={selectedKey} multiActive={multi.includes(n)} onPick={pick} />
             ))}
           </div>
 
@@ -333,7 +372,7 @@ export function ToothChart({
           {/* الفك السفلي */}
           <div className="flex justify-start gap-0.5 overflow-x-auto pt-1 sm:justify-center">
             {lowerTeeth.map((n) => (
-              <ToothUnit key={n} num={n} upper={false} records={recordsByTooth.get(n) ?? []} selectedKey={selectedKey} onPick={pick} />
+              <ToothUnit key={n} num={n} upper={false} records={recordsByTooth.get(n) ?? []} selectedKey={selectedKey} multiActive={multi.includes(n)} onPick={pick} />
             ))}
           </div>
           <p className="mt-1 text-center text-xs text-slate-400">{tr("dent.lower")}</p>
@@ -423,7 +462,69 @@ export function ToothChart({
       {/* لوحة إضافة إجراء */}
       <div>
         <Card className="sticky top-4 p-5">
-          {selected === null ? (
+          {multiMode ? (
+            <div className="space-y-4">
+              <div className="rounded-lg bg-brand-50 p-3 text-center">
+                <p className="text-2xl font-bold text-brand-700">{multi.length}</p>
+                <p className="text-xs text-brand-600">{tr("dent.teethSelected")}</p>
+              </div>
+              {multi.length === 0 ? (
+                <p className="py-6 text-center text-xs text-slate-400">{tr("dent.multiHint")}</p>
+              ) : (
+                <>
+                  <div className="flex flex-wrap gap-1">
+                    {multi.map((n) => (
+                      <span key={n} className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+                        {n % 10}
+                      </span>
+                    ))}
+                  </div>
+                  <div>
+                    <Label>{tr("dent.surface")}</Label>
+                    <div className="flex flex-wrap gap-1.5">
+                      {SURFACES.map((s) => {
+                        const active = bulkSurface === s.value;
+                        return (
+                          <button
+                            type="button"
+                            key={s.value}
+                            onClick={() => setBulkSurface(s.value)}
+                            className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors ${
+                              active ? "border-brand-600 bg-brand-600 text-white" : "border-slate-300 bg-white text-slate-600 hover:border-brand-400"
+                            }`}
+                          >
+                            {s.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <div>
+                    <Label>{tr("dent.procedure")}</Label>
+                    <Select value={bulkProcedure} onChange={(e) => setBulkProcedure(e.target.value)}>
+                      <option value="">{tr("dent.noProcedure")}</option>
+                      {procedures.map((p) => (
+                        <option key={p.id} value={p.id}>{p.name} ({formatCurrency(p.price)})</option>
+                      ))}
+                    </Select>
+                    <p className="mt-1 text-xs text-slate-400">{tr("dent.priceAuto")}</p>
+                  </div>
+                  <div>
+                    <Label>{tr("form.notes")}</Label>
+                    <Textarea rows={2} value={bulkNotes} onChange={(e) => setBulkNotes(e.target.value)} />
+                  </div>
+                  <div className="flex gap-2">
+                    <Button type="button" className="flex-1" disabled={bulkPending} onClick={submitBulk}>
+                      {bulkPending ? tr("form.saving") : tr("dent.applyToAll")}
+                    </Button>
+                    <Button type="button" variant="secondary" onClick={() => setMulti([])}>
+                      {tr("common.cancel")}
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
+          ) : selected === null ? (
             <div className="py-8 text-center">
               <p className="text-sm font-medium text-slate-600">{tr("dent.pickTooth")}</p>
               <p className="mt-1 text-xs text-slate-400">{tr("dent.pickToothHint")}</p>

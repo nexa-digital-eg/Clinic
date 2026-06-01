@@ -15,18 +15,14 @@ const schema = z.object({
   notes: z.string().optional(),
 });
 
-// إضافة إجراء على سن + إضافة سعره تلقائياً على الكشف (الفاتورة)
-export async function addToothRecord(
-  _prev: { error?: string } | undefined,
-  formData: FormData,
-): Promise<{ error?: string }> {
-  const session = await getSession();
-  if (!session) return { error: "غير مصرح" };
-
-  const parsed = schema.safeParse(Object.fromEntries(formData));
-  if (!parsed.success) return { error: "بيانات غير صحيحة" };
-  const d = parsed.data;
-
+// منطق مشترك لإنشاء سجل سن واحد + ربطه بالفاتورة والمخزون
+async function createToothRecordCore(d: {
+  patientId: string;
+  toothNumber: number;
+  surface?: string;
+  procedureId?: string;
+  notes?: string;
+}): Promise<{ procedureName: string }> {
   let price = 0;
   let procedureName = "إجراء";
   if (d.procedureId) {
@@ -37,7 +33,6 @@ export async function addToothRecord(
     }
   }
 
-  // أنشئ سجل السن
   const record = await db.toothRecord.create({
     data: {
       patientId: d.patientId,
@@ -50,7 +45,6 @@ export async function addToothRecord(
     },
   });
 
-  // أضف السعر تلقائياً على الكشف (الفاتورة المفتوحة)
   if (d.procedureId && price > 0) {
     const invoice = await getOrCreateOpenInvoice(d.patientId);
     await db.invoiceItem.create({
@@ -65,20 +59,64 @@ export async function addToothRecord(
       },
     });
     await recalcInvoice(invoice.id);
-    // الإجراء عبارة عن مديونية على المريض → ينقص الرصيد
     await db.patient.update({
       where: { id: d.patientId },
       data: { balance: { decrement: price } },
     });
-
-    // السحب التلقائي من المخزون (ربط المنتجات بالإجراء)
     await deductInventoryForProcedure(d.procedureId);
   }
+  return { procedureName };
+}
+
+// إضافة إجراء على سن واحد
+export async function addToothRecord(
+  _prev: { error?: string } | undefined,
+  formData: FormData,
+): Promise<{ error?: string }> {
+  const session = await getSession();
+  if (!session) return { error: "غير مصرح" };
+
+  const parsed = schema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { error: "بيانات غير صحيحة" };
+  const d = parsed.data;
+
+  const { procedureName } = await createToothRecordCore(d);
 
   await logActivity("TOOTH_ADD", `${procedureName} — سن ${d.toothNumber}`);
   revalidatePath(`/dental-chart/${d.patientId}`);
   revalidatePath(`/patients/${d.patientId}`);
   return {};
+}
+
+// إضافة نفس الإجراء على عدة أسنان دفعة واحدة
+export async function addToothRecordsBulk(
+  patientId: string,
+  toothNumbers: number[],
+  surface: string | null,
+  procedureId: string | null,
+  notes: string | null,
+): Promise<{ error?: string; ok?: boolean }> {
+  const session = await getSession();
+  if (!session) return { error: "غير مصرح" };
+  if (!patientId || toothNumbers.length === 0) return { error: "اختر سنّاً واحداً على الأقل" };
+
+  let procedureName = "إجراء";
+  for (const toothNumber of toothNumbers) {
+    if (toothNumber < 11 || toothNumber > 85) continue;
+    const res = await createToothRecordCore({
+      patientId,
+      toothNumber,
+      surface: surface || undefined,
+      procedureId: procedureId || undefined,
+      notes: notes || undefined,
+    });
+    procedureName = res.procedureName;
+  }
+
+  await logActivity("TOOTH_ADD", `${procedureName} — ${toothNumbers.length} أسنان`);
+  revalidatePath(`/dental-chart/${patientId}`);
+  revalidatePath(`/patients/${patientId}`);
+  return { ok: true };
 }
 
 // سحب الكميات المرتبطة بالإجراء من المخزون
