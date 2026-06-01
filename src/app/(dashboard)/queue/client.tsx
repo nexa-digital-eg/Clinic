@@ -2,10 +2,91 @@
 
 import { useActionState, useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
-import { addToQueue, setQueueStatus, removeFromQueue, lookupPhone } from "./actions";
+import { useRouter } from "next/navigation";
+import {
+  addToQueue,
+  setQueueStatus,
+  removeFromQueue,
+  lookupPhone,
+  queueSnapshot,
+} from "./actions";
 import { Card, Button, Input, Label, Select, Textarea, Badge } from "@/components/ui";
 import { useT } from "@/lib/i18n-client";
-import { Play, Check, Trash2, UserCheck, Phone, ExternalLink } from "lucide-react";
+import { Play, Check, Trash2, UserCheck, Phone, ExternalLink, Bell, BellRing } from "lucide-react";
+
+// تنبيه صوتي + تحديث تلقائي عند وصول عميل جديد للطابور
+export function QueueAlerts({ initialCount }: { initialCount: number }) {
+  const tr = useT();
+  const router = useRouter();
+  const [enabled, setEnabled] = useState(false);
+  const lastCount = useRef(initialCount);
+  const audioCtx = useRef<AudioContext | null>(null);
+
+  const beep = () => {
+    const ctx = audioCtx.current;
+    if (!ctx) return;
+    // نغمتان قصيرتان لطيفتان
+    const play = (freq: number, start: number) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = freq;
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      const t0 = ctx.currentTime + start;
+      gain.gain.setValueAtTime(0.0001, t0);
+      gain.gain.exponentialRampToValueAtTime(0.3, t0 + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.35);
+      osc.start(t0);
+      osc.stop(t0 + 0.36);
+    };
+    play(880, 0);
+    play(1175, 0.18);
+  };
+
+  const enable = () => {
+    // يجب إنشاء AudioContext بعد تفاعل المستخدم (سياسة المتصفحات)
+    const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    audioCtx.current = new Ctx();
+    void audioCtx.current.resume();
+    setEnabled(true);
+    beep();
+  };
+
+  // استطلاع دوري لاكتشاف وصول عميل جديد
+  useEffect(() => {
+    if (!enabled) return;
+    const tick = async () => {
+      try {
+        const snap = await queueSnapshot();
+        if (snap.count > lastCount.current) {
+          beep();
+          router.refresh();
+        }
+        lastCount.current = snap.count;
+      } catch {
+        // تجاهل أخطاء الشبكة العابرة
+      }
+    };
+    const interval = setInterval(tick, 5000);
+    return () => clearInterval(interval);
+  }, [enabled, router]);
+
+  return (
+    <button
+      onClick={enable}
+      disabled={enabled}
+      className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+        enabled
+          ? "bg-green-50 text-green-700"
+          : "bg-brand-600 text-white hover:bg-brand-700"
+      }`}
+    >
+      {enabled ? <BellRing className="h-4 w-4" /> : <Bell className="h-4 w-4" />}
+      {enabled ? tr("queue.soundOff") : tr("queue.soundOn")}
+    </button>
+  );
+}
 
 export function AddToQueueForm({
   doctors,

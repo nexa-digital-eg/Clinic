@@ -520,6 +520,9 @@ const DICT: Record<string, { ar: string; en: string }> = {
   "queue.position": { ar: "الدور", en: "Position" },
   "queue.next": { ar: "التالي", en: "Next" },
   "queue.code": { ar: "كود الملف", en: "File code" },
+  "queue.soundOn": { ar: "تفعيل صوت التنبيه", en: "Enable alert sound" },
+  "queue.soundOff": { ar: "صوت التنبيه مُفعّل", en: "Alert sound on" },
+  "queue.newArrival": { ar: "وصل عميل جديد للطابور", en: "New client joined the queue" },
 
   // التذكيرات
   "rem.generate": { ar: "توليد تذكيرات الحجوزات", en: "Generate Appointment Reminders" },

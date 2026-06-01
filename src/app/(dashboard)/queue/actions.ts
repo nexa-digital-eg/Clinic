@@ -78,6 +78,27 @@ export async function addToQueue(
   };
 }
 
+// لقطة خفيفة لعدد المنتظرين وآخر داخل — للتنبيه الصوتي والتحديث التلقائي
+export async function queueSnapshot(): Promise<{
+  count: number;
+  latestId: string | null;
+  latestName: string | null;
+}> {
+  const session = await getSession();
+  if (!session) return { count: 0, latestId: null, latestName: null };
+  const rows = await db.queueEntry.findMany({
+    where: { status: "WAITING" },
+    orderBy: { createdAt: "desc" },
+    take: 1,
+  });
+  const count = await db.queueEntry.count({ where: { status: "WAITING" } });
+  return {
+    count,
+    latestId: rows[0]?.id ?? null,
+    latestName: rows[0]?.name ?? null,
+  };
+}
+
 export async function setQueueStatus(id: string, status: QueueStatus) {
   const session = await getSession();
   if (!session) return;

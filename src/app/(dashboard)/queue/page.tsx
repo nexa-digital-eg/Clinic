@@ -3,7 +3,7 @@ import { Card, Badge } from "@/components/ui";
 import { ListOrdered } from "lucide-react";
 import { getLocale } from "@/lib/locale";
 import { t } from "@/lib/i18n";
-import { AddToQueueForm, QueueRow } from "./client";
+import { AddToQueueForm, QueueRow, QueueAlerts } from "./client";
 
 export default async function QueuePage() {
   const [entries, doctors] = await Promise.all([
@@ -21,9 +21,12 @@ export default async function QueuePage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-800">{t("queue.title", locale)}</h1>
-        <p className="text-sm text-slate-500">{t("queue.subtitle", locale)}</p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800">{t("queue.title", locale)}</h1>
+          <p className="text-sm text-slate-500">{t("queue.subtitle", locale)}</p>
+        </div>
+        <QueueAlerts initialCount={waiting.length} />
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
