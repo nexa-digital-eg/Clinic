@@ -332,6 +332,20 @@ model Payment {
   @@index([patientId])
 }
 
+// مصروفات الخزنة (إيجار/رواتب/خامات/...) — المرحلة المالية
+model Expense {
+  id        String        @id @default(cuid())
+  amount    Float
+  category  String // فئة المصروف
+  note      String?
+  method    PaymentMethod @default(CASH)
+  spentAt   DateTime      @default(now()) // تاريخ الصرف
+  createdAt DateTime      @default(now())
+
+  @@index([spentAt])
+  @@index([category])
+}
+
 // ============================================================
 // المخزون وربط المنتجات (المرحلة 5)
 // ============================================================

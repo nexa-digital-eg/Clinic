@@ -172,6 +172,24 @@ const DICT: Record<string, { ar: string; en: string }> = {
   "method.TRANSFER": { ar: "تحويل", en: "Transfer" },
   "method.OTHER": { ar: "أخرى", en: "Other" },
 
+  // الخزنة
+  "nav.treasury": { ar: "الخزنة", en: "Treasury" },
+  "treasury.title": { ar: "الخزنة", en: "Treasury" },
+  "treasury.subtitle": { ar: "الإيرادات والمصروفات وصافي الخزنة شهرياً", en: "Income, expenses and net cash by month" },
+  "treasury.income": { ar: "الإيرادات", en: "Income" },
+  "treasury.expenses": { ar: "المصروفات", en: "Expenses" },
+  "treasury.net": { ar: "صافي الخزنة", en: "Net cash" },
+  "treasury.addExpense": { ar: "إضافة مصروف", en: "Add Expense" },
+  "treasury.amount": { ar: "المبلغ", en: "Amount" },
+  "treasury.category": { ar: "الفئة", en: "Category" },
+  "treasury.method": { ar: "طريقة الدفع", en: "Payment method" },
+  "treasury.spentAt": { ar: "تاريخ الصرف", en: "Date" },
+  "treasury.saved": { ar: "تم تسجيل المصروف ✅", en: "Expense recorded ✅" },
+  "treasury.byCategory": { ar: "جرد المصروفات بالفئات", en: "Expenses by category" },
+  "treasury.incomeByMethod": { ar: "جرد الإيراد حسب طريقة الدفع", en: "Income by payment method" },
+  "treasury.expensesList": { ar: "سجل المصروفات", en: "Expenses log" },
+  "treasury.noExpenses": { ar: "لا توجد مصروفات في هذا الشهر", en: "No expenses this month" },
+
   // الحجوزات
   "appt.title": { ar: "الحجوزات والمواعيد", en: "Appointments" },
   "appt.subtitle": { ar: "تقويم شهري لكل طبيب وفرع", en: "Monthly calendar per doctor & branch" },
