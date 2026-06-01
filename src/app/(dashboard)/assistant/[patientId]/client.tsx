@@ -10,7 +10,7 @@ import {
 import type { ChatMessage } from "@/lib/ai";
 import { Card, Button, Input, Label, Textarea } from "@/components/ui";
 import { Send, Mic, MicOff, FileText, Plus, Trash2, Sparkles } from "lucide-react";
-import { useT } from "@/lib/i18n-client";
+import { useT, useLocale } from "@/lib/i18n-client";
 
 /* ============ Web Speech API hook (تحويل الصوت لنص) ============ */
 type RecognitionLike = {
@@ -246,10 +246,21 @@ export function PrescriptionBuilder({
   medications?: string[];
 }) {
   const tr = useT();
+  const locale = useLocale();
   const [state, action, pending] = useActionState(createPrescription, undefined);
   const [rows, setRows] = useState<Row[]>([{ id: 1 }]);
   const formRef = useRef<HTMLFormElement>(null);
   const [saveTpl, setSaveTpl] = useState(false);
+
+  // اقتراحات جاهزة وواضحة للتكرار والمدة
+  const freqOptions =
+    locale === "ar"
+      ? ["مرة يومياً", "مرتين يومياً", "3 مرات يومياً", "4 مرات يومياً", "كل 8 ساعات", "كل 12 ساعة", "عند اللزوم"]
+      : ["Once daily", "Twice daily", "3 times daily", "4 times daily", "Every 8 hours", "Every 12 hours", "When needed"];
+  const durationOptions =
+    locale === "ar"
+      ? ["يوم واحد", "3 أيام", "5 أيام", "أسبوع", "10 أيام", "أسبوعين", "حسب الحاجة"]
+      : ["1 day", "3 days", "5 days", "1 week", "10 days", "2 weeks", "As needed"];
 
   if (state?.ok && formRef.current) {
     // reset بعد النجاح
@@ -267,6 +278,16 @@ export function PrescriptionBuilder({
           ))}
         </datalist>
       )}
+      <datalist id="freq-options">
+        {freqOptions.map((f) => (
+          <option key={f} value={f} />
+        ))}
+      </datalist>
+      <datalist id="duration-options">
+        {durationOptions.map((d) => (
+          <option key={d} value={d} />
+        ))}
+      </datalist>
       <form ref={formRef} action={action} className="space-y-3">
         <input type="hidden" name="patientId" value={patientId} />
 
@@ -283,11 +304,11 @@ export function PrescriptionBuilder({
               </div>
               <div className="sm:col-span-2">
                 <Label>{tr("ai.freq")}</Label>
-                <Input name="frequency" />
+                <Input name="frequency" list="freq-options" autoComplete="off" placeholder={freqOptions[0]} />
               </div>
               <div className="sm:col-span-2">
                 <Label>{tr("ai.dur")}</Label>
-                <Input name="duration" />
+                <Input name="duration" list="duration-options" autoComplete="off" placeholder={durationOptions[1]} />
               </div>
               <div className="sm:col-span-2">
                 <Label>{tr("ai.alt")}</Label>
