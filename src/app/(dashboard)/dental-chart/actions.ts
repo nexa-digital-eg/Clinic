@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { logActivity } from "@/server/audit";
 import { getOrCreateOpenInvoice, recalcInvoice } from "@/server/billing";
 
 const schema = z.object({
@@ -74,6 +75,7 @@ export async function addToothRecord(
     await deductInventoryForProcedure(d.procedureId);
   }
 
+  await logActivity("TOOTH_ADD", `${procedureName} — سن ${d.toothNumber}`);
   revalidatePath(`/dental-chart/${d.patientId}`);
   revalidatePath(`/patients/${d.patientId}`);
   return {};

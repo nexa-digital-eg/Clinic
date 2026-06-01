@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { logActivity } from "@/server/audit";
 import type { PaymentMethod } from "@prisma/client";
 
 // إضافة مصروف للخزنة
@@ -32,6 +33,7 @@ export async function addExpense(
     },
   });
 
+  await logActivity("EXPENSE_ADD", `${amount} — ${category}`);
   revalidatePath("/treasury");
   return { ok: true };
 }

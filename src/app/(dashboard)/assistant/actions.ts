@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { askClaude, type ChatMessage } from "@/lib/ai";
 import { buildPatientContext } from "@/server/ai-context";
+import { logActivity } from "@/server/audit";
 
 // محادثة المساعد مع سياق ملف المريض
 export async function chatAssistant(
@@ -170,6 +171,7 @@ export async function createPrescription(
     });
   }
 
+  await logActivity("PRESCRIPTION_CREATE", `${items.length} دواء`);
   revalidatePath(`/assistant/${patientId}`);
   revalidatePath(`/patients/${patientId}`);
   return { ok: true };

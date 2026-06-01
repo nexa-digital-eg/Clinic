@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { logActivity } from "@/server/audit";
 import type { QueueStatus } from "@prisma/client";
 
 // التحقق من رقم الهاتف — هل هو عميل سابق؟
@@ -70,6 +71,7 @@ export async function addToQueue(
     },
   });
 
+  await logActivity("QUEUE_ADD", returning ? `${patient.firstName} ${patient.lastName}` : name);
   revalidatePath("/queue");
   return {
     ok: true,

@@ -7,6 +7,7 @@ import { canAccessPath } from "@/lib/permissions";
 import { Sidebar } from "@/components/sidebar";
 import { LanguageToggle } from "@/components/language-toggle";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { HistoryButton } from "@/components/history-button";
 import { logout } from "../(auth)/actions";
 import { LogOut } from "lucide-react";
 import { getLocale } from "@/lib/locale";
@@ -51,6 +52,7 @@ export default async function DashboardLayout({
           <div className="flex items-center gap-1">
             <LanguageToggle locale={locale} />
             <ThemeToggle />
+            {me.role === "ADMIN" && <HistoryButton />}
           </div>
           <div className="flex items-center gap-4">
             <Link href="/account" className={`rounded-lg px-1 transition-colors hover:opacity-80 ${locale === "ar" ? "text-end" : "text-start"}`}>

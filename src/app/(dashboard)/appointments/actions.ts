@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { logActivity } from "@/server/audit";
 import { getDefaultDoctor } from "@/server/clinic";
 import type { AppointmentStatus } from "@prisma/client";
 
@@ -54,6 +55,7 @@ export async function createAppointment(
     },
   });
 
+  await logActivity("APPOINTMENT_CREATE", startsAt.toLocaleString("en-GB"));
   revalidatePath("/appointments");
   redirect("/appointments");
 }

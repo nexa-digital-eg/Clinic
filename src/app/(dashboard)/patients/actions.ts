@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { logActivity } from "@/server/audit";
 import { del } from "@vercel/blob";
 
 const patientSchema = z.object({
@@ -56,6 +57,7 @@ export async function createPatient(
     },
   });
 
+  await logActivity("PATIENT_CREATE", `${d.firstName} ${d.lastName}`);
   revalidatePath("/patients");
   redirect(`/patients/${patient.id}`);
 }
@@ -146,5 +148,6 @@ export async function addPayment(patientId: string, formData: FormData) {
       data: { balance: { increment: amount } },
     }),
   ]);
+  await logActivity("PAYMENT_ADD", String(amount));
   revalidatePath(`/patients/${patientId}`);
 }

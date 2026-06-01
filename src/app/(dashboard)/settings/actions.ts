@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { getSession, hashPassword } from "@/lib/auth";
+import { logActivity } from "@/server/audit";
 import type { Role } from "@prisma/client";
 
 async function requireAdmin() {
@@ -154,6 +155,7 @@ export async function createStaff(
     });
   }
 
+  await logActivity("STAFF_CREATE", `${d.name} (${d.role})`);
   revalidatePath("/settings");
   return { ok: true };
 }
