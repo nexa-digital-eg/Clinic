@@ -82,7 +82,7 @@ export function HistoryButton() {
       </button>
 
       {open && (
-        <div className="animate-pop absolute end-0 z-50 mt-2 w-80 origin-top overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+        <div className="animate-pop fixed inset-x-3 top-16 z-50 origin-top overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl sm:absolute sm:inset-x-auto sm:end-0 sm:top-auto sm:mt-2 sm:w-80">
           <div className="bg-gradient-to-br from-brand-600 to-indigo-700 px-4 py-3 text-white">
             <div className="flex items-center gap-2">
               <Activity className="h-4 w-4" />
@@ -91,7 +91,7 @@ export function HistoryButton() {
             <p className="text-xs text-white/70">{tr("hist.subtitle")}</p>
           </div>
 
-          <div className="max-h-96 overflow-y-auto">
+          <div className="max-h-[70vh] overflow-y-auto sm:max-h-96">
             {loading ? (
               <p className="py-8 text-center text-sm text-slate-400">{tr("hist.loading")}</p>
             ) : !items || items.length === 0 ? (
