@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
-const PUBLIC_PATHS = ["/login", "/booking"];
+const PUBLIC_PATHS = ["/login", "/booking", "/forgot", "/reset"];
 
 const FALLBACK_SECRET = "smart-clinic-insecure-default-secret-please-set-AUTH_SECRET";
 

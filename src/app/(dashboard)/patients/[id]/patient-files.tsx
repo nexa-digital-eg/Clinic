@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
+import { upload } from "@vercel/blob/client";
 import { recordPatientFile, deletePatientFile } from "../actions";
 import { Card, Button, Label, Select, EmptyState } from "@/components/ui";
 import { useT } from "@/lib/i18n-client";
@@ -64,19 +65,30 @@ export function PatientFiles({
       r.readAsDataURL(file);
     });
 
+  // يرفع الملف: يحاول Vercel Blob (تخزين مستقل) أولاً، وإلا يرجع لـ data URL
+  const storeFile = async (file: File): Promise<string> => {
+    try {
+      const blob = await upload(`patients/${patientId}/${Date.now()}-${file.name}`, file, {
+        access: "public",
+        handleUploadUrl: "/api/files/upload",
+      });
+      return blob.url;
+    } catch {
+      // لا يوجد تخزين سحابي مُهيّأ → خزّن داخل القاعدة (للملفات الصغيرة فقط)
+      if (file.size > 5 * 1024 * 1024) throw new Error(tr("files.tooLarge"));
+      return readDataUrl(file);
+    }
+  };
+
   const onPick = async (picked: File) => {
     setError(null);
     setUploading(true);
     try {
       const file = await maybeCompress(picked);
-      if (file.size > 5 * 1024 * 1024) {
-        setError(tr("files.tooLarge"));
-        return;
-      }
-      const dataUrl = await readDataUrl(file);
+      const url = await storeFile(file);
       const rec = await recordPatientFile(patientId, {
         name: file.name,
-        url: dataUrl,
+        url,
         mimeType: file.type,
         size: file.size,
         category,
@@ -85,7 +97,7 @@ export function PatientFiles({
         {
           id: rec?.id ?? `${Date.now()}`,
           name: file.name,
-          url: dataUrl,
+          url,
           mimeType: file.type,
           category,
           createdAt: new Date().toISOString(),

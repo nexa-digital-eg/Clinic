@@ -68,6 +68,9 @@ export function LoginForm({
           <Button type="submit" className="w-full" disabled={pending}>
             {pending ? t("login.loading", locale) : t("login.submit", locale)}
           </Button>
+          <a href="/forgot" className="block text-center text-sm text-brand-600 hover:underline">
+            {t("login.forgot", locale)}
+          </a>
         </form>
       </Card>
     </div>

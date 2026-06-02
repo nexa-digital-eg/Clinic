@@ -40,6 +40,20 @@ model User {
   doctor       Doctor?
   branchId     String?
   branch       Branch?  @relation(fields: [branchId], references: [id])
+  resetTokens  PasswordResetToken[]
+}
+
+// رموز إعادة تعيين كلمة المرور (نسيت كلمة المرور)
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 // سجل أحداث الأمان (تغيير كلمة المرور...) — يطّلع عليه الأدمن
