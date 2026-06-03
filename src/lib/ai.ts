@@ -6,9 +6,17 @@ const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 
 type Provider = "anthropic" | "gemini" | "none";
 
+// قراءة مفتاح من البيئة مع تجاهل المسافات الزائدة والقيم الفارغة
+function envKey(name: string): string | undefined {
+  const v = process.env[name];
+  if (!v) return undefined;
+  const trimmed = v.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
 export function aiProvider(): Provider {
-  if (process.env.ANTHROPIC_API_KEY) return "anthropic";
-  if (process.env.GEMINI_API_KEY) return "gemini";
+  if (envKey("ANTHROPIC_API_KEY")) return "anthropic";
+  if (envKey("GEMINI_API_KEY")) return "gemini";
   return "none";
 }
 
@@ -63,7 +71,7 @@ async function askAnthropic(p: AskParams): Promise<AskResult> {
     const res = await fetch(ANTHROPIC_URL, {
       method: "POST",
       headers: {
-        "x-api-key": process.env.ANTHROPIC_API_KEY!,
+        "x-api-key": envKey("ANTHROPIC_API_KEY")!,
         "anthropic-version": "2023-06-01",
         "content-type": "application/json",
       },
@@ -89,7 +97,7 @@ async function askAnthropic(p: AskParams): Promise<AskResult> {
 }
 
 async function askGemini(p: AskParams): Promise<AskResult> {
-  const key = process.env.GEMINI_API_KEY!;
+  const key = envKey("GEMINI_API_KEY")!;
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${key}`;
   try {
     const res = await fetch(url, {
