@@ -479,6 +479,28 @@ const DICT: Record<string, { ar: string; en: string }> = {
   "files.error": { ar: "فشل الرفع", en: "Upload failed" },
   "files.tooLarge": { ar: "الملف كبير جداً (الحد 5 ميجا). صغّر الصورة أو الملف.", en: "File too large (max 5MB). Please use a smaller file." },
 
+  // شاشة انتظار المرضى (عامة)
+  "wait.title": { ar: "متابعة دورك", en: "Track Your Turn" },
+  "wait.subtitle": { ar: "أدخل رقم هاتفك لمعرفة دورك في قائمة الانتظار", en: "Enter your phone to see your place in the queue" },
+  "wait.phone": { ar: "رقم الهاتف", en: "Phone number" },
+  "wait.check": { ar: "اعرف دوري", en: "Check my turn" },
+  "wait.checking": { ar: "جارٍ التحقق...", en: "Checking..." },
+  "wait.notFound": { ar: "لم نجد رقمك في قائمة الانتظار الحالية. تأكد من الرقم أو راجع الاستقبال.", en: "We couldn't find your number in the current queue. Check the number or ask reception." },
+  "wait.aheadOfYou": { ar: "أمامك", en: "Ahead of you" },
+  "wait.person": { ar: "شخص", en: "person" },
+  "wait.persons": { ar: "أشخاص", en: "people" },
+  "wait.yourTurn": { ar: "دورك الآن! 🎉", en: "It's your turn! 🎉" },
+  "wait.nextUp": { ar: "أنت التالي مباشرةً", en: "You're next" },
+  "wait.beingServedNow": { ar: "جارٍ الكشف الآن", en: "Now being served" },
+  "wait.yourPosition": { ar: "رقمك في الدور", en: "Your number" },
+  "wait.totalWaiting": { ar: "إجمالي المنتظرين", en: "Total waiting" },
+  "wait.queueList": { ar: "قائمة الانتظار", en: "Queue list" },
+  "wait.you": { ar: "أنت", en: "You" },
+  "wait.serving": { ar: "كشف", en: "In room" },
+  "wait.autoRefresh": { ar: "يتحدّث تلقائياً", en: "Auto-updating" },
+  "wait.change": { ar: "تغيير الرقم", en: "Change number" },
+  "wait.done": { ar: "انتهى دورك أو لم تَعُد في القائمة.", en: "Your turn is over or you're no longer in the queue." },
+
   // البحث السريع العام
   "qs.placeholder": { ar: "بحث سريع عن مريض... (Ctrl+K)", en: "Quick patient search... (Ctrl+K)" },
   "qs.noResults": { ar: "لا توجد نتائج", en: "No results" },
