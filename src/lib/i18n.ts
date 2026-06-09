@@ -479,6 +479,16 @@ const DICT: Record<string, { ar: string; en: string }> = {
   "files.error": { ar: "فشل الرفع", en: "Upload failed" },
   "files.tooLarge": { ar: "الملف كبير جداً (الحد 5 ميجا). صغّر الصورة أو الملف.", en: "File too large (max 5MB). Please use a smaller file." },
 
+  // البحث السريع العام
+  "qs.placeholder": { ar: "بحث سريع عن مريض... (Ctrl+K)", en: "Quick patient search... (Ctrl+K)" },
+  "qs.noResults": { ar: "لا توجد نتائج", en: "No results" },
+  "qs.searching": { ar: "جارٍ البحث...", en: "Searching..." },
+  "qs.hint": { ar: "اكتب اسماً أو رقم هاتف أو كوداً", en: "Type a name, phone, or code" },
+
+  // تنبيهات طبية في ملف المريض
+  "alert.allergies": { ar: "تنبيه حساسية", en: "Allergy Alert" },
+  "alert.chronic": { ar: "أمراض مزمنة", en: "Chronic Conditions" },
+
   // قائمة إجراءات الحجز
   "apptAct.complete": { ar: "تم الكشف", en: "Mark completed" },
   "apptAct.confirm": { ar: "تأكيد", en: "Confirm" },

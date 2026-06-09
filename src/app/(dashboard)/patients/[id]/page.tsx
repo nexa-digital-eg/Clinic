@@ -4,7 +4,7 @@ import { Card, Badge, Button, Input, Label, Textarea, Select, EmptyState } from 
 import { formatDate, formatDateTime, formatCurrency, calcAge } from "@/lib/utils";
 import { addComplaint, addDiagnosis, addPayment } from "../actions";
 import Link from "next/link";
-import { ArrowRight, Phone, Mail, MapPin, Droplet, Pencil } from "lucide-react";
+import { ArrowRight, Phone, Mail, MapPin, Droplet, Pencil, AlertTriangle, HeartPulse } from "lucide-react";
 import { DeletePatientButton } from "./patient-actions";
 import { getLocale } from "@/lib/locale";
 import { t, type Locale } from "@/lib/i18n";
@@ -113,6 +113,30 @@ export default async function PatientProfile({
           />
         </div>
       </div>
+
+      {/* تنبيه طبي بارز (حساسية / أمراض مزمنة) — أمان للطبيب قبل أي إجراء */}
+      {(patient.allergies || patient.chronicConditions) && (
+        <div className="flex flex-wrap gap-3">
+          {patient.allergies && (
+            <div className="flex flex-1 items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 min-w-[260px]">
+              <AlertTriangle className="h-5 w-5 shrink-0 text-red-600" />
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wide text-red-600">{t("alert.allergies", locale)}</p>
+                <p className="text-sm font-medium text-red-800">{patient.allergies}</p>
+              </div>
+            </div>
+          )}
+          {patient.chronicConditions && (
+            <div className="flex flex-1 items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 min-w-[260px]">
+              <HeartPulse className="h-5 w-5 shrink-0 text-amber-600" />
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wide text-amber-600">{t("alert.chronic", locale)}</p>
+                <p className="text-sm font-medium text-amber-800">{patient.chronicConditions}</p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* بطاقة المعلومات السريعة */}
       <Card className="grid grid-cols-2 gap-4 p-5 sm:grid-cols-4">

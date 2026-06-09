@@ -8,6 +8,7 @@ import { Sidebar } from "@/components/sidebar";
 import { LanguageToggle } from "@/components/language-toggle";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { HistoryButton } from "@/components/history-button";
+import { QuickSearch } from "@/components/quick-search";
 import { logout } from "../(auth)/actions";
 import { LogOut } from "lucide-react";
 import { getLocale } from "@/lib/locale";
@@ -49,10 +50,13 @@ export default async function DashboardLayout({
       <Sidebar role={me.role} permissions={me.permissions} locale={locale} clinicName={clinic.name} logoUrl={clinic.logoUrl} />
       <div className="flex flex-1 flex-col overflow-hidden">
         <header className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-3">
-          <div className="flex items-center gap-1">
-            <LanguageToggle locale={locale} />
-            <ThemeToggle />
-            {me.role === "ADMIN" && <HistoryButton />}
+          <div className="flex flex-1 items-center gap-3">
+            <div className="flex items-center gap-1">
+              <LanguageToggle locale={locale} />
+              <ThemeToggle />
+              {me.role === "ADMIN" && <HistoryButton />}
+            </div>
+            <QuickSearch />
           </div>
           <div className="flex items-center gap-4">
             <Link href="/account" className={`rounded-lg px-1 transition-colors hover:opacity-80 ${locale === "ar" ? "text-end" : "text-start"}`}>
