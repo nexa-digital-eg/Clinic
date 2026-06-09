@@ -3,7 +3,6 @@ import { Cairo } from "next/font/google";
 import "./globals.css";
 import { getLocale } from "@/lib/locale";
 import { dirFor } from "@/lib/i18n";
-import { SplashScreen } from "@/components/splash-screen";
 
 const cairo = Cairo({
   subsets: ["arabic", "latin"],
@@ -52,7 +51,6 @@ export default async function RootLayout({
         />
       </head>
       <body className={`${cairo.variable} font-sans antialiased`}>
-        <SplashScreen />
         {children}
       </body>
     </html>
