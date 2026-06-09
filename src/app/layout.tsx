@@ -1,11 +1,15 @@
 import type { Metadata, Viewport } from "next";
-import { Cairo } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { getLocale } from "@/lib/locale";
 import { dirFor } from "@/lib/i18n";
 
-const cairo = Cairo({
-  subsets: ["arabic", "latin"],
+// خط Cairo مُضمَّن داخل المشروع (بدون أي اعتماد على شبكة وقت البناء)
+const cairo = localFont({
+  src: [
+    { path: "../fonts/cairo-arabic.woff2", weight: "200 1000", style: "normal" },
+    { path: "../fonts/cairo-latin.woff2", weight: "200 1000", style: "normal" },
+  ],
   variable: "--font-cairo",
   display: "swap",
 });
